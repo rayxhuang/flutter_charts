@@ -6,11 +6,11 @@ import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
 import 'bar_chart/bar_chart.dart';
 
 BarChartData data = BarChartDataNumber.Double(data: sampleData);
-Map<double, double> sampleData = {
-  0.5: 8,
-  0.6:4,
-  3.2:1
-};
+List<BarData> sampleData = [
+  BarData(x1: 0, x2: 0.5, y: 8),
+  BarData(x1: 0.5, x2: 1.2, y: 4),
+  BarData(x1: 3, x2: 4, y: 3.4),
+];
 
 void main() {
   runApp(MyApp());
@@ -61,33 +61,32 @@ class _MyHomePageState extends State<MyHomePage> {
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height / 3,
               margin: EdgeInsets.all(5),
+              actualDataGridAreaOffsetFromBottomLeft: Offset(20, 20),
+              actualDataGridAreaOffsetFromTopRight: Offset(5, 5),
+              xAxisStyle: AxisStyle(
+                preferredStart: 0,
+                preferredEnd: 5,
+              ),
+              yAxisStyle: AxisStyle(
+                preferredStart: 0,
+                preferredEnd: 10,
+              ),
             ),
             const SizedBox(height: 5,),
             // BarChart(
-            //   barChartData: BarChartDataNumber.Double(),
+            //   barChartData: BarChartDataNumber.Double(
+            //     data: sampleData,
+            //   ),
             //   width: MediaQuery.of(context).size.width,
             //   height: MediaQuery.of(context).size.height / 3,
             //   margin: EdgeInsets.all(5),
-            //   contentPadding: EdgeInsets.all(5),
-            //   axisX: AxisWithNum.X(
-            //     style: AxisStyle(
-            //       color: Colors.pink,
-            //     ),
+            //   actualDataGridAreaOffsetFromBottomLeft: Offset(20, 20),
+            //   actualDataGridAreaOffsetFromTopRight: Offset(5, 5),
+            //   xAxisStyle: AxisStyle(
+            //     shift: 50
             //   ),
-            //   axisY: AxisWithNum.Y(
-            //     startValue: -10,
-            //     endValue: 0,
-            //     style: AxisStyle(
-            //       startMarginX: 40,
-            //       endMarginX: 40,
-            //       startMarginY: 30,
-            //       numTicks: 5,
-            //       tick: Tick(
-            //         tickLength: -5,
-            //         tickDecimal: 1,
-            //         tickMargin: 5
-            //       ),
-            //     ),
+            //   yAxisStyle: AxisStyle(
+            //     shift: 50
             //   ),
             // ),
             const SizedBox(height: 5,),

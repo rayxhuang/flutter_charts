@@ -18,11 +18,6 @@ abstract class BaseAxis {
   });
 
   double get valueRange => (this.endValue - this.startValue).abs();
-
-  double get totalMargin =>
-    this.type == AxisType.XWithNum
-        ? this.style.getMarginX
-        : this.style.getMarginY;
 }
 
 class AxisWithNum extends BaseAxis {
@@ -54,31 +49,27 @@ class AxisWithNum extends BaseAxis {
 }
 
 class AxisStyle {
-  final double startMarginX;
-  final double startMarginY;
-  final double endMarginX;
-  final double endMarginY;
+  final double shift;
+  final bool visible;
   final int numTicks;
   final Tick tick;
   final Color color;
   final double strokeWidth;
   final StrokeCap strokeCap;
+  final double preferredStart;
+  final double preferredEnd;
 
   const AxisStyle({
-    this.startMarginX = 20,
-    this.startMarginY = 20,
-    this.endMarginX = 20,
-    this.endMarginY = 20,
+    this.shift = 0,
+    this.visible = true,
     this.numTicks = 10,
     this.tick = const Tick(),
     this.color = Colors.teal,
     this.strokeWidth = 3,
     this.strokeCap = StrokeCap.round,
+    this.preferredStart,
+    this.preferredEnd,
   });
-
-  double get getMarginX => this.startMarginX + this.endMarginX;
-
-  double get getMarginY => this.startMarginY + this.endMarginY;
 }
 
 class Tick {

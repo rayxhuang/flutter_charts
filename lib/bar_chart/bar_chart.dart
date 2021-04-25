@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -10,27 +11,27 @@ class BarChart extends StatefulWidget {
   final BarChartData barChartData;
   final double width;
   final double height;
+  final Offset actualDataGridAreaOffsetFromBottomLeft;
+  final Offset actualDataGridAreaOffsetFromTopRight;
   final EdgeInsetsGeometry margin;
   final EdgeInsetsGeometry contentPadding;
   final ShapeBorder outerShape;
-  final bool showXAxis;
-  final bool showYAxis;
-  final BaseAxis axisX;
-  final BaseAxis axisY;
+  final AxisStyle xAxisStyle;
+  final AxisStyle yAxisStyle;
 
   BarChart({
     @required this.barChartData,
     @required this.width,
     @required this.height,
+    @required this.actualDataGridAreaOffsetFromBottomLeft,
+    @required this.actualDataGridAreaOffsetFromTopRight,
     this.margin = const EdgeInsets.all(0),
     this.contentPadding = const EdgeInsets.all(10),
     this.outerShape = const RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(20)),
     ),
-    this.showXAxis = true,
-    this.showYAxis = true,
-    this.axisX = const AxisWithNum.X(),
-    this.axisY = const AxisWithNum.Y(),
+    this.xAxisStyle = const AxisStyle(),
+    this.yAxisStyle = const AxisStyle(),
   });
 
   @override
@@ -45,14 +46,14 @@ class _BarChartState extends State<BarChart> {
     super.initState();
 
     _painter = BarChartPainter(
-      // Temp
-      startOffset: Offset(20, 20),
-      showXAxis: widget.showXAxis,
-      showYAxis: widget.showYAxis,
-      axisX: widget.axisX,
-      axisY: widget.axisY,
+      startOffset: widget.actualDataGridAreaOffsetFromBottomLeft,
+      endOffset: widget.actualDataGridAreaOffsetFromTopRight,
       barChartData: widget.barChartData,
+      xStyle: widget.xAxisStyle,
+      yStyle: widget.yAxisStyle,
     );
+
+    _painter.analyseData();
   }
 
   @override
@@ -75,154 +76,130 @@ class _BarChartState extends State<BarChart> {
 }
 
 class BarChartPainter extends CustomPainter {
-  final bool showXAxis, showYAxis;
-  final BaseAxis axisX, axisY;
+  final Offset startOffset, endOffset;
+  final AxisStyle xStyle, yStyle;
   final BarChartData barChartData;
-  Offset absoluteStart, startOffset;
-  // AxisThemeData axisXStyle, axisYStyle;
-  // Offset axisXStartOffset, axisXEndOffset, axisYStartOffset, axisYEndOffset;
-  // Paint paintX, paintY;
+  List<BarData> _data;
+  List<double> _xValueRange = [], _yValueRange = [];
+  List<double> _xValueList1 = [], _xValueList2 = [], _yValueList = [];
+  Offset _topLeft, _topRight, _bottomLeft, _bottomRight, _axisIntersection;
+  bool xSatisfied = false;
+  bool ySatisfied = false;
 
   BarChartPainter({
     this.startOffset,
-    this.showXAxis,
-    this.showYAxis,
-    this.axisX,
-    this.axisY,
+    this.endOffset,
     this.barChartData,
+    this.xStyle,
+    this.yStyle,
   });
+
+  void analyseData() {
+    _data = barChartData.data;
+    if (barChartData.type == BarChartDataType.Double) {
+      double xMin, xMax, yMin, yMax;
+      _data.forEach((bar) {
+        _xValueList1.add(bar.x1);
+        _xValueList2.add(bar.x2);
+        _yValueList.add(bar.y);
+      });
+      xMin = _xValueList1.reduce(min);
+      xMax = _xValueList2.reduce(max);
+      _xValueRange = [xMin, xMax];
+      yMin = _yValueList.reduce(min);
+      yMax = _yValueList.reduce(max);
+      _yValueRange = [yMin, yMax];
+
+      print(_xValueRange);
+      print(_yValueRange);
+    }
+  }
+
+  void canFitAsDesired() {
+    if (_xValueRange[1] <= xStyle.preferredEnd && _xValueRange[0] >= xStyle.preferredStart) { xSatisfied = true; }
+    if (_yValueRange[1] <= yStyle.preferredEnd && _yValueRange[0] >= yStyle.preferredStart) { ySatisfied = true; }
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
-    print('Called paint function');
+    canvas.drawRect(Offset(0, 0) & size, Paint()..color = Colors.white);
+
+    //Get actual size available for data
+    double actualLengthX = size.width - startOffset.dx - endOffset.dx;
+    double actualLengthY = size.height - startOffset.dy - endOffset.dy;
+    Size actualGridSize = Size(actualLengthX, actualLengthY);
+
+    //Set four useful points
+    _topLeft = Offset(0, 0).translate(startOffset.dx, endOffset.dy);
+    _topRight = _topLeft.translate(actualGridSize.width, 0);
+    _bottomLeft = _topLeft.translate(0, actualGridSize.height);
+    _bottomRight = _topLeft.translate(actualGridSize.width, actualGridSize.height);
+
+    Paint p = Paint()..color = Colors.red;
+    canvas.drawLine(_topLeft, _topRight, p);
+    canvas.drawLine(_topLeft, _bottomLeft, p);
+    canvas.drawLine(_topRight, _bottomRight, p);
+    canvas.drawLine(_bottomLeft, _bottomRight, p);
+
     // Draw X Axis
-    if (showXAxis) {
-      final axisXStyle = axisX.style;
-      final axisXStartOffset = Offset(
-        axisXStyle.startMarginX,
-        size.height - axisXStyle.startMarginY,
-      );
-      final axisXEndOffset = Offset(
-        size.width - axisXStyle.endMarginX,
-        size.height - axisXStyle.endMarginY,
-      );
+    if (xStyle.visible) {
+      final axisXStartOffset = _bottomLeft.translate(0, - xStyle.shift);
+      final axisXEndOffset = _bottomRight.translate(0, - xStyle.shift);
       final paintX = Paint()
-        ..color = axisXStyle.color
-        ..strokeWidth = axisXStyle.strokeWidth
-        ..strokeCap = axisXStyle.strokeCap;
-      drawAxis(canvas, paintX, axisX, axisXStartOffset, axisXEndOffset);
+        ..color = xStyle.color
+        ..strokeWidth = xStyle.strokeWidth
+        ..strokeCap = xStyle.strokeCap;
+      canvas.drawLine(axisXStartOffset, axisXEndOffset, paintX);
+      // Adjust size according to stroke taken by the axis
+      double strokeWidth = xStyle.strokeWidth / 2;
+      _bottomLeft = _bottomLeft.translate(0, - strokeWidth);
+      _bottomRight = _bottomRight.translate(0, - strokeWidth);
+      actualLengthY -= strokeWidth;
     }
 
     // Draw Y Axis
-    if (showYAxis) {
-      final axisYStyle = axisY.style;
-      final axisYStartOffset = Offset(
-        axisYStyle.startMarginX,
-        size.height - axisYStyle.startMarginY,
-      );
-      final axisYEndOffset = Offset(
-        axisYStyle.endMarginX,
-        axisYStyle.endMarginY,
-      );
+    if (yStyle.visible) {
+      final axisYStartOffset = _bottomLeft.translate(yStyle.shift, 0);
+      final axisYEndOffset = _topLeft.translate(yStyle.shift, 0);
       final paintY = Paint()
-        ..color = axisYStyle.color
-        ..strokeWidth = axisYStyle.strokeWidth
-        ..strokeCap = axisYStyle.strokeCap;
-      drawAxis(canvas, paintY, axisY, axisYStartOffset, axisYEndOffset);
+        ..color = yStyle.color
+        ..strokeWidth = yStyle.strokeWidth
+        ..strokeCap = yStyle.strokeCap;
+      canvas.drawLine(axisYStartOffset, axisYEndOffset, paintY);
+      // Adjust size according to stroke taken by the axis
+      double strokeWidth = yStyle.strokeWidth / 2;
+      _bottomLeft = _bottomLeft.translate(strokeWidth, 0);
+      _topLeft = _topLeft.translate(strokeWidth, 0);
+      actualLengthX -= strokeWidth;
     }
 
-    // Draw Data
-    if (barChartData.data.isNotEmpty) {
-      print(size);
-      Map data = barChartData.data;
-      double xUnit;
-      if (showXAxis) {
-        double canvasLength = size.width - axisX.totalMargin;
-        xUnit = axisX.valueRange / canvasLength;
-        // print(canvasLength);
-        // print(axisX.valueRange);
-        print(xUnit);
-      }
-      double yUnit;
-      if (showYAxis) {
-        double canvasHeight = size.height - axisY.totalMargin;
-        yUnit = axisY.valueRange / canvasHeight;
-        // print(canvasHeight);
-        // print(axisY.valueRange);
-        print(yUnit);
-      }
-      final Offset bottomLeftPoint = Offset(0, size.height);
-      absoluteStart = bottomLeftPoint.translate(startOffset.dx, -startOffset.dy);
-      print(absoluteStart);
-      Paint paint = Paint()
-      ..color = Colors.white
+    actualGridSize = Size(actualLengthX, actualLengthY);
+    _axisIntersection = _bottomLeft.translate(yStyle.shift, -xStyle.shift);
+
+    canFitAsDesired();
+
+    double xUnitPerPixel, yUnitPerPixel;
+    if (xSatisfied) { xUnitPerPixel = (xStyle.preferredEnd - xStyle.preferredStart) / actualLengthX; }
+    if (ySatisfied) { yUnitPerPixel = (yStyle.preferredEnd - yStyle.preferredStart) / actualLengthY; }
+
+    //This is the bar paint
+    Paint paint = Paint()
+      ..color = Colors.yellow
       ..strokeWidth = 2;
-      List<Offset> points = [];
-      data.forEach((x, y) {
-        print('$x,$y');
-        Offset p = absoluteStart.translate(x / xUnit, -(y / yUnit));
-        print(p);
-        points.add(p);
-        print(points);
-      });
-      canvas.drawPoints(PointMode.points, points, paint);
+
+    //Draw data as bars on grid
+    for (BarData bar in _data) {
+      double x1FromBottomLeft = (bar.x1 - xStyle.preferredStart) / xUnitPerPixel;
+      double x2FromBottomLeft = x1FromBottomLeft + (bar.x2 - bar.x1) / xUnitPerPixel;
+      double yFromBottomLeft = (bar.y - yStyle.preferredStart) / yUnitPerPixel;
+      Rect rect = Rect.fromPoints(
+        _bottomLeft.translate(x1FromBottomLeft, -yFromBottomLeft),
+        _bottomLeft.translate(x2FromBottomLeft, 0)
+      );
+      canvas.drawRect(rect, paint);
     }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
-  }
-
-  void drawAxis(Canvas canvas, Paint paint, BaseAxis axis, Offset start, Offset end,) {
-    // Draw the axis line
-    canvas.drawLine(start, end, paint);
-
-    // Draw the ticks if any
-    double axisLength;
-    axis.type == AxisType.XWithNum
-        ? axisLength = end.dx - start.dx
-        : axisLength = start.dy - end.dy;
-    int tickUnitLength = axisLength ~/ axis.style.numTicks;
-    double tickUnitValue = (axis.endValue - axis.startValue) / axis.style.numTicks;
-    for (int i = 0; i < axis.style.numTicks + 1; i++) {
-      // Draw ticks on axis
-      Offset p1, p2;
-      if (axis.type == AxisType.XWithNum) {
-        p1 = start.translate((i * tickUnitLength).toDouble(), 0);
-        p2 = p1.translate(0, axis.style.tick.tickLength);
-      } else {
-        p1 = start.translate(0, - (i * tickUnitLength).toDouble());
-        p2 = p1.translate(-axis.style.tick.tickLength, 0);
-      }
-      canvas.drawLine(p1, p2, paint);
-
-      final String label = (axis.startValue + i * tickUnitValue).toStringAsFixed(axis.style.tick.tickDecimal);
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: '$label',
-          style: TextStyle(color: Colors.white),
-        ),
-        textDirection: TextDirection.ltr,
-      );
-      textPainter.layout(
-        //TODO
-      );
-
-      // This aligns the text to the center of the tick
-      final sizeOfLabel = textPainter.size;
-      if (axis.type == AxisType.XWithNum) {
-        p2 = p2.translate(
-          -(sizeOfLabel.width / 2),
-          axis.style.tick.tickMargin.abs() + axis.style.tick.tickLength.abs(),
-        );
-      } else {
-        p2 = p2.translate(
-          -(sizeOfLabel.width + axis.style.tick.tickMargin.abs() + axis.style.tick.tickLength.abs()),
-          -(sizeOfLabel.height / 2),
-        );
-      }
-      textPainter.paint(canvas, p2);
-    }
-  }
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
