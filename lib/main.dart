@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_charts/bar_chart/axis.dart';
-import 'package:flutter_charts/bar_chart/bar_chart_bar.dart';
 import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
 
 import 'bar_chart/bar_chart.dart';

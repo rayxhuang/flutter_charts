@@ -141,6 +141,8 @@ class BarChartPainter extends CustomPainter {
     canvas.drawLine(_topRight, _bottomRight, p);
     canvas.drawLine(_bottomLeft, _bottomRight, p);
 
+    canFitAsDesired();
+
     // Draw X Axis
     if (xStyle.visible) {
       final axisXStartOffset = _bottomLeft.translate(0, - xStyle.shift);
@@ -150,6 +152,7 @@ class BarChartPainter extends CustomPainter {
         ..strokeWidth = xStyle.strokeWidth
         ..strokeCap = xStyle.strokeCap;
       canvas.drawLine(axisXStartOffset, axisXEndOffset, paintX);
+
       // Adjust size according to stroke taken by the axis
       double strokeWidth = xStyle.strokeWidth / 2;
       _bottomLeft = _bottomLeft.translate(0, - strokeWidth);
@@ -176,11 +179,20 @@ class BarChartPainter extends CustomPainter {
     actualGridSize = Size(actualLengthX, actualLengthY);
     _axisIntersection = _bottomLeft.translate(yStyle.shift, -xStyle.shift);
 
-    canFitAsDesired();
-
+    //Calculate unitPerPixel
     double xUnitPerPixel, yUnitPerPixel;
     if (xSatisfied) { xUnitPerPixel = (xStyle.preferredEnd - xStyle.preferredStart) / actualLengthX; }
     if (ySatisfied) { yUnitPerPixel = (yStyle.preferredEnd - yStyle.preferredStart) / actualLengthY; }
+
+    //Draw ticks
+    if (xStyle.visible) {
+      if (xSatisfied) {
+        final Tick tick = xStyle.tick;
+        if (tick.onlyShowLastTick && tick.useLastTickForLabel) {
+
+        }
+      }
+    }
 
     //This is the bar paint
     Paint paint = Paint()
