@@ -139,15 +139,15 @@ class _BarChartState extends State<BarChart> with TickerProviderStateMixin{
 
 class BarChartPainter extends CustomPainter {
   final Offset startOffset, endOffset;
-  final AxisStyle xStyle, yStyle;
   final BarChartData barChartData;
   final List<double> xValueRange, yValueRange;
+  final AxisStyle xStyle, yStyle;
+  
   List<BarData> _data;
   double axisAnimationFraction, barAnimationFraction;
   Offset _topLeft, _topRight, _bottomLeft, _bottomRight, _axisIntersection;
   Offset _axisXStartOffset, _axisXEndOffset, _axisYStartOffset, _axisYEndOffset;
-  bool xSatisfied = false;
-  bool ySatisfied = false;
+  double xMin, xMax, yMin, yMax;
 
   BarChartPainter({
     this.startOffset,
@@ -161,10 +161,22 @@ class BarChartPainter extends CustomPainter {
     this.barAnimationFraction,
   });
 
-  // TODO Adjust start and end value
-  void canFitAsDesired() {
-    if (xValueRange[1] <= xStyle.preferredEndValue && xValueRange[0] >= xStyle.preferredStartValue) { xSatisfied = true; }
-    if (yValueRange[1] <= yStyle.preferredEndValue && yValueRange[0] >= yStyle.preferredStartValue) { ySatisfied = true; }
+  void adjustAxisValueRange() {
+    xStyle.preferredStartValue <= xValueRange[0]
+        ? xMin = xStyle.preferredStartValue
+        : xMin = xValueRange[0];
+    
+    xStyle.preferredEndValue >= xValueRange[1]
+        ? xMax = xStyle.preferredEndValue
+        : xMax = xValueRange[1];
+
+    yStyle.preferredStartValue <= yValueRange[0]
+        ? yMin = yStyle.preferredStartValue
+        : yMin = yValueRange[0];
+
+    yStyle.preferredEndValue >= yValueRange[1]
+        ? yMax = yStyle.preferredEndValue
+        : yMax = yValueRange[1];
   }
 
   void drawTicksOnAxis(
@@ -254,8 +266,8 @@ class BarChartPainter extends CustomPainter {
     String endText;
     //If the user want last tick to show unit as text
     tick.lastTickWithUnit
-        ? endText = style.preferredEndValue.toStringAsFixed(tick.tickDecimal) + tick.unit
-        : endText = style.preferredEndValue.toStringAsFixed(tick.tickDecimal);
+        ? endText = endValue.toStringAsFixed(tick.tickDecimal) + tick.unit
+        : endText = endValue.toStringAsFixed(tick.tickDecimal);
     _textPainter.text = TextSpan(
       text: '$endText',
       style: tickTextStyle,
@@ -273,9 +285,9 @@ class BarChartPainter extends CustomPainter {
       ..strokeWidth = 2;
     //Draw data as bars on grid
     for (BarData bar in _data) {
-      double x1FromBottomLeft = (bar.x1 - xStyle.preferredStartValue) / xUnitPerPixel;
+      double x1FromBottomLeft = (bar.x1 - xMin) / xUnitPerPixel;
       double x2FromBottomLeft = x1FromBottomLeft + (bar.x2 - bar.x1) / xUnitPerPixel;
-      double yFromBottomLeft = (bar.y - yStyle.preferredStartValue) / yUnitPerPixel;
+      double yFromBottomLeft = (bar.y - yMin) / yUnitPerPixel;
       Rect rect = Rect.fromPoints(
           _bottomLeft.translate(x1FromBottomLeft, -yFromBottomLeft * barAnimationFraction),
           _bottomLeft.translate(x2FromBottomLeft, 0)
@@ -307,7 +319,7 @@ class BarChartPainter extends CustomPainter {
     // canvas.drawLine(_topLeft, _bottomLeft, p);
     // canvas.drawLine(_topRight, _bottomRight, p);
     // canvas.drawLine(_bottomLeft, _bottomRight, p);
-    canFitAsDesired();
+    adjustAxisValueRange();
 
     // Draw X Axis
     if (xStyle.visible) {
@@ -350,22 +362,22 @@ class BarChartPainter extends CustomPainter {
     _axisIntersection = _bottomLeft.translate(yStyle.shift, -xStyle.shift);
 
     // Draw ticks on X Axis
-    if (xStyle.visible && xSatisfied && axisAnimationFraction == 1) {
+    if (xStyle.visible && axisAnimationFraction == 1) {
       // TODO Remove use of value in style
-      drawTicksOnAxis(canvas, xStyle, actualLengthX, xStyle.preferredStartValue, xStyle.preferredEndValue);
+      drawTicksOnAxis(canvas, xStyle, actualLengthX, xMin, xMax);
     }
 
     // Draw ticks on Y Axis
-    if (yStyle.visible && ySatisfied && axisAnimationFraction == 1) {
+    if (yStyle.visible && axisAnimationFraction == 1) {
       // TODO Remove use of value in style
-      drawTicksOnAxis(canvas, yStyle, actualLengthY, yStyle.preferredStartValue, yStyle.preferredEndValue, isHorizontal: false);
+      drawTicksOnAxis(canvas, yStyle, actualLengthY, yMin, yMax, isHorizontal: false);
     }
 
     // Calculate unitPerPixel then draw data
     double xUnitPerPixel, yUnitPerPixel;
     // TODO Remove use of value in style
-    if (xSatisfied) { xUnitPerPixel = (xStyle.preferredEndValue - xStyle.preferredStartValue) / actualLengthX; }
-    if (ySatisfied) { yUnitPerPixel = (yStyle.preferredEndValue - yStyle.preferredStartValue) / actualLengthY; }
+    xUnitPerPixel = (xMax - xMin) / actualLengthX;
+    yUnitPerPixel = (yMax - yMin) / actualLengthY;
     drawData(canvas, xUnitPerPixel, yUnitPerPixel);
   }
 

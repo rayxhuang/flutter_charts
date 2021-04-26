@@ -66,7 +66,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   gridAreaOffsetFromBottomLeft: const Offset(20, 20),
                   gridAreaOffsetFromTopRight: const Offset(15, 5),
                   xAxisStyle: const AxisStyle(
-                    preferredStartValue: 0,
                     preferredEndValue: 5,
                     axisColor: Colors.teal,
                     numTicks: 11,
@@ -78,7 +77,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     )
                   ),
                   yAxisStyle: const AxisStyle(
-                    preferredStartValue: 0,
                     preferredEndValue: 10,
                     axisColor: Colors.teal,
                     tick: Tick(

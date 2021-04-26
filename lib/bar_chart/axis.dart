@@ -20,8 +20,8 @@ class AxisStyle {
     this.axisColor = Colors.black,
     this.strokeWidth = 3,
     this.strokeCap = StrokeCap.round,
-    this.preferredStartValue,
-    this.preferredEndValue,
+    this.preferredStartValue = 0,
+    this.preferredEndValue = 1,
     this.label = '',
   });
 }
