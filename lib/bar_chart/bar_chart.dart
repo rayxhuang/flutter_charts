@@ -161,10 +161,127 @@ class BarChartPainter extends CustomPainter {
     this.barAnimationFraction,
   });
 
-  // TODO
+  // TODO Adjust start and end value
   void canFitAsDesired() {
     if (xValueRange[1] <= xStyle.preferredEndValue && xValueRange[0] >= xStyle.preferredStartValue) { xSatisfied = true; }
     if (yValueRange[1] <= yStyle.preferredEndValue && yValueRange[0] >= yStyle.preferredStartValue) { ySatisfied = true; }
+  }
+
+  void drawTicksOnAxis(
+    Canvas canvas,
+    AxisStyle style,
+    double length,
+    double startValue,
+    double endValue,
+    {bool isHorizontal = true}
+  ) {
+    final Tick tick = style.tick;
+    final double lengthPerTick = length / (style.numTicks - 1);
+    final double valuePerTick = (endValue - startValue) / (style.numTicks - 1);
+    final Paint tickPaint = Paint()
+      ..strokeWidth = style.strokeWidth
+      ..strokeCap = style.strokeCap
+      ..color = tick.tickColor;
+    final TextStyle tickTextStyle = TextStyle(color: tick.textColor, fontSize: tick.labelTextSize);
+    final TextPainter _textPainter = TextPainter(
+      text: TextSpan(),
+      textDirection: TextDirection.ltr,
+    );
+    _textPainter.layout();
+
+    Offset p1, p2, p3;
+    if (!tick.onlyShowTicksAtTwoSides) {
+      int _numTicksBetween = style.numTicks - 2;
+      for (int i = 1; i < _numTicksBetween + 1; i++) {
+        // TODO is this divided by pi?
+        if (isHorizontal) {
+          p1 = _bottomLeft.translate(i * lengthPerTick, tickPaint.strokeWidth / 2);
+          p2 = p1.translate(0, tick.tickLength);
+          p3 = p2.translate(0, tick.tickMargin);
+        } else {
+          p1 = _bottomLeft.translate(-tickPaint.strokeWidth / 2, -(i * lengthPerTick));
+          p2 = p1.translate(-tick.tickLength, 0);
+          p3 = p2.translate(-tick.tickMargin, 0);
+        }
+
+        //Draw the tick line
+        canvas.drawLine(p1, p2, tickPaint);
+        final String value = (startValue + i * valuePerTick).toStringAsFixed(tick.tickDecimal);
+        _textPainter.text = TextSpan(
+          text: '$value',
+          style: tickTextStyle,
+        );
+        _textPainter.layout();
+        //Draw the tick value text
+        isHorizontal
+            ? _textPainter.paint(canvas, p3.translate(-(_textPainter.width / 2), 0))
+            : _textPainter.paint(canvas, p3.translate(-(_textPainter.width), -(_textPainter.height / 2)));
+      }
+    }
+
+    //Draw start value
+    if (isHorizontal) {
+      p1 = _bottomLeft.translate(0, tickPaint.strokeWidth / 2);
+      p2 = p1.translate(0, tick.tickLength);
+      p3 = p2.translate(0, tick.tickMargin);
+    } else {
+      p1 = _bottomLeft.translate(-(tickPaint.strokeWidth / 2), 0);
+      p2 = p1.translate(-(tick.tickLength), 0);
+      p3 = p2.translate(-tick.tickMargin, 0);
+    }
+    canvas.drawLine(p1, p2, tickPaint);
+    final String startText = startValue.toStringAsFixed(tick.tickDecimal);
+    _textPainter.text = TextSpan(
+      text: '$startText',
+      style: tickTextStyle,
+    );
+    _textPainter.layout();
+    isHorizontal
+        ? _textPainter.paint(canvas, p3.translate(-(_textPainter.width / 2), 0))
+        : _textPainter.paint(canvas, p3.translate(-(_textPainter.width), -(_textPainter.height / 2)));
+
+    //Draw end value
+    if (isHorizontal) {
+      p1 = _bottomRight.translate(0, tickPaint.strokeWidth / 2);
+      p2 = p1.translate(0, tick.tickLength);
+      p3 = p2.translate(0, tick.tickMargin);
+    } else {
+      p1 = _topLeft.translate(-(tickPaint.strokeWidth / 2), 0);
+      p2 = p1.translate(-(tick.tickLength), 0);
+      p3 = p2.translate(-tick.tickMargin, 0);
+    }
+    canvas.drawLine(p1, p2, tickPaint);
+    String endText;
+    //If the user want last tick to show unit as text
+    tick.lastTickWithUnit
+        ? endText = style.preferredEndValue.toStringAsFixed(tick.tickDecimal) + tick.unit
+        : endText = style.preferredEndValue.toStringAsFixed(tick.tickDecimal);
+    _textPainter.text = TextSpan(
+      text: '$endText',
+      style: tickTextStyle,
+    );
+    _textPainter.layout();
+    isHorizontal
+        ? _textPainter.paint(canvas, p3.translate(-(_textPainter.width / 2), 0))
+        : _textPainter.paint(canvas, p3.translate(-(_textPainter.width), -(_textPainter.height / 2)));
+  }
+
+  void drawData(Canvas canvas, double xUnitPerPixel, double yUnitPerPixel) {
+    //This is the bar paint
+    Paint paint = Paint()
+      ..color = barChartData.style.color
+      ..strokeWidth = 2;
+    //Draw data as bars on grid
+    for (BarData bar in _data) {
+      double x1FromBottomLeft = (bar.x1 - xStyle.preferredStartValue) / xUnitPerPixel;
+      double x2FromBottomLeft = x1FromBottomLeft + (bar.x2 - bar.x1) / xUnitPerPixel;
+      double yFromBottomLeft = (bar.y - yStyle.preferredStartValue) / yUnitPerPixel;
+      Rect rect = Rect.fromPoints(
+          _bottomLeft.translate(x1FromBottomLeft, -yFromBottomLeft * barAnimationFraction),
+          _bottomLeft.translate(x2FromBottomLeft, 0)
+      );
+      canvas.drawRect(rect, paint);
+    }
   }
 
   @override
@@ -184,14 +301,12 @@ class BarChartPainter extends CustomPainter {
     _topRight = _topLeft.translate(actualGridSize.width, 0);
     _bottomLeft = _topLeft.translate(0, actualGridSize.height);
     _bottomRight = _topLeft.translate(actualGridSize.width, actualGridSize.height);
-
     // DEBUG USE ONLY
     // Paint p = Paint()..color = Colors.red;
     // canvas.drawLine(_topLeft, _topRight, p);
     // canvas.drawLine(_topLeft, _bottomLeft, p);
     // canvas.drawLine(_topRight, _bottomRight, p);
     // canvas.drawLine(_bottomLeft, _bottomRight, p);
-
     canFitAsDesired();
 
     // Draw X Axis
@@ -230,163 +345,28 @@ class BarChartPainter extends CustomPainter {
       actualLengthX -= strokeWidth;
     }
 
+    // These might be useful later
     actualGridSize = Size(actualLengthX, actualLengthY);
     _axisIntersection = _bottomLeft.translate(yStyle.shift, -xStyle.shift);
 
-    //Calculate unitPerPixel
+    // Draw ticks on X Axis
+    if (xStyle.visible && xSatisfied && axisAnimationFraction == 1) {
+      // TODO Remove use of value in style
+      drawTicksOnAxis(canvas, xStyle, actualLengthX, xStyle.preferredStartValue, xStyle.preferredEndValue);
+    }
+
+    // Draw ticks on Y Axis
+    if (yStyle.visible && ySatisfied && axisAnimationFraction == 1) {
+      // TODO Remove use of value in style
+      drawTicksOnAxis(canvas, yStyle, actualLengthY, yStyle.preferredStartValue, yStyle.preferredEndValue, isHorizontal: false);
+    }
+
+    // Calculate unitPerPixel then draw data
     double xUnitPerPixel, yUnitPerPixel;
+    // TODO Remove use of value in style
     if (xSatisfied) { xUnitPerPixel = (xStyle.preferredEndValue - xStyle.preferredStartValue) / actualLengthX; }
     if (ySatisfied) { yUnitPerPixel = (yStyle.preferredEndValue - yStyle.preferredStartValue) / actualLengthY; }
-
-    //Draw ticks on X Axis
-    if (xStyle.visible && xSatisfied && axisAnimationFraction == 1) {
-      final Tick tick = xStyle.tick;
-      final double lengthPerTick = actualLengthX / (xStyle.numTicks - 1);
-      final double valuePerTick = (xStyle.preferredEndValue - xStyle.preferredStartValue) / (xStyle.numTicks - 1);
-      final Paint tickPaint = Paint()
-      ..strokeWidth = xStyle.strokeWidth
-      ..strokeCap = xStyle.strokeCap
-      ..color = tick.tickColor;
-      final TextStyle tickTextStyle = TextStyle(color: tick.textColor, fontSize: tick.labelTextSize);
-      final TextPainter _textPainter = TextPainter(
-        text: TextSpan(),
-        textDirection: TextDirection.ltr,
-      );
-      _textPainter.layout();
-
-      if (!tick.onlyShowTicksAtTwoSides) {
-        int _numTicksBetween = xStyle.numTicks - 2;
-        for (int i = 1; i < _numTicksBetween + 1; i++) {
-          // TODO is this divided by pi?
-          Offset p1 = _bottomLeft.translate(i * lengthPerTick, tickPaint.strokeWidth / 2);
-          Offset p2 = p1.translate(0, tick.tickLength);
-          Offset p3 = p2.translate(0, tick.tickMargin);
-          //Draw the tick line
-          canvas.drawLine(p1, p2, tickPaint);
-          final String value = (xStyle.preferredStartValue + i * valuePerTick).toStringAsFixed(tick.tickDecimal);
-          _textPainter.text = TextSpan(
-            text: '$value',
-            style: tickTextStyle,
-          );
-          _textPainter.layout();
-          //Draw the tick value text
-          _textPainter.paint(canvas, p3.translate(-(_textPainter.width / 2), 0));
-        }
-      }
-
-      //Draw start value
-      Offset p1 = _bottomLeft.translate(0, tickPaint.strokeWidth / 2);
-      Offset p2 = p1.translate(0, tick.tickLength);
-      Offset p3 = p2.translate(0, tick.tickMargin);
-      canvas.drawLine(p1, p2, tickPaint);
-      final String startValue = xStyle.preferredStartValue.toStringAsFixed(tick.tickDecimal);
-      _textPainter.text = TextSpan(
-        text: '$startValue',
-        style: tickTextStyle,
-      );
-      _textPainter.layout();
-      _textPainter.paint(canvas, p3.translate(-(_textPainter.width / 2), 0));
-
-      //Draw end value
-      p1 = _bottomRight.translate(0, tickPaint.strokeWidth / 2);
-      p2 = p1.translate(0, tick.tickLength);
-      p3 = p2.translate(0, tick.tickMargin);
-      canvas.drawLine(p1, p2, tickPaint);
-      String _endValue;
-      //If the user want last tick to show unit as text
-      tick.lastTickWithUnit
-          ? _endValue = xStyle.preferredEndValue.toStringAsFixed(tick.tickDecimal) + tick.unit
-          : _endValue = xStyle.preferredEndValue.toStringAsFixed(tick.tickDecimal);
-      _textPainter.text = TextSpan(
-        text: '$_endValue',
-        style: tickTextStyle,
-      );
-      _textPainter.layout();
-      _textPainter.paint(canvas, p3.translate(-(_textPainter.width / 2), 0));
-    }
-
-    //Draw ticks on Y Axis
-    if (yStyle.visible && ySatisfied && axisAnimationFraction == 1) {
-      final Tick tick = yStyle.tick;
-      final double lengthPerTick = actualLengthY / (yStyle.numTicks - 1);
-      final double valuePerTick = (yStyle.preferredEndValue - yStyle.preferredStartValue) / (yStyle.numTicks - 1);
-      final Paint tickPaint = Paint()
-        ..strokeWidth = yStyle.strokeWidth
-        ..strokeCap = yStyle.strokeCap
-        ..color = tick.tickColor;
-      final TextStyle tickTextStyle = TextStyle(color: tick.textColor, fontSize: tick.labelTextSize);
-      final TextPainter _textPainter = TextPainter(
-        text: TextSpan(),
-        textDirection: TextDirection.ltr,
-      );
-      _textPainter.layout();
-
-      if (!tick.onlyShowTicksAtTwoSides) {
-        int _numTicksBetween = yStyle.numTicks - 2;
-        for (int i = 1; i < _numTicksBetween + 1; i++) {
-          //TODO pi?
-          Offset p1 = _bottomLeft.translate(-tickPaint.strokeWidth / 2, -(i * lengthPerTick));
-          Offset p2 = p1.translate(-tick.tickLength, 0);
-          Offset p3 = p2.translate(-tick.tickMargin, 0);
-          //Draw the tick line
-          canvas.drawLine(p1, p2, tickPaint);
-          final String value = (yStyle.preferredStartValue + i * valuePerTick).toStringAsFixed(tick.tickDecimal);
-          _textPainter.text = TextSpan(
-            text: '$value',
-            style: tickTextStyle,
-          );
-          _textPainter.layout();
-          //Draw the tick value text
-          _textPainter.paint(canvas, p3.translate(-(_textPainter.width), -(_textPainter.height / 2)));
-        }
-      }
-
-      //Draw start value
-      Offset p1 = _bottomLeft.translate(-(tickPaint.strokeWidth / 2), 0);
-      Offset p2 = p1.translate(-(tick.tickLength), 0);
-      Offset p3 = p2.translate(-tick.tickMargin, 0);
-      canvas.drawLine(p1, p2, tickPaint);
-      final String startValue = yStyle.preferredStartValue.toStringAsFixed(tick.tickDecimal);
-      _textPainter.text = TextSpan(
-        text: '$startValue',
-        style: tickTextStyle,
-      );
-      _textPainter.layout();
-      _textPainter.paint(canvas, p3.translate(-(_textPainter.width), -(_textPainter.height / 2)));
-
-      //Draw end value
-      p1 = _topLeft.translate(-(tickPaint.strokeWidth / 2), 0);
-      p2 = p1.translate(-(tick.tickLength), 0);
-      p3 = p2.translate(-tick.tickMargin, 0);
-      canvas.drawLine(p1, p2, tickPaint);
-      String _endValue;
-      //If the user want last tick to show unit as text
-      tick.lastTickWithUnit
-          ? _endValue = yStyle.preferredEndValue.toStringAsFixed(tick.tickDecimal) + tick.unit
-          : _endValue = yStyle.preferredEndValue.toStringAsFixed(tick.tickDecimal);
-      _textPainter.text = TextSpan(
-        text: '$_endValue',
-        style: tickTextStyle,
-      );
-      _textPainter.layout();
-      _textPainter.paint(canvas, p3.translate(-(_textPainter.width), -(_textPainter.height / 2)));
-    }
-
-    //This is the bar paint
-    Paint paint = Paint()
-      ..color = barChartData.style.color
-      ..strokeWidth = 2;
-    //Draw data as bars on grid
-    for (BarData bar in _data) {
-      double x1FromBottomLeft = (bar.x1 - xStyle.preferredStartValue) / xUnitPerPixel;
-      double x2FromBottomLeft = x1FromBottomLeft + (bar.x2 - bar.x1) / xUnitPerPixel;
-      double yFromBottomLeft = (bar.y - yStyle.preferredStartValue) / yUnitPerPixel;
-      Rect rect = Rect.fromPoints(
-        _bottomLeft.translate(x1FromBottomLeft, -yFromBottomLeft * barAnimationFraction),
-        _bottomLeft.translate(x2FromBottomLeft, 0)
-      );
-      canvas.drawRect(rect, paint);
-    }
+    drawData(canvas, xUnitPerPixel, yUnitPerPixel);
   }
 
   @override
