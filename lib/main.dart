@@ -4,11 +4,11 @@ import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
 
 import 'bar_chart/bar_chart.dart';
 
-BarChartData data = BarChartDataNumber.Double(data: sampleData);
+BarChartData data = BarChartDataNumber.double(data: sampleData);
 List<BarData> sampleData = [
   BarData(x1: 0, x2: 0.5, y: 8),
   BarData(x1: 0.8, x2: 1.2, y: 4),
-  //BarData(x1: 3, x2: 4, y: 3.4),
+  BarData(x1: 3, x2: 4, y: 3.4),
 ];
 
 void main() {
@@ -53,36 +53,41 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           children: [
             const SizedBox(height: 5,),
-            BarChart(
-              barChartData: BarChartDataNumber.Double(
-                data: sampleData,
+            Card(
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20)),
               ),
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height / 3,
-              margin: EdgeInsets.all(5),
-              actualDataGridAreaOffsetFromBottomLeft: Offset(20, 20),
-              actualDataGridAreaOffsetFromTopRight: Offset(15, 5),
-              xAxisStyle: const AxisStyle(
-                preferredStart: 0,
-                preferredEnd: 1.5,
-                color: Colors.teal,
-                numTicks: 16,
-                tick: Tick(
-                  labelTextSize: 10,
-                  tickDecimal: 2,
-                  tickLength: 5,
-                  tickColor: Colors.teal,
-                  unit: '',
-                )
-              ),
-              yAxisStyle: AxisStyle(
-                preferredStart: 0,
-                preferredEnd: 10,
-                color: Colors.teal,
-                tick: Tick(
-                  tickLength: 5,
-                  tickColor: Colors.teal,
-                )
+              margin: const EdgeInsets.all(5),
+              child: Center(
+                child: BarChart(
+                  barChartData: BarChartDataNumber.double(data: sampleData,),
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height / 3,
+                  gridAreaOffsetFromBottomLeft: const Offset(20, 20),
+                  gridAreaOffsetFromTopRight: const Offset(15, 5),
+                  xAxisStyle: const AxisStyle(
+                    preferredStart: 0,
+                    preferredEnd: 5,
+                    color: Colors.teal,
+                    numTicks: 11,
+                    tick: Tick(
+                      labelTextSize: 10,
+                      tickDecimal: 1,
+                      tickLength: 5,
+                      tickColor: Colors.teal,
+                      unit: '',
+                    )
+                  ),
+                  yAxisStyle: const AxisStyle(
+                    preferredStart: 0,
+                    preferredEnd: 10,
+                    color: Colors.teal,
+                    tick: Tick(
+                      tickLength: 5,
+                      tickColor: Colors.teal,
+                    )
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 5,),

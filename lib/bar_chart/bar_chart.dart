@@ -11,11 +11,9 @@ class BarChart extends StatefulWidget {
   final BarChartData barChartData;
   final double width;
   final double height;
-  final Offset actualDataGridAreaOffsetFromBottomLeft;
-  final Offset actualDataGridAreaOffsetFromTopRight;
-  final EdgeInsetsGeometry margin;
+  final Offset gridAreaOffsetFromBottomLeft;
+  final Offset gridAreaOffsetFromTopRight;
   final EdgeInsetsGeometry contentPadding;
-  final ShapeBorder outerShape;
   final AxisStyle xAxisStyle;
   final AxisStyle yAxisStyle;
 
@@ -23,13 +21,9 @@ class BarChart extends StatefulWidget {
     @required this.barChartData,
     @required this.width,
     @required this.height,
-    @required this.actualDataGridAreaOffsetFromBottomLeft,
-    @required this.actualDataGridAreaOffsetFromTopRight,
-    this.margin = const EdgeInsets.all(0),
+    @required this.gridAreaOffsetFromBottomLeft,
+    @required this.gridAreaOffsetFromTopRight,
     this.contentPadding = const EdgeInsets.all(10),
-    this.outerShape = const RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(20)),
-    ),
     this.xAxisStyle = const AxisStyle(),
     this.yAxisStyle = const AxisStyle(),
   });
@@ -38,36 +32,81 @@ class BarChart extends StatefulWidget {
   _BarChartState createState() => _BarChartState();
 }
 
-class _BarChartState extends State<BarChart> {
-  BarChartPainter _painter;
+class _BarChartState extends State<BarChart> with TickerProviderStateMixin{
+  // BarChartPainter _painter;
+  List<double> _xValueRange = [], _yValueRange = [];
+  AnimationController _animationController;
+  double animation;
 
   @override
   void initState() {
     super.initState();
 
-    _painter = BarChartPainter(
-      startOffset: widget.actualDataGridAreaOffsetFromBottomLeft,
-      endOffset: widget.actualDataGridAreaOffsetFromTopRight,
-      barChartData: widget.barChartData,
-      xStyle: widget.xAxisStyle,
-      yStyle: widget.yAxisStyle,
+    analyseData();
+
+    Tween<double> _tween = Tween(begin: 0, end: 1);
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
     );
 
-    _painter.analyseData();
+    var _animation = _tween.animate(_animationController)..addListener(() {
+      setState(() {
+        animation = _animationController.value;
+      });
+    });
+    // _painter = BarChartPainter(
+    //   startOffset: widget.actualDataGridAreaOffsetFromBottomLeft,
+    //   endOffset: widget.actualDataGridAreaOffsetFromTopRight,
+    //   barChartData: widget.barChartData,
+    //   xStyle: widget.xAxisStyle,
+    //   yStyle: widget.yAxisStyle,
+    //   animation: _animationController.value, //TODO
+    // );
+
+
+    //_painter.analyseData();
+    print('called controller forward');
+    _animationController.forward(from: 0);
+  }
+
+  void analyseData() {
+    List<double> _xValueList1 = [], _xValueList2 = [], _yValueList = [];
+    var data = widget.barChartData.data;
+    if (widget.barChartData.type == BarChartDataType.Double) {
+      double xMin, xMax, yMin, yMax;
+      data.forEach((bar) {
+        _xValueList1.add(bar.x1);
+        _xValueList2.add(bar.x2);
+        _yValueList.add(bar.y);
+      });
+      xMin = _xValueList1.reduce(min);
+      xMax = _xValueList2.reduce(max);
+      _xValueRange = [xMin, xMax];
+      yMin = _yValueList.reduce(min);
+      yMax = _yValueList.reduce(max);
+      _yValueRange = [yMin, yMax];
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: widget.outerShape,
-      margin: widget.margin,
-      child: Center(
-        child: Container(
-          padding: widget.contentPadding,
-          width: widget.width,
-          height: widget.height,
-          child: CustomPaint(
-            painter: _painter,
+    return SizedBox(
+      width: widget.width,
+      height: widget.height,
+      child: Padding(
+        padding: widget.contentPadding,
+        child: CustomPaint(
+          //painter: _painter,
+          painter: BarChartPainter(
+            startOffset: widget.gridAreaOffsetFromBottomLeft,
+            endOffset: widget.gridAreaOffsetFromTopRight,
+            barChartData: widget.barChartData,
+            xValueRange: _xValueRange,
+            yValueRange: _yValueRange,
+            xStyle: widget.xAxisStyle,
+            yStyle: widget.yAxisStyle,
+            axisAnimationFraction: animation, //TODO
           ),
         ),
       ),
@@ -79,9 +118,9 @@ class BarChartPainter extends CustomPainter {
   final Offset startOffset, endOffset;
   final AxisStyle xStyle, yStyle;
   final BarChartData barChartData;
+  final List<double> xValueRange, yValueRange;
   List<BarData> _data;
-  List<double> _xValueRange = [], _yValueRange = [];
-  List<double> _xValueList1 = [], _xValueList2 = [], _yValueList = [];
+  double axisAnimationFraction;
   Offset _topLeft, _topRight, _bottomLeft, _bottomRight, _axisIntersection;
   Offset _axisXStartOffset, _axisXEndOffset, _axisYStartOffset, _axisYEndOffset;
   bool xSatisfied = false;
@@ -91,41 +130,25 @@ class BarChartPainter extends CustomPainter {
     this.startOffset,
     this.endOffset,
     this.barChartData,
+    this.xValueRange,
+    this.yValueRange,
     this.xStyle,
     this.yStyle,
+    this.axisAnimationFraction,
   });
-
-  void analyseData() {
-    _data = barChartData.data;
-    if (barChartData.type == BarChartDataType.Double) {
-      double xMin, xMax, yMin, yMax;
-      _data.forEach((bar) {
-        _xValueList1.add(bar.x1);
-        _xValueList2.add(bar.x2);
-        _yValueList.add(bar.y);
-      });
-      xMin = _xValueList1.reduce(min);
-      xMax = _xValueList2.reduce(max);
-      _xValueRange = [xMin, xMax];
-      yMin = _yValueList.reduce(min);
-      yMax = _yValueList.reduce(max);
-      _yValueRange = [yMin, yMax];
-
-      print(_xValueRange);
-      print(_yValueRange);
-    }
-  }
 
   // TODO
   void canFitAsDesired() {
-    if (_xValueRange[1] <= xStyle.preferredEnd && _xValueRange[0] >= xStyle.preferredStart) { xSatisfied = true; }
-    if (_yValueRange[1] <= yStyle.preferredEnd && _yValueRange[0] >= yStyle.preferredStart) { ySatisfied = true; }
+    if (xValueRange[1] <= xStyle.preferredEnd && xValueRange[0] >= xStyle.preferredStart) { xSatisfied = true; }
+    if (yValueRange[1] <= yStyle.preferredEnd && yValueRange[0] >= yStyle.preferredStart) { ySatisfied = true; }
   }
 
   @override
   void paint(Canvas canvas, Size size) {
+    _data = barChartData.data;
     // DEBUG USE ONLY
     //canvas.drawRect(Offset(0, 0) & size, Paint()..color = Colors.white);
+    print(axisAnimationFraction);
 
     //Get actual size available for data
     double actualLengthX = size.width - startOffset.dx - endOffset.dx;
@@ -139,11 +162,11 @@ class BarChartPainter extends CustomPainter {
     _bottomRight = _topLeft.translate(actualGridSize.width, actualGridSize.height);
 
     // DEBUG USE ONLY
-    Paint p = Paint()..color = Colors.red;
-    canvas.drawLine(_topLeft, _topRight, p);
-    canvas.drawLine(_topLeft, _bottomLeft, p);
-    canvas.drawLine(_topRight, _bottomRight, p);
-    canvas.drawLine(_bottomLeft, _bottomRight, p);
+    // Paint p = Paint()..color = Colors.red;
+    // canvas.drawLine(_topLeft, _topRight, p);
+    // canvas.drawLine(_topLeft, _bottomLeft, p);
+    // canvas.drawLine(_topRight, _bottomRight, p);
+    // canvas.drawLine(_bottomLeft, _bottomRight, p);
 
     canFitAsDesired();
 
@@ -151,11 +174,13 @@ class BarChartPainter extends CustomPainter {
     if (xStyle.visible) {
       _axisXStartOffset = _bottomLeft.translate(0, - xStyle.shift);
       _axisXEndOffset = _bottomRight.translate(0, - xStyle.shift);
+      double axisXLength = _axisXEndOffset.dx - _axisXStartOffset.dx;
       final paintX = Paint()
         ..color = xStyle.color
         ..strokeWidth = xStyle.strokeWidth
         ..strokeCap = xStyle.strokeCap;
-      canvas.drawLine(_axisXStartOffset, _axisXEndOffset, paintX);
+      //canvas.drawLine(_axisXStartOffset, _axisXEndOffset, paintX);
+      canvas.drawLine(_axisXStartOffset, _axisXStartOffset.translate(axisXLength * axisAnimationFraction, 0), paintX);
 
       // Adjust size according to stroke taken by the axis
       double strokeWidth = xStyle.strokeWidth / 2;
@@ -328,7 +353,7 @@ class BarChartPainter extends CustomPainter {
 
     //This is the bar paint
     Paint paint = Paint()
-      ..color = Colors.yellow
+      ..color = barChartData.style.color
       ..strokeWidth = 2;
     //Draw data as bars on grid
     for (BarData bar in _data) {
@@ -344,5 +369,7 @@ class BarChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant BarChartPainter oldDelegate) {
+    return oldDelegate.axisAnimationFraction != axisAnimationFraction;
+  }
 }
