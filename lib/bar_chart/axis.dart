@@ -27,9 +27,11 @@ class AxisStyle {
 }
 
 class Tick {
-  final bool onlyShowLastTick;
-  final bool useLastTickForLabel;
+  final bool onlyShowTicksAtTwoSides;
+  final bool lastTickWithUnit;
+  final double labelTextSize;
   final String unit;
+  final Color textColor;
   final Color tickColor;
   final double tickMargin;
   final int tickDecimal;
@@ -38,11 +40,13 @@ class Tick {
 
 
   const Tick({
-    this.onlyShowLastTick = false,
-    this.useLastTickForLabel = true,
+    this.onlyShowTicksAtTwoSides = false,
+    this.lastTickWithUnit = true,
+    this.labelTextSize = 14,
     this.unit = '',
-    this.tickColor = Colors.black,
-    this.tickMargin = 5,
+    this.textColor = Colors.white,
+    this.tickColor = Colors.white,
+    this.tickMargin = 3,
     this.tickDecimal = 0,
     this.tickLength = 0,
   });
