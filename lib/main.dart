@@ -66,12 +66,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   gridAreaOffsetFromBottomLeft: const Offset(20, 20),
                   gridAreaOffsetFromTopRight: const Offset(15, 5),
                   xAxisStyle: const AxisStyle(
-                    preferredStart: 0,
-                    preferredEnd: 5,
-                    color: Colors.teal,
+                    preferredStartValue: 0,
+                    preferredEndValue: 5,
+                    axisColor: Colors.teal,
                     numTicks: 11,
                     tick: Tick(
-                      labelTextSize: 10,
                       tickDecimal: 1,
                       tickLength: 5,
                       tickColor: Colors.teal,
@@ -79,13 +78,17 @@ class _MyHomePageState extends State<MyHomePage> {
                     )
                   ),
                   yAxisStyle: const AxisStyle(
-                    preferredStart: 0,
-                    preferredEnd: 10,
-                    color: Colors.teal,
+                    preferredStartValue: 0,
+                    preferredEndValue: 10,
+                    axisColor: Colors.teal,
                     tick: Tick(
                       tickLength: 5,
                       tickColor: Colors.teal,
                     )
+                  ),
+                  animation: const BarChartAnimation(
+                    animateAxis: true,
+                    animateData: true,
                   ),
                 ),
               ),

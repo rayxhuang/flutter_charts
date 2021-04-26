@@ -5,11 +5,11 @@ class AxisStyle {
   final bool visible;
   final int numTicks;
   final Tick tick;
-  final Color color;
+  final Color axisColor;
   final double strokeWidth;
   final StrokeCap strokeCap;
-  final double preferredStart;
-  final double preferredEnd;
+  final double preferredStartValue;
+  final double preferredEndValue;
   final String label;
 
   const AxisStyle({
@@ -17,11 +17,11 @@ class AxisStyle {
     this.visible = true,
     this.numTicks = 11,
     this.tick = const Tick(),
-    this.color = Colors.black,
+    this.axisColor = Colors.black,
     this.strokeWidth = 3,
     this.strokeCap = StrokeCap.round,
-    this.preferredStart,
-    this.preferredEnd,
+    this.preferredStartValue,
+    this.preferredEndValue,
     this.label = '',
   });
 }

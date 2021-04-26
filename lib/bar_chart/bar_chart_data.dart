@@ -48,3 +48,19 @@ class BarData {
     this.y = 0,
   });
 }
+
+class BarChartAnimation {
+  final bool animateAxis;
+  final bool animateData;
+  final Duration axisAnimationDuration;
+  final Duration dataAnimationDuration;
+  final bool animateDataAfterAxis;
+
+  const BarChartAnimation({
+    this.animateAxis = false,
+    this.animateData = false,
+    this.axisAnimationDuration = const Duration(milliseconds: 1500),
+    this.dataAnimationDuration = const Duration(milliseconds: 1500),
+    this.animateDataAfterAxis = true,
+  });
+}
