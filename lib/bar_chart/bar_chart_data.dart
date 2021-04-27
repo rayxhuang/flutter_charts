@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 enum BarChartDataType {Number, Double}
-enum BarChartBarShape {Rectangle, Rounded}
+enum BarChartBarShape {Rectangle, RoundedRectangle}
 
 abstract class BarChartData{
   final List<BarData> data;
@@ -30,10 +30,18 @@ class BarChartDataNumber extends BarChartData {
 class BarChartBarStyle {
   final Color color;
   final BarChartBarShape shape;
+  final Radius topLeft;
+  final Radius topRight;
+  final Radius bottomLeft;
+  final Radius bottomRight;
 
   const BarChartBarStyle({
     this.color = Colors.red,
     this.shape = BarChartBarShape.Rectangle,
+    this.topLeft = const Radius.circular(0),
+    this.topRight = const Radius.circular(0),
+    this.bottomLeft = const Radius.circular(0),
+    this.bottomRight = const Radius.circular(0),
   });
 }
 
@@ -41,11 +49,14 @@ class BarData {
   final double x1;
   final double x2;
   final double y;
+  final BarChartBarStyle style;
 
   const BarData({
     this.x1 = 0,
     this.x2 = 0,
     this.y = 0,
+    //this.style = const BarChartBarStyle(),
+    this.style,
   });
 }
 

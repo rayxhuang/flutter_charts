@@ -35,7 +35,6 @@ class BarChart extends StatefulWidget {
 }
 
 class _BarChartState extends State<BarChart> with TickerProviderStateMixin{
-  // BarChartPainter _painter;
   List<double> _xValueRange = [], _yValueRange = [];
   AnimationController _axisAnimationController, _dataAnimationController;
   double axisAnimationValue = 0, dataAnimationValue = 0;
@@ -179,6 +178,13 @@ class BarChartPainter extends CustomPainter {
         : yMax = yValueRange[1];
   }
 
+  Paint getAxisPaint(AxisStyle style) {
+    return Paint()
+      ..color = style.axisColor
+      ..strokeWidth = style.strokeWidth
+      ..strokeCap = style.strokeCap;
+  }
+
   void drawTicksOnAxis(
     Canvas canvas,
     AxisStyle style,
@@ -297,20 +303,40 @@ class BarChartPainter extends CustomPainter {
   }
 
   void drawData(Canvas canvas, double xUnitPerPixel, double yUnitPerPixel) {
+    final BarChartBarStyle barStyle = barChartData.style;
     //This is the bar paint
     Paint paint = Paint()
-      ..color = barChartData.style.color
       ..strokeWidth = 2;
     //Draw data as bars on grid
     for (BarData bar in _data) {
+      BarChartBarStyle style = bar.style;
+      if (style == null) {
+        // If individual bar style is not set, then it comes from parent
+        style = barStyle;
+      }
+      paint..color = style.color;
       double x1FromBottomLeft = (bar.x1 - xMin) / xUnitPerPixel;
       double x2FromBottomLeft = x1FromBottomLeft + (bar.x2 - bar.x1) / xUnitPerPixel;
       double yFromBottomLeft = (bar.y - yMin) / yUnitPerPixel;
       Rect rect = Rect.fromPoints(
-          _bottomLeft.translate(x1FromBottomLeft, -yFromBottomLeft * barAnimationFraction),
-          _bottomLeft.translate(x2FromBottomLeft, 0)
+        // Top Left
+        _bottomLeft.translate(x1FromBottomLeft, -yFromBottomLeft * barAnimationFraction),
+        // Bottom Right
+        _bottomLeft.translate(x2FromBottomLeft, 0)
       );
-      canvas.drawRect(rect, paint);
+      if (style.shape == BarChartBarShape.Rectangle) { canvas.drawRect(rect, paint); }
+      if (style.shape == BarChartBarShape.RoundedRectangle) {
+        canvas.drawRRect(
+          RRect.fromRectAndCorners(
+            rect,
+            topLeft: style.topLeft,
+            topRight: style.topRight,
+            bottomLeft: style.bottomLeft,
+            bottomRight: style.bottomRight,
+          ),
+          paint,
+        );
+      }
     }
   }
 
@@ -344,13 +370,7 @@ class BarChartPainter extends CustomPainter {
       _axisXStartOffset = _bottomLeft.translate(0, - xStyle.shift);
       _axisXEndOffset = _bottomRight.translate(0, - xStyle.shift);
       double axisXLength = _axisXEndOffset.dx - _axisXStartOffset.dx;
-      final paintX = Paint()
-        ..color = xStyle.axisColor
-        ..strokeWidth = xStyle.strokeWidth
-        ..strokeCap = xStyle.strokeCap;
-      //canvas.drawLine(_axisXStartOffset, _axisXEndOffset, paintX);
-      canvas.drawLine(_axisXStartOffset, _axisXStartOffset.translate(axisXLength * axisAnimationFraction, 0), paintX);
-
+      canvas.drawLine(_axisXStartOffset, _axisXStartOffset.translate(axisXLength * axisAnimationFraction, 0), getAxisPaint(xStyle));
       // Adjust size according to stroke taken by the axis
       double strokeWidth = xStyle.strokeWidth / 2;
       _bottomLeft = _bottomLeft.translate(0, - strokeWidth);
@@ -363,11 +383,7 @@ class BarChartPainter extends CustomPainter {
       _axisYStartOffset = _bottomLeft.translate(yStyle.shift, 0);
       _axisYEndOffset = _topLeft.translate(yStyle.shift, 0);
       double axisYLength = _axisYEndOffset.dy - _axisYStartOffset.dy;
-      final paintY = Paint()
-        ..color = yStyle.axisColor
-        ..strokeWidth = yStyle.strokeWidth
-        ..strokeCap = yStyle.strokeCap;
-      canvas.drawLine(_axisYStartOffset, _axisYStartOffset.translate(0, axisYLength * axisAnimationFraction), paintY);
+      canvas.drawLine(_axisYStartOffset, _axisYStartOffset.translate(0, axisYLength * axisAnimationFraction), getAxisPaint(yStyle));
       // Adjust size according to stroke taken by the axis
       double strokeWidth = yStyle.strokeWidth / 2;
       _bottomLeft = _bottomLeft.translate(strokeWidth, 0);
@@ -394,12 +410,13 @@ class BarChartPainter extends CustomPainter {
       drawTicksOnAxis(canvas, yStyle, actualLengthY, yMin, yMax, isHorizontal: false, py: py);
     }
 
-    // Calculate unitPerPixel then draw data
-    double xUnitPerPixel, yUnitPerPixel;
-    // TODO Remove use of value in style
-    xUnitPerPixel = (xMax - xMin) / actualLengthX;
-    yUnitPerPixel = (yMax - yMin) / actualLengthY;
-    drawData(canvas, xUnitPerPixel, yUnitPerPixel);
+    if (axisAnimationFraction == 1) {
+      // Calculate unitPerPixel then draw data
+      double xUnitPerPixel, yUnitPerPixel;
+      xUnitPerPixel = (xMax - xMin) / actualLengthX;
+      yUnitPerPixel = (yMax - yMin) / actualLengthY;
+      drawData(canvas, xUnitPerPixel, yUnitPerPixel);
+    }
   }
 
   @override

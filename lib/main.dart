@@ -6,7 +6,7 @@ import 'bar_chart/bar_chart.dart';
 
 BarChartData data = BarChartDataNumber.double(data: sampleData);
 List<BarData> sampleData = [
-  BarData(x1: 0, x2: 0.5, y: 8),
+  BarData(x1: 0, x2: 0.5, y: 8, style: BarChartBarStyle(color: Colors.red)),
   BarData(x1: 0.8, x2: 1.2, y: 4),
   BarData(x1: 3, x2: 4, y: 3.4),
 ];
@@ -60,10 +60,18 @@ class _MyHomePageState extends State<MyHomePage> {
               margin: const EdgeInsets.all(5),
               child: Center(
                 child: BarChart(
-                  barChartData: BarChartDataNumber.double(data: sampleData,),
+                  barChartData: BarChartDataNumber.double(
+                    data: sampleData,
+                    style: BarChartBarStyle(
+                      color: Colors.orange,
+                      shape: BarChartBarShape.RoundedRectangle,
+                      topLeft: const Radius.circular(15),
+                      topRight: const Radius.circular(15),
+                    ),
+                  ),
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height / 3,
-                  gridAreaOffsetFromBottomLeft: const Offset(40, 40),
+                  gridAreaOffsetFromBottomLeft: const Offset(35, 35),
                   gridAreaOffsetFromTopRight: const Offset(15, 5),
                   xAxisStyle: const AxisStyle(
                     label: 'X Axis',
