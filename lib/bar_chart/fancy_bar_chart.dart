@@ -19,7 +19,7 @@ class FancyBarChart extends StatefulWidget {
     @required this.width,
     @required this.height,
     this.style,
-  });
+  }) : assert(rawData != null);
 
   @override
   _FancyBarChartState createState() => _FancyBarChartState();
@@ -27,7 +27,8 @@ class FancyBarChart extends StatefulWidget {
 
 class _FancyBarChartState extends State<FancyBarChart> with TickerProviderStateMixin{
   BarChartStyle style;
-  List<String> xGroups = [];
+  List<String> xGroups = [], subGroups = [];
+  Map<String, Color> subGroupColors;
   List<double> _yValues = [];
   List<BarChartBarDataDouble> _bars = [];
   List<BarChartBarDataDoubleGrouped> _groupedBars = [];
@@ -41,6 +42,7 @@ class _FancyBarChartState extends State<FancyBarChart> with TickerProviderStateM
   void initState() {
     super.initState();
     style = widget.style;
+    subGroupColors = style.subGroupColors ?? {};
 
     analyseData();
 
@@ -95,30 +97,42 @@ class _FancyBarChartState extends State<FancyBarChart> with TickerProviderStateM
         print('This is an ungrouped chart');
         chartIsGrouped = false;
       }
-    }
-
-    xGroups = widget.rawData.keys.toList();
-    if (style.sortXAxis) {
-      style.groupComparator != null
-          ? xGroups.sort(style.groupComparator)
-          : xGroups.sort();
-    }
-    if (!chartIsGrouped) {
-      for (String key in xGroups) {
-        // TODO Add try catch?
-        final double d = widget.rawData[key].toDouble();
-        _yValues.add(d);
-        _bars.add(BarChartBarDataDouble(group: key, data: d, style: style.barStyle));
+      xGroups = widget.rawData.keys.toList();
+      if (style.sortXAxis) {
+        style.groupComparator != null
+            ? xGroups.sort(style.groupComparator)
+            : xGroups.sort();
       }
-    } else {
-      for (String key in xGroups) {
-        final Map<String, num> groupData = widget.rawData[key];
-        final List<BarChartBarDataDouble> dataInGroup = [];
-        groupData.values.forEach((d) { dataInGroup.add(BarChartBarDataDouble(group: key, data: d.toDouble())); _yValues.add(d.toDouble()); });
-        _groupedBars.add(BarChartBarDataDoubleGrouped(mainGroup: key, dataList: dataInGroup));
+      if (!chartIsGrouped) {
+        for (String key in xGroups) {
+          // TODO Add try catch?
+          final double d = widget.rawData[key].toDouble();
+          _yValues.add(d);
+          _bars.add(BarChartBarDataDouble(group: key, data: d, style: style.barStyle));
+        }
+      } else {
+        for (String key in xGroups) {
+          final Map<String, num> groupData = widget.rawData[key];
+          final List<BarChartBarDataDouble> dataInGroup = [];
+          groupData.forEach((subgroup, value) {
+            subGroups.add(subgroup);
+            dataInGroup.add(BarChartBarDataDouble(group: subgroup, data: value.toDouble()));
+            _yValues.add(value.toDouble());
+          });
+          _groupedBars.add(BarChartBarDataDoubleGrouped(mainGroup: key, dataList: dataInGroup));
+        }
+        subGroups = subGroups.toSet().toList();
+        final List<String> existedGroupColor = subGroupColors.keys.toList();
+        for (String subGroup in subGroups) {
+          if (!existedGroupColor.contains(subGroup)) {
+            // Generate random color for subgroup if not specified
+            // TODO Better function?
+            subGroupColors[subGroup] = Colors.primaries[Random().nextInt(Colors.primaries.length)];
+          }
+        }
       }
+      _yValueRange = [_yValues.reduce(min), _yValues.reduce(max)];
     }
-    _yValueRange = [_yValues.reduce(min), _yValues.reduce(max)];
   }
 
   @override
@@ -133,14 +147,14 @@ class _FancyBarChartState extends State<FancyBarChart> with TickerProviderStateM
             startOffset: style.gridAreaOffsetFromBottomLeft,
             endOffset: style.gridAreaOffsetFromTopRight,
             xGroups: xGroups,
+            subGroups: subGroups,
+            subGroupColors: subGroupColors,
             type: chartIsGrouped ? BarChartType.Grouped : BarChartType.Ungrouped,
             bars: _bars,
             groupedBars: _groupedBars,
             yValues: _yValues,
             yValueRange: _yValueRange,
-            xStyle: style.xAxisStyle,
-            yStyle: style.yAxisStyle,
-            barStyle: style.barStyle,
+            style: style,
             axisAnimationFraction: axisAnimationValue,
             barAnimationFraction: dataAnimationValue,
           ),
@@ -160,16 +174,18 @@ class _FancyBarChartState extends State<FancyBarChart> with TickerProviderStateM
 class BarChartPainter extends CustomPainter {
   final Offset startOffset, endOffset;
   final BarChartType type;
-  final List<String> xGroups;
+  final List<String> xGroups, subGroups;
+  final BarChartStyle style;
+  final Map<String, Color> subGroupColors;
   final List<BarChartBarDataDouble> bars;
   final List<BarChartBarDataDoubleGrouped> groupedBars;
   final List<double> yValues;
   final List<double> yValueRange;
-  final AxisStyle xStyle, yStyle;
-  final BarChartBarStyle barStyle;
   double axisAnimationFraction, barAnimationFraction;
 
   // Local
+  AxisStyle xStyle, yStyle;
+  BarChartBarStyle barStyle;
   int xGroupNum;
   double xSectionLength, actualLengthX, actualLengthY;
   Map<String, int> groupSectionMap = {};
@@ -181,17 +197,17 @@ class BarChartPainter extends CustomPainter {
     this.startOffset,
     this.endOffset,
     this.xGroups,
+    this.subGroups,
+    this.subGroupColors,
     this.type,
     this.bars,
     this.groupedBars,
     this.yValues,
     this.yValueRange,
-    this.xStyle,
-    this.yStyle,
-    this.barStyle,
+    this.style,
     this.axisAnimationFraction,
     this.barAnimationFraction,
-  }) : assert(!(bars == null && groupedBars == null));
+  }) : assert((bars != null || groupedBars != null));
 
   Paint getAxisPaint(AxisStyle style) {
     return Paint()
@@ -335,33 +351,15 @@ class BarChartPainter extends CustomPainter {
     //Draw data as bars on grid
     if (type == BarChartType.Ungrouped) {
       for (BarChartBarDataDouble bar in bars) {
-        BarChartBarStyle style = bar.style;
-        String group = bar.group;
-        double d = bar.data;
-        if (style == null) { style = barStyle; }
-        paint..color = style.color;
-        int section = groupSectionMap[group];
+        BarChartBarStyle _barStyle = bar.style;
+        if (_barStyle == null) { _barStyle = barStyle; }
+        paint..color = _barStyle.color;
+        int section = groupSectionMap[bar.group];
         // Temp 80% width
-        double x1FromBottomLeft = section * xSectionLength + xSectionLength * 0.1;
-        double x2FromBottomLeft = x1FromBottomLeft + xSectionLength * 0.8;
-        double y1FromBottomLeft = (d - yMin) / yUnitPerPixel;
-        Rect rect = Rect.fromPoints(
-          _bottomLeft.translate(x1FromBottomLeft, -y1FromBottomLeft * barAnimationFraction),
-          _bottomLeft.translate(x2FromBottomLeft, 0)
-        );
-        if (style.shape == BarChartBarShape.Rectangle) { canvas.drawRect(rect, paint); }
-        if (style.shape == BarChartBarShape.RoundedRectangle) {
-          canvas.drawRRect(
-            RRect.fromRectAndCorners(
-              rect,
-              topLeft: style.topLeft,
-              topRight: style.topRight,
-              bottomLeft: style.bottomLeft,
-              bottomRight: style.bottomRight,
-            ),
-            paint,
-          );
-        }
+        double x1FromBottomLeft = section * xSectionLength + style.groupMargin / 2;
+        double x2FromBottomLeft = x1FromBottomLeft + xSectionLength - style.groupMargin;
+        double y1FromBottomLeft = (bar.data - yMin) / yUnitPerPixel;
+        drawRect(canvas, x1FromBottomLeft, x2FromBottomLeft, y1FromBottomLeft, _barStyle, paint);
       }
     } else if (type == BarChartType.Grouped) {
       for (BarChartBarDataDoubleGrouped dataInGroup in groupedBars) {
@@ -369,41 +367,46 @@ class BarChartPainter extends CustomPainter {
         List<BarChartBarDataDouble> data = dataInGroup.dataList;
         int j = 0;
         for (BarChartBarDataDouble bar in data) {
-          BarChartBarStyle style = bar.style;
-          String group = bar.group;
-          double d = bar.data;
-          if (style == null) { style = barStyle; }
-          paint..color = style.color;
+          BarChartBarStyle _barStyle = barStyle;
+          // Grouped Data must use grouped Color
+          paint..color = subGroupColors[bar.group];
           // Temp 80% width
-          double barWidth = xSectionLength * 0.8 / data.length;
-          double x1FromBottomLeft = section * xSectionLength + xSectionLength * 0.1 + j * barWidth;
+          double barWidth = (xSectionLength -  style.groupMargin) / data.length;
+          double x1FromBottomLeft = section * xSectionLength + style.groupMargin / 2 + j * barWidth;
           double x2FromBottomLeft = x1FromBottomLeft + barWidth;
-          double y1FromBottomLeft = (d - yMin) / yUnitPerPixel;
-          Rect rect = Rect.fromPoints(
-              _bottomLeft.translate(x1FromBottomLeft, -y1FromBottomLeft * barAnimationFraction),
-              _bottomLeft.translate(x2FromBottomLeft, 0)
-          );
-          if (style.shape == BarChartBarShape.Rectangle) { canvas.drawRect(rect, paint); }
-          if (style.shape == BarChartBarShape.RoundedRectangle) {
-            canvas.drawRRect(
-              RRect.fromRectAndCorners(
-                rect,
-                topLeft: style.topLeft,
-                topRight: style.topRight,
-                bottomLeft: style.bottomLeft,
-                bottomRight: style.bottomRight,
-              ),
-              paint,
-            );
-          }
+          double y1FromBottomLeft = (bar.data - yMin) / yUnitPerPixel;
+          drawRect(canvas, x1FromBottomLeft, x2FromBottomLeft, y1FromBottomLeft, _barStyle, paint);
           j++;
         }
       }
     }
   }
 
+  void drawRect(Canvas canvas, double x1, double x2, double y, BarChartBarStyle style, Paint paint) {
+    Rect rect = Rect.fromPoints(
+      _bottomLeft.translate(x1, -y * barAnimationFraction),
+      _bottomLeft.translate(x2, 0)
+    );
+    if (style.shape == BarChartBarShape.Rectangle) { canvas.drawRect(rect, paint); }
+    if (style.shape == BarChartBarShape.RoundedRectangle) {
+      canvas.drawRRect(
+        RRect.fromRectAndCorners(
+          rect,
+          topLeft: style.topLeft,
+          topRight: style.topRight,
+          bottomLeft: style.bottomLeft,
+          bottomRight: style.bottomRight,
+        ),
+        paint,
+      );
+    }
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
+    xStyle = style.xAxisStyle;
+    yStyle = style.yAxisStyle;
+    barStyle = style.barStyle;
     xGroupNum = xGroups.length;
     // DEBUG USE ONLY
     //canvas.drawRect(Offset(0, 0) & size, Paint()..color = Colors.white);

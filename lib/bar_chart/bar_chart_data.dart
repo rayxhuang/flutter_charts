@@ -48,7 +48,7 @@ class BarChartBarDataDouble {
   const BarChartBarDataDouble({
     @required this.group,
     @required this.data,
-    this.style = const BarChartBarStyle(),
+    this.style,
   });
 }
 

@@ -229,6 +229,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     sortXAxis: true,
                     gridAreaOffsetFromBottomLeft: const Offset(35, 35),
                     gridAreaOffsetFromTopRight: const Offset(15, 5),
+                    groupMargin: 50,
                     xAxisStyle: const AxisStyle(
                       label: 'X Axis',
                       axisColor: Colors.teal,
@@ -248,6 +249,11 @@ class _MyHomePageState extends State<MyHomePage> {
                         tickLength: 5,
                         tickColor: Colors.teal,
                       ),
+                    ),
+                    barStyle: const BarChartBarStyle(
+                      shape: BarChartBarShape.RoundedRectangle,
+                      topLeft: const Radius.circular(15),
+                      topRight: const Radius.circular(15),
                     ),
                     animation: BarChartAnimation(
                       animateData: true,

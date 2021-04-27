@@ -4,6 +4,8 @@ typedef Comparator<T> = int Function(T a, T b);
 enum BarChartBarShape {Rectangle, RoundedRectangle}
 
 class BarChartStyle {
+  final double groupMargin;
+  final Map<String, Color> subGroupColors;
   final bool sortXAxis;
   final Comparator<String> groupComparator;
   final EdgeInsetsGeometry contentPadding;
@@ -15,7 +17,9 @@ class BarChartStyle {
   final BarChartAnimation animation;
 
   const BarChartStyle({
+    this.groupMargin = 10,
     this.sortXAxis = false,
+    this.subGroupColors,
     this.groupComparator,
     this.contentPadding = const EdgeInsets.all(10),
     this.gridAreaOffsetFromBottomLeft = const Offset(20, 20),
