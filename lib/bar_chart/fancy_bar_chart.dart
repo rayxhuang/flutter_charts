@@ -1,39 +1,24 @@
 import 'dart:math';
 import 'dart:ui';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
-import 'axis.dart';
 
-typedef Comparator<T> = int Function(T a, T b);
+import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
+import 'package:flutter_charts/bar_chart/bar_chart_style.dart';
+
+enum BarChartType {Ungrouped, Grouped}
+
 class FancyBarChart extends StatefulWidget {
   final Map<String, dynamic> rawData;
-  final Comparator<String> groupComparator;
-  final bool sortXAxis;
-  //final BarChartData barChartData;
   final double width;
   final double height;
-  final Offset gridAreaOffsetFromBottomLeft;
-  final Offset gridAreaOffsetFromTopRight;
-  final EdgeInsetsGeometry contentPadding;
-  final AxisStyle xAxisStyle;
-  final AxisStyle yAxisStyle;
-  final BarChartAnimation animation;
+  final BarChartStyle style;
 
   FancyBarChart({
     @required this.rawData,
-    //@required this.barChartData,
     @required this.width,
     @required this.height,
-    @required this.gridAreaOffsetFromBottomLeft,
-    @required this.gridAreaOffsetFromTopRight,
-    this.groupComparator,
-    this.sortXAxis = false,
-    this.contentPadding = const EdgeInsets.all(10),
-    this.xAxisStyle = const AxisStyle(),
-    this.yAxisStyle = const AxisStyle(),
-    this.animation = const BarChartAnimation(),
+    this.style,
   });
 
   @override
@@ -41,22 +26,25 @@ class FancyBarChart extends StatefulWidget {
 }
 
 class _FancyBarChartState extends State<FancyBarChart> with TickerProviderStateMixin{
+  BarChartStyle style;
   List<String> xGroups = [];
   List<double> _yValues = [];
-  List<BarChartBarDataDouble> _bars= [];
+  List<BarChartBarDataDouble> _bars = [];
+  List<BarChartBarDataDoubleGrouped> _groupedBars = [];
   bool chartIsGrouped;
 
-  List<double> _xValueRange = [], _yValueRange = [];
+  List<double> _yValueRange = [];
   AnimationController _axisAnimationController, _dataAnimationController;
   double axisAnimationValue = 0, dataAnimationValue = 0;
 
   @override
   void initState() {
     super.initState();
+    style = widget.style;
 
     analyseData();
 
-    final BarChartAnimation animation = widget.animation;
+    final BarChartAnimation animation = style.animation;
     final Tween<double> _tween = Tween(begin: 0, end: 1);
     if (animation.animateAxis) {
       _axisAnimationController = AnimationController(
@@ -108,21 +96,29 @@ class _FancyBarChartState extends State<FancyBarChart> with TickerProviderStateM
         chartIsGrouped = false;
       }
     }
+
+    xGroups = widget.rawData.keys.toList();
+    if (style.sortXAxis) {
+      style.groupComparator != null
+          ? xGroups.sort(style.groupComparator)
+          : xGroups.sort();
+    }
     if (!chartIsGrouped) {
-      xGroups = widget.rawData.keys.toList();
-      if (widget.sortXAxis) {
-        widget.groupComparator != null
-            ? xGroups.sort(widget.groupComparator)
-            : xGroups.sort();
-      }
       for (String key in xGroups) {
         // TODO Add try catch?
         final double d = widget.rawData[key].toDouble();
         _yValues.add(d);
-        _bars.add(BarChartBarDataDouble(group: key, data: d));
+        _bars.add(BarChartBarDataDouble(group: key, data: d, style: style.barStyle));
       }
-      _yValueRange = [_yValues.reduce(min), _yValues.reduce(max)];
+    } else {
+      for (String key in xGroups) {
+        final Map<String, num> groupData = widget.rawData[key];
+        final List<BarChartBarDataDouble> dataInGroup = [];
+        groupData.values.forEach((d) { dataInGroup.add(BarChartBarDataDouble(group: key, data: d.toDouble())); _yValues.add(d.toDouble()); });
+        _groupedBars.add(BarChartBarDataDoubleGrouped(mainGroup: key, dataList: dataInGroup));
+      }
     }
+    _yValueRange = [_yValues.reduce(min), _yValues.reduce(max)];
   }
 
   @override
@@ -131,17 +127,20 @@ class _FancyBarChartState extends State<FancyBarChart> with TickerProviderStateM
       width: widget.width,
       height: widget.height,
       child: Padding(
-        padding: widget.contentPadding,
+        padding: style.contentPadding,
         child: CustomPaint(
           painter: BarChartPainter(
-            startOffset: widget.gridAreaOffsetFromBottomLeft,
-            endOffset: widget.gridAreaOffsetFromTopRight,
+            startOffset: style.gridAreaOffsetFromBottomLeft,
+            endOffset: style.gridAreaOffsetFromTopRight,
             xGroups: xGroups,
+            type: chartIsGrouped ? BarChartType.Grouped : BarChartType.Ungrouped,
             bars: _bars,
+            groupedBars: _groupedBars,
             yValues: _yValues,
             yValueRange: _yValueRange,
-            xStyle: widget.xAxisStyle,
-            yStyle: widget.yAxisStyle,
+            xStyle: style.xAxisStyle,
+            yStyle: style.yAxisStyle,
+            barStyle: style.barStyle,
             axisAnimationFraction: axisAnimationValue,
             barAnimationFraction: dataAnimationValue,
           ),
@@ -160,11 +159,14 @@ class _FancyBarChartState extends State<FancyBarChart> with TickerProviderStateM
 
 class BarChartPainter extends CustomPainter {
   final Offset startOffset, endOffset;
+  final BarChartType type;
   final List<String> xGroups;
   final List<BarChartBarDataDouble> bars;
+  final List<BarChartBarDataDoubleGrouped> groupedBars;
   final List<double> yValues;
   final List<double> yValueRange;
   final AxisStyle xStyle, yStyle;
+  final BarChartBarStyle barStyle;
   double axisAnimationFraction, barAnimationFraction;
 
   // Local
@@ -179,14 +181,17 @@ class BarChartPainter extends CustomPainter {
     this.startOffset,
     this.endOffset,
     this.xGroups,
+    this.type,
     this.bars,
+    this.groupedBars,
     this.yValues,
     this.yValueRange,
     this.xStyle,
     this.yStyle,
+    this.barStyle,
     this.axisAnimationFraction,
     this.barAnimationFraction,
-  });
+  }) : assert(!(bars == null && groupedBars == null));
 
   Paint getAxisPaint(AxisStyle style) {
     return Paint()
@@ -206,7 +211,7 @@ class BarChartPainter extends CustomPainter {
   }
 
   void drawTicksOnXAxis(Canvas canvas, AxisStyle style,) {
-    final Tick tick = style.tick;
+    final TickStyle tick = style.tick;
     final Paint tickPaint = Paint()
       ..strokeWidth = style.strokeWidth
       ..strokeCap = style.strokeCap
@@ -245,7 +250,7 @@ class BarChartPainter extends CustomPainter {
   }
 
   void drawTicksOnYAxis(Canvas canvas, AxisStyle style, Offset py,) {
-    final Tick tick = style.tick;
+    final TickStyle tick = style.tick;
     final double lengthPerTick = actualLengthY / (style.numTicks - 1);
     final double valuePerTick = (yMax - yMin) / (style.numTicks - 1);
     final Paint tickPaint = Paint()
@@ -324,48 +329,75 @@ class BarChartPainter extends CustomPainter {
   }
 
   void drawData(Canvas canvas, double yUnitPerPixel) {
-    final BarChartBarStyle barStyle = const BarChartBarStyle();
     //This is the bar paint
     Paint paint = Paint()
       ..strokeWidth = 2;
     //Draw data as bars on grid
-    for (BarChartBarDataDouble bar in bars) {
-      BarChartBarStyle style = bar.style;
-      String group = bar.group;
-      double d = bar.data;
-      if (style == null) {
-        // If individual bar style is not set, then it comes from parent
-        style = barStyle;
-      }
-      paint..color = style.color;
-      int section = groupSectionMap[group];
-      // Temp 80% width
-      double x1FromBottomLeft = section * xSectionLength + xSectionLength * 0.1;
-      double x2FromBottomLeft = x1FromBottomLeft + xSectionLength * 0.8;
-      double y1FromBottomLeft = (d - yMin) / yUnitPerPixel;
-
-      //double y2FromBottomLeft = y1FromBottomLeft + (bar.y2 - bar.y1) / yUnitPerPixel;
-      //print(y1FromBottomLeft);
-      //print(y2FromBottomLeft);
-      //print(-y2FromBottomLeft * barAnimationFraction);
-      Rect rect = Rect.fromPoints(
-        // Top Left
-        _bottomLeft.translate(x1FromBottomLeft, -y1FromBottomLeft * barAnimationFraction),
-        // Bottom Right
-        _bottomLeft.translate(x2FromBottomLeft, 0)
-      );
-      if (style.shape == BarChartBarShape.Rectangle) { canvas.drawRect(rect, paint); }
-      if (style.shape == BarChartBarShape.RoundedRectangle) {
-        canvas.drawRRect(
-          RRect.fromRectAndCorners(
-            rect,
-            topLeft: style.topLeft,
-            topRight: style.topRight,
-            bottomLeft: style.bottomLeft,
-            bottomRight: style.bottomRight,
-          ),
-          paint,
+    if (type == BarChartType.Ungrouped) {
+      for (BarChartBarDataDouble bar in bars) {
+        BarChartBarStyle style = bar.style;
+        String group = bar.group;
+        double d = bar.data;
+        if (style == null) { style = barStyle; }
+        paint..color = style.color;
+        int section = groupSectionMap[group];
+        // Temp 80% width
+        double x1FromBottomLeft = section * xSectionLength + xSectionLength * 0.1;
+        double x2FromBottomLeft = x1FromBottomLeft + xSectionLength * 0.8;
+        double y1FromBottomLeft = (d - yMin) / yUnitPerPixel;
+        Rect rect = Rect.fromPoints(
+          _bottomLeft.translate(x1FromBottomLeft, -y1FromBottomLeft * barAnimationFraction),
+          _bottomLeft.translate(x2FromBottomLeft, 0)
         );
+        if (style.shape == BarChartBarShape.Rectangle) { canvas.drawRect(rect, paint); }
+        if (style.shape == BarChartBarShape.RoundedRectangle) {
+          canvas.drawRRect(
+            RRect.fromRectAndCorners(
+              rect,
+              topLeft: style.topLeft,
+              topRight: style.topRight,
+              bottomLeft: style.bottomLeft,
+              bottomRight: style.bottomRight,
+            ),
+            paint,
+          );
+        }
+      }
+    } else if (type == BarChartType.Grouped) {
+      for (BarChartBarDataDoubleGrouped dataInGroup in groupedBars) {
+        int section = groupSectionMap[dataInGroup.mainGroup];
+        List<BarChartBarDataDouble> data = dataInGroup.dataList;
+        int j = 0;
+        for (BarChartBarDataDouble bar in data) {
+          BarChartBarStyle style = bar.style;
+          String group = bar.group;
+          double d = bar.data;
+          if (style == null) { style = barStyle; }
+          paint..color = style.color;
+          // Temp 80% width
+          double barWidth = xSectionLength * 0.8 / data.length;
+          double x1FromBottomLeft = section * xSectionLength + xSectionLength * 0.1 + j * barWidth;
+          double x2FromBottomLeft = x1FromBottomLeft + barWidth;
+          double y1FromBottomLeft = (d - yMin) / yUnitPerPixel;
+          Rect rect = Rect.fromPoints(
+              _bottomLeft.translate(x1FromBottomLeft, -y1FromBottomLeft * barAnimationFraction),
+              _bottomLeft.translate(x2FromBottomLeft, 0)
+          );
+          if (style.shape == BarChartBarShape.Rectangle) { canvas.drawRect(rect, paint); }
+          if (style.shape == BarChartBarShape.RoundedRectangle) {
+            canvas.drawRRect(
+              RRect.fromRectAndCorners(
+                rect,
+                topLeft: style.topLeft,
+                topRight: style.topRight,
+                bottomLeft: style.bottomLeft,
+                bottomRight: style.bottomRight,
+              ),
+              paint,
+            );
+          }
+          j++;
+        }
       }
     }
   }
@@ -399,27 +431,22 @@ class BarChartPainter extends CustomPainter {
     _axisXStartOffset = _bottomLeft.translate(0, - xStyle.shift);
     _axisXEndOffset = _bottomRight.translate(0, - xStyle.shift);
     double axisXLength = _axisXEndOffset.dx - _axisXStartOffset.dx;
-    if (xStyle.visible) {
-      canvas.drawLine(_axisXStartOffset, _axisXStartOffset.translate(axisXLength * axisAnimationFraction, 0), getAxisPaint(xStyle));
-    }
+    if (xStyle.visible) { canvas.drawLine(_axisXStartOffset, _axisXStartOffset.translate(axisXLength * axisAnimationFraction, 0), getAxisPaint(xStyle)); }
     // Adjust size according to stroke taken by the axis
-    double strokeWidth = xStyle.strokeWidth / 2;
-    _bottomLeft = _bottomLeft.translate(0, - strokeWidth);
-    _bottomRight = _bottomRight.translate(0, - strokeWidth);
-    actualLengthY -= strokeWidth;
+    _bottomLeft = _bottomLeft.translate(0, - xStyle.strokeWidth / 2);
+    _bottomRight = _bottomRight.translate(0, - xStyle.strokeWidth / 2);
+    actualLengthY -= xStyle.strokeWidth / 2;
 
     // Draw Y Axis
-    if (yStyle.visible) {
-      _axisYStartOffset = _bottomLeft.translate(yStyle.shift, 0);
-      _axisYEndOffset = _topLeft.translate(yStyle.shift, 0);
-      double axisYLength = _axisYEndOffset.dy - _axisYStartOffset.dy;
-      canvas.drawLine(_axisYStartOffset, _axisYStartOffset.translate(0, axisYLength * axisAnimationFraction), getAxisPaint(yStyle));
-      // Adjust size according to stroke taken by the axis
-      double strokeWidth = yStyle.strokeWidth / 2;
-      _bottomLeft = _bottomLeft.translate(strokeWidth, 0);
-      _topLeft = _topLeft.translate(strokeWidth, 0);
-      actualLengthX -= strokeWidth;
-    }
+    _axisYStartOffset = _bottomLeft.translate(yStyle.shift, 0);
+    _axisYEndOffset = _topLeft.translate(yStyle.shift, 0);
+    double axisYLength = _axisYEndOffset.dy - _axisYStartOffset.dy;
+    if (yStyle.visible) { canvas.drawLine(_axisYStartOffset, _axisYStartOffset.translate(0, axisYLength * axisAnimationFraction), getAxisPaint(yStyle)); }
+    // Adjust size according to stroke taken by the axis
+    _bottomLeft = _bottomLeft.translate(yStyle.strokeWidth / 2, 0);
+    _topLeft = _topLeft.translate(yStyle.strokeWidth / 2, 0);
+    actualLengthX -= yStyle.strokeWidth / 2;
+
 
     // Calculate the x length of each group, and allocate area
     xSectionLength = actualLengthX / xGroupNum;
@@ -431,7 +458,7 @@ class BarChartPainter extends CustomPainter {
 
     // Draw ticks on Y Axis
     if (yStyle.visible && axisAnimationFraction == 1) {
-      final Tick tick = yStyle.tick;
+      final TickStyle tick = yStyle.tick;
       Offset py = Offset(0, 0).translate(
           endOffset.dy + actualLengthY / 2,
           -(size.width - endOffset.dx - actualLengthX - tick.tickMargin - tick.tickLength - yStyle.strokeWidth / 2)
@@ -440,11 +467,9 @@ class BarChartPainter extends CustomPainter {
     }
 
     //Calculate unitPerPixel then draw data
-    if (axisAnimationFraction == 1) {
-      double yUnitPerPixel;
-      yUnitPerPixel = (yMax - yMin) / actualLengthY;
-      drawData(canvas, yUnitPerPixel);
-    }
+    double yUnitPerPixel;
+    yUnitPerPixel = (yMax - yMin) / actualLengthY;
+    drawData(canvas, yUnitPerPixel);
   }
 
   @override

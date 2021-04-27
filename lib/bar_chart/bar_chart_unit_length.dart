@@ -4,8 +4,7 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
-
-import 'axis.dart';
+import 'bar_chart_style.dart';
 
 class BarChartUnitLength extends StatefulWidget {
   final BarChartDataDoubleWithUnitLength barChartData;
@@ -189,7 +188,7 @@ class BarChartUnitLengthPainter extends CustomPainter {
       double endValue,
       {bool isHorizontal = true, Offset py,}
       ) {
-    final Tick tick = style.tick;
+    final TickStyle tick = style.tick;
     final double lengthPerTick = length / (style.numTicks - 1);
     final double valuePerTick = (endValue - startValue) / (style.numTicks - 1);
     final Paint tickPaint = Paint()
@@ -401,7 +400,7 @@ class BarChartUnitLengthPainter extends CustomPainter {
 
     // Draw ticks on Y Axis
     if (yStyle.visible && axisAnimationFraction == 1) {
-      final Tick tick = yStyle.tick;
+      final TickStyle tick = yStyle.tick;
       Offset py = Offset(0, 0).translate(
           endOffset.dy + actualLengthY / 2,
           -(size.width - endOffset.dx - actualLengthX - tick.tickMargin - tick.tickLength - yStyle.strokeWidth / 2)

@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'bar_chart_style.dart';
+
 enum BarChartDataType {Number, Double, DoubleWithUnitLength}
-enum BarChartBarShape {Rectangle, RoundedRectangle}
 
 abstract class BarChartData{
   final List<BarData> data;
@@ -42,32 +43,24 @@ class BarChartDataDoubleWithUnitLength {
 class BarChartBarDataDouble {
   final String group;
   final double data;
-  final double unitLength;
   final BarChartBarStyle style;
 
   const BarChartBarDataDouble({
     @required this.group,
     @required this.data,
-    this.unitLength = 1,
     this.style = const BarChartBarStyle(),
   });
 }
 
-class BarChartBarStyle {
-  final Color color;
-  final BarChartBarShape shape;
-  final Radius topLeft;
-  final Radius topRight;
-  final Radius bottomLeft;
-  final Radius bottomRight;
+class BarChartBarDataDoubleGrouped {
+  final String mainGroup;
+  final List<BarChartBarDataDouble> dataList;
+  final BarChartBarStyle sectionStyle;
 
-  const BarChartBarStyle({
-    this.color = Colors.red,
-    this.shape = BarChartBarShape.Rectangle,
-    this.topLeft = const Radius.circular(0),
-    this.topRight = const Radius.circular(0),
-    this.bottomLeft = const Radius.circular(0),
-    this.bottomRight = const Radius.circular(0),
+  const BarChartBarDataDoubleGrouped({
+    @required this.mainGroup,
+    @required this.dataList,
+    this.sectionStyle = const BarChartBarStyle(),
   });
 }
 
@@ -75,16 +68,15 @@ class BarData {
   final double x1;
   final double x2;
   final double y1;
-  //final double y2;
+  final double y2;
   final BarChartBarStyle style;
 
   const BarData({
     this.x1 = 0,
     this.x2 = 0,
     this.y1 = 0,
-    //this.y2 = 0,
-    //this.style = const BarChartBarStyle(),
-    this.style,
+    this.y2 = 0,
+    this.style = const BarChartBarStyle(),
   });
 }
 
@@ -97,21 +89,5 @@ class BarDataUnitLength extends BarData{
     this.x = 0,
     this.y = 0,
     this.style,
-  });
-}
-
-class BarChartAnimation {
-  final bool animateAxis;
-  final bool animateData;
-  final Duration axisAnimationDuration;
-  final Duration dataAnimationDuration;
-  final bool animateDataAfterAxis;
-
-  const BarChartAnimation({
-    this.animateAxis = false,
-    this.animateData = false,
-    this.axisAnimationDuration = const Duration(milliseconds: 1500),
-    this.dataAnimationDuration = const Duration(milliseconds: 1500),
-    this.animateDataAfterAxis = true,
   });
 }
