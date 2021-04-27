@@ -7,8 +7,8 @@ import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
 
 import 'axis.dart';
 
-class BarChart extends StatefulWidget {
-  final BarChartData barChartData;
+class BarChartUnitLength extends StatefulWidget {
+  final BarChartDataDoubleWithUnitLength barChartData;
   final double width;
   final double height;
   final Offset gridAreaOffsetFromBottomLeft;
@@ -18,7 +18,7 @@ class BarChart extends StatefulWidget {
   final AxisStyle yAxisStyle;
   final BarChartAnimation animation;
 
-  BarChart({
+  BarChartUnitLength({
     @required this.barChartData,
     @required this.width,
     @required this.height,
@@ -31,11 +31,12 @@ class BarChart extends StatefulWidget {
   });
 
   @override
-  _BarChartState createState() => _BarChartState();
+  _BarChartUnitLengthState createState() => _BarChartUnitLengthState();
 }
 
-class _BarChartState extends State<BarChart> with TickerProviderStateMixin{
-  List<double> _xValueRange = [], _yValueRange = [];
+class _BarChartUnitLengthState extends State<BarChartUnitLength> with TickerProviderStateMixin{
+  List<double> _yValueRange = [];
+  int xLength;
   AnimationController _axisAnimationController, _dataAnimationController;
   double axisAnimationValue = 0, dataAnimationValue = 0;
 
@@ -86,22 +87,12 @@ class _BarChartState extends State<BarChart> with TickerProviderStateMixin{
   }
 
   void analyseData() {
-    List<double> _xValueList1 = [], _xValueList2 = [], _yValueList = [];
     var data = widget.barChartData.data;
-    if (widget.barChartData.type == BarChartDataType.Double) {
-      double xMin, xMax, yMin, yMax;
-      data.forEach((bar) {
-        _xValueList1.add(bar.x1);
-        _xValueList2.add(bar.x2);
-        _yValueList.add(bar.y1);
-      });
-      xMin = _xValueList1.reduce(min);
-      xMax = _xValueList2.reduce(max);
-      _xValueRange = [xMin, xMax];
-      yMin = _yValueList.reduce(min);
-      yMax = _yValueList.reduce(max);
-      _yValueRange = [yMin, yMax];
-    }
+    xLength = data.length;
+    double yMin, yMax;
+    yMin = data.reduce(min);
+    yMax = data.reduce(max);
+    _yValueRange = [yMin, yMax];
   }
 
   @override
@@ -112,11 +103,12 @@ class _BarChartState extends State<BarChart> with TickerProviderStateMixin{
       child: Padding(
         padding: widget.contentPadding,
         child: CustomPaint(
-          painter: BarChartPainter(
+          painter: BarChartUnitLengthPainter(
             startOffset: widget.gridAreaOffsetFromBottomLeft,
             endOffset: widget.gridAreaOffsetFromTopRight,
             barChartData: widget.barChartData,
-            xValueRange: _xValueRange,
+            xLength: xLength,
+            unitLength: widget.barChartData.unitLength,
             yValueRange: _yValueRange,
             xStyle: widget.xAxisStyle,
             yStyle: widget.yAxisStyle,
@@ -136,23 +128,26 @@ class _BarChartState extends State<BarChart> with TickerProviderStateMixin{
   }
 }
 
-class BarChartPainter extends CustomPainter {
+class BarChartUnitLengthPainter extends CustomPainter {
   final Offset startOffset, endOffset;
-  final BarChartData barChartData;
-  final List<double> xValueRange, yValueRange;
+  final BarChartDataDoubleWithUnitLength barChartData;
+  final int xLength;
+  final double unitLength;
+  final List<double> yValueRange;
   final AxisStyle xStyle, yStyle;
-  
-  List<BarData> _data;
+
+  List<double> _data;
   double axisAnimationFraction, barAnimationFraction;
   Offset _topLeft, _topRight, _bottomLeft, _bottomRight, _axisIntersection;
   Offset _axisXStartOffset, _axisXEndOffset, _axisYStartOffset, _axisYEndOffset;
   double xMin, xMax, yMin, yMax;
 
-  BarChartPainter({
+  BarChartUnitLengthPainter({
     this.startOffset,
     this.endOffset,
     this.barChartData,
-    this.xValueRange,
+    this.xLength,
+    this.unitLength,
     this.yValueRange,
     this.xStyle,
     this.yStyle,
@@ -160,14 +155,15 @@ class BarChartPainter extends CustomPainter {
     this.barAnimationFraction,
   });
 
-  void adjustAxisValueRange() {
-    xStyle.preferredStartValue <= xValueRange[0]
-        ? xMin = xStyle.preferredStartValue
-        : xMin = xValueRange[0];
-    
-    xStyle.preferredEndValue >= xValueRange[1]
+  void adjustAxisValueRange(double actualLengthX){
+    //TODO check safety
+    xMin = xStyle.preferredStartValue;
+
+    //xMin = 0;
+
+    xStyle.preferredEndValue >= xLength
         ? xMax = xStyle.preferredEndValue
-        : xMax = xValueRange[1];
+        : xMax = xLength.toDouble();
 
     yStyle.preferredStartValue <= yValueRange[0]
         ? yMin = yStyle.preferredStartValue
@@ -186,13 +182,13 @@ class BarChartPainter extends CustomPainter {
   }
 
   void drawTicksOnAxis(
-    Canvas canvas,
-    AxisStyle style,
-    double length,
-    double startValue,
-    double endValue,
-    {bool isHorizontal = true, Offset py,}
-  ) {
+      Canvas canvas,
+      AxisStyle style,
+      double length,
+      double startValue,
+      double endValue,
+      {bool isHorizontal = true, Offset py,}
+      ) {
     final Tick tick = style.tick;
     final double lengthPerTick = length / (style.numTicks - 1);
     final double valuePerTick = (endValue - startValue) / (style.numTicks - 1);
@@ -211,7 +207,6 @@ class BarChartPainter extends CustomPainter {
     if (!tick.onlyShowTicksAtTwoSides) {
       int _numTicksBetween = style.numTicks - 2;
       for (int i = 1; i < _numTicksBetween + 1; i++) {
-        // TODO is this divided by pi?
         if (isHorizontal) {
           p1 = _bottomLeft.translate(i * lengthPerTick, tickPaint.strokeWidth / 2);
           p2 = p1.translate(0, tick.tickLength);
@@ -308,26 +303,23 @@ class BarChartPainter extends CustomPainter {
     Paint paint = Paint()
       ..strokeWidth = 2;
     //Draw data as bars on grid
-    for (BarData bar in _data) {
-      BarChartBarStyle style = bar.style;
+    for (int i = 0; i < xLength; i++) {
+      double d = _data[i];
+      BarChartBarStyle style = barChartData.style;
       if (style == null) {
         // If individual bar style is not set, then it comes from parent
         style = barStyle;
       }
       paint..color = style.color;
-      double x1FromBottomLeft = (bar.x1 - xMin) / xUnitPerPixel;
-      double x2FromBottomLeft = x1FromBottomLeft + (bar.x2 - bar.x1) / xUnitPerPixel;
-      double y1FromBottomLeft = (bar.y1 - yMin) / yUnitPerPixel;
-      //double y2FromBottomLeft = y1FromBottomLeft + (bar.y2 - bar.y1) / yUnitPerPixel;
-      //print(y1FromBottomLeft);
-      //print(y2FromBottomLeft);
-      //print(-y2FromBottomLeft * barAnimationFraction);
+      double x1 = i * unitLength;
+      double x1FromBottomLeft = (x1 - xMin) / xUnitPerPixel;
+      double x2FromBottomLeft = x1FromBottomLeft + unitLength / xUnitPerPixel;
+      double y1FromBottomLeft = (d - yMin) / yUnitPerPixel;
       Rect rect = Rect.fromPoints(
         // Top Left
-        _bottomLeft.translate(x1FromBottomLeft, -y1FromBottomLeft * barAnimationFraction),
-        // Bottom Right
-        //_bottomLeft.translate(x2FromBottomLeft, -y1FromBottomLeft)
-        _bottomLeft.translate(x2FromBottomLeft, 0)
+          _bottomLeft.translate(x1FromBottomLeft, -y1FromBottomLeft * barAnimationFraction),
+          // Bottom Right
+          _bottomLeft.translate(x2FromBottomLeft, 0)
       );
       if (style.shape == BarChartBarShape.Rectangle) { canvas.drawRect(rect, paint); }
       if (style.shape == BarChartBarShape.RoundedRectangle) {
@@ -368,7 +360,7 @@ class BarChartPainter extends CustomPainter {
     // canvas.drawLine(_topLeft, _bottomLeft, p);
     // canvas.drawLine(_topRight, _bottomRight, p);
     // canvas.drawLine(_bottomLeft, _bottomRight, p);
-    adjustAxisValueRange();
+    adjustAxisValueRange(actualLengthX);
 
     // Draw X Axis
     if (xStyle.visible) {
@@ -400,7 +392,7 @@ class BarChartPainter extends CustomPainter {
     actualGridSize = Size(actualLengthX, actualLengthY);
     _axisIntersection = _bottomLeft.translate(yStyle.shift, -xStyle.shift);
 
-    // Draw ticks on X Axis
+    //Draw ticks on X Axis
     if (xStyle.visible && axisAnimationFraction == 1) {
       drawTicksOnAxis(canvas, xStyle, actualLengthX, xMin, xMax);
     }
@@ -409,8 +401,8 @@ class BarChartPainter extends CustomPainter {
     if (yStyle.visible && axisAnimationFraction == 1) {
       final Tick tick = yStyle.tick;
       Offset py = Offset(0, 0).translate(
-        endOffset.dy + actualLengthY / 2,
-        -(size.width - endOffset.dx - actualLengthX - tick.tickMargin - tick.tickLength - yStyle.strokeWidth / 2)
+          endOffset.dy + actualLengthY / 2,
+          -(size.width - endOffset.dx - actualLengthX - tick.tickMargin - tick.tickLength - yStyle.strokeWidth / 2)
       );
       drawTicksOnAxis(canvas, yStyle, actualLengthY, yMin, yMax, isHorizontal: false, py: py);
     }
@@ -425,7 +417,7 @@ class BarChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant BarChartPainter oldDelegate) {
+  bool shouldRepaint(covariant BarChartUnitLengthPainter oldDelegate) {
     return (oldDelegate.axisAnimationFraction != axisAnimationFraction || oldDelegate.barAnimationFraction != barAnimationFraction);
   }
 }
