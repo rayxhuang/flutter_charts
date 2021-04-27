@@ -39,6 +39,20 @@ class BarChartDataDoubleWithUnitLength {
   });
 }
 
+class BarChartBarDataDouble {
+  final String group;
+  final double data;
+  final double unitLength;
+  final BarChartBarStyle style;
+
+  const BarChartBarDataDouble({
+    @required this.group,
+    @required this.data,
+    this.unitLength = 1,
+    this.style = const BarChartBarStyle(),
+  });
+}
+
 class BarChartBarStyle {
   final Color color;
   final BarChartBarShape shape;
