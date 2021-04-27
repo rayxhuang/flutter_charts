@@ -185,7 +185,7 @@ class BarChartPainter extends CustomPainter {
     double length,
     double startValue,
     double endValue,
-    {bool isHorizontal = true}
+    {bool isHorizontal = true, Offset py,}
   ) {
     final Tick tick = style.tick;
     final double lengthPerTick = length / (style.numTicks - 1);
@@ -201,7 +201,7 @@ class BarChartPainter extends CustomPainter {
     );
     _textPainter.layout();
 
-    Offset p1, p2, p3;
+    Offset p1, p2, p3, p4;
     if (!tick.onlyShowTicksAtTwoSides) {
       int _numTicksBetween = style.numTicks - 2;
       for (int i = 1; i < _numTicksBetween + 1; i++) {
@@ -274,8 +274,26 @@ class BarChartPainter extends CustomPainter {
     );
     _textPainter.layout();
     isHorizontal
-        ? _textPainter.paint(canvas, p3.translate(-(_textPainter.width / 2), 0))
-        : _textPainter.paint(canvas, p3.translate(-(_textPainter.width), -(_textPainter.height / 2)));
+        ? p4 = p3.translate(-(_textPainter.width / 2), 0)
+        : p4 = p3.translate(-(_textPainter.width), -(_textPainter.height / 2));
+    _textPainter.paint(canvas, p4);
+    final Size endLabelSize = Size(_textPainter.width, _textPainter.height);
+
+    // Draw axis label
+    _textPainter.text = TextSpan(
+      text: '${style.label}',
+      style: tickTextStyle,
+    );
+    _textPainter.layout();
+    if (isHorizontal) {
+      _textPainter.paint(canvas, p3.translate(-((length + _textPainter.width) / 2), endLabelSize.height));
+    } else {
+      canvas.save();
+      canvas.rotate(1.5708);
+      py = py.translate(-_textPainter.width / 2, endLabelSize.width);
+      _textPainter.paint(canvas, py);
+      canvas.restore();
+    }
   }
 
   void drawData(Canvas canvas, double xUnitPerPixel, double yUnitPerPixel) {
@@ -363,14 +381,17 @@ class BarChartPainter extends CustomPainter {
 
     // Draw ticks on X Axis
     if (xStyle.visible && axisAnimationFraction == 1) {
-      // TODO Remove use of value in style
       drawTicksOnAxis(canvas, xStyle, actualLengthX, xMin, xMax);
     }
 
     // Draw ticks on Y Axis
     if (yStyle.visible && axisAnimationFraction == 1) {
-      // TODO Remove use of value in style
-      drawTicksOnAxis(canvas, yStyle, actualLengthY, yMin, yMax, isHorizontal: false);
+      final Tick tick = yStyle.tick;
+      Offset py = Offset(0, 0).translate(
+        endOffset.dy + actualLengthY / 2,
+        -(size.width - endOffset.dx - actualLengthX - tick.tickMargin - tick.tickLength - yStyle.strokeWidth / 2)
+      );
+      drawTicksOnAxis(canvas, yStyle, actualLengthY, yMin, yMax, isHorizontal: false, py: py);
     }
 
     // Calculate unitPerPixel then draw data

@@ -63,9 +63,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   barChartData: BarChartDataNumber.double(data: sampleData,),
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height / 3,
-                  gridAreaOffsetFromBottomLeft: const Offset(20, 20),
+                  gridAreaOffsetFromBottomLeft: const Offset(40, 40),
                   gridAreaOffsetFromTopRight: const Offset(15, 5),
                   xAxisStyle: const AxisStyle(
+                    label: 'X Axis',
                     preferredEndValue: 5,
                     axisColor: Colors.teal,
                     numTicks: 11,
@@ -73,10 +74,11 @@ class _MyHomePageState extends State<MyHomePage> {
                       tickDecimal: 1,
                       tickLength: 5,
                       tickColor: Colors.teal,
-                      unit: '',
+                      unit: 'cm',
                     )
                   ),
                   yAxisStyle: const AxisStyle(
+                    label: 'Y Axis',
                     preferredEndValue: 10,
                     axisColor: Colors.teal,
                     tick: Tick(
