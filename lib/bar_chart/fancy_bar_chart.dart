@@ -38,9 +38,20 @@ class _FancyBarChartState extends State<FancyBarChart> with TickerProviderStateM
   AnimationController _axisAnimationController, _dataAnimationController;
   double axisAnimationValue = 0, dataAnimationValue = 0;
 
+  ScrollController _scrollController;
+  double scrollOffset = 0;
+
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(() {
+      print(widget.width * 1.5);
+      print(_scrollController.offset);
+      setState(() {
+        scrollOffset = _scrollController.offset;
+      });
+    });
     style = widget.style;
     subGroupColors = style.subGroupColors ?? {};
 
@@ -143,39 +154,89 @@ class _FancyBarChartState extends State<FancyBarChart> with TickerProviderStateM
     return SizedBox(
       width: widget.width,
       height: widget.height,
-      child: Padding(
-        padding: style.contentPadding,
-        child: CustomPaint(
-          painter: BarChartPainter(
-            startOffset: style.gridAreaOffsetFromBottomLeft,
-            endOffset: style.gridAreaOffsetFromTopRight,
-            xGroups: xGroups,
-            subGroups: subGroups,
-            subGroupColors: subGroupColors,
-            type: chartIsGrouped
-                ? widget.style.isStacked
-                      ? BarChartType.GroupedStacked
-                      : BarChartType.Grouped
-                : BarChartType.Ungrouped,
-            bars: _bars,
-            groupedBars: _groupedBars,
-            yValues: _yValues,
-            yValueRange: _yValueRange,
-            style: widget.style,
-            axisAnimationFraction: axisAnimationValue,
-            barAnimationFraction: dataAnimationValue,
+      child: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: style.contentPadding,
+            controller: _scrollController,
+            scrollDirection: Axis.horizontal,
+            child: CustomPaint(
+              size: Size(widget.width * 1.5, widget.height),
+              painter: BarChartPainter(
+                startOffset: style.gridAreaOffsetFromBottomLeft,
+                endOffset: style.gridAreaOffsetFromTopRight,
+                xGroups: xGroups,
+                subGroups: subGroups,
+                subGroupColors: subGroupColors,
+                type: chartIsGrouped
+                    ? widget.style.isStacked
+                    ? BarChartType.GroupedStacked
+                    : BarChartType.Grouped
+                    : BarChartType.Ungrouped,
+                bars: _bars,
+                groupedBars: _groupedBars,
+                yValues: _yValues,
+                yValueRange: _yValueRange,
+                style: widget.style,
+                axisAnimationFraction: axisAnimationValue,
+                barAnimationFraction: dataAnimationValue,
+                scrollOffset: scrollOffset,
+              ),
+            ),
           ),
-        ),
+          Padding(
+            padding: widget.style.contentPadding,
+            child: CustomPaint(
+              painter: BoringPainter(
+                startOffset: style.gridAreaOffsetFromBottomLeft,
+                endOffset: style.gridAreaOffsetFromTopRight,
+                yValues: _yValues,
+                yValueRange: _yValueRange,
+                xStrokeWidth: widget.style.xAxisStyle.strokeWidth / 2,
+                style: widget.style.yAxisStyle,
+              )
+            )
+          ),
+        ]
       ),
     );
   }
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _axisAnimationController.dispose();
     _dataAnimationController.dispose();
     super.dispose();
   }
+}
+
+class BoringPainter extends CustomPainter {
+  final Offset startOffset, endOffset;
+  final List<double> yValues;
+  final List<double> yValueRange;
+  final AxisStyle style;
+  final double xStrokeWidth;
+
+  const BoringPainter({
+    this.startOffset,
+    this.endOffset,
+    this.yValues,
+    this.yValueRange,
+    this.style,
+    this.xStrokeWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawLine(Offset(0,0), Offset(0, 200), Paint()..color = Colors.lightBlueAccent);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
+  }
+
 }
 
 class BarChartPainter extends CustomPainter {
@@ -189,6 +250,8 @@ class BarChartPainter extends CustomPainter {
   final List<double> yValues;
   final List<double> yValueRange;
   double axisAnimationFraction, barAnimationFraction;
+
+  final double scrollOffset;
 
   // Local
   AxisStyle xStyle, yStyle;
@@ -214,6 +277,7 @@ class BarChartPainter extends CustomPainter {
     this.style,
     this.axisAnimationFraction,
     this.barAnimationFraction,
+    this.scrollOffset,
   }) : assert((bars != null || groupedBars != null));
 
   Paint getAxisPaint(AxisStyle style) {
@@ -304,7 +368,8 @@ class BarChartPainter extends CustomPainter {
     if (!tick.onlyShowTicksAtTwoSides) {
       int _numTicksBetween = style.numTicks - 2;
       for (int i = 1; i < _numTicksBetween + 1; i++) {
-        p1 = _bottomLeft.translate(-tickPaint.strokeWidth / 2, -(i * lengthPerTick));
+        //p1 = _bottomLeft.translate(-tickPaint.strokeWidth / 2, -(i * lengthPerTick));
+        p1 = _bottomLeft.translate(-tickPaint.strokeWidth / 2 + scrollOffset, -(i * lengthPerTick));
         p2 = p1.translate(-tick.tickLength, 0);
         p3 = p2.translate(-tick.tickMargin, 0);
 
@@ -322,7 +387,7 @@ class BarChartPainter extends CustomPainter {
     }
 
     //Draw start value
-    p1 = _bottomLeft.translate(-(tickPaint.strokeWidth / 2), 0);
+    p1 = _bottomLeft.translate(-(tickPaint.strokeWidth / 2) + scrollOffset, 0);
     p2 = p1.translate(-(tick.tickLength), 0);
     p3 = p2.translate(-tick.tickMargin, 0);
     canvas.drawLine(p1, p2, tickPaint);
@@ -335,7 +400,7 @@ class BarChartPainter extends CustomPainter {
     _textPainter.paint(canvas, p3.translate(-(_textPainter.width), -(_textPainter.height / 2)));
 
     //Draw end value
-    p1 = _topLeft.translate(-(tickPaint.strokeWidth / 2), 0);
+    p1 = _topLeft.translate(-(tickPaint.strokeWidth / 2) + scrollOffset, 0);
     p2 = p1.translate(-(tick.tickLength), 0);
     p3 = p2.translate(-tick.tickMargin, 0);
     canvas.drawLine(p1, p2, tickPaint);
@@ -497,7 +562,8 @@ class BarChartPainter extends CustomPainter {
     _axisYStartOffset = _bottomLeft.translate(yStyle.shift, 0);
     _axisYEndOffset = _topLeft.translate(yStyle.shift, 0);
     double axisYLength = _axisYEndOffset.dy - _axisYStartOffset.dy;
-    if (yStyle.visible) { canvas.drawLine(_axisYStartOffset, _axisYStartOffset.translate(0, axisYLength * axisAnimationFraction), getAxisPaint(yStyle)); }
+    if (yStyle.visible) { canvas.drawLine(_axisYStartOffset.translate(scrollOffset, 0), _axisYStartOffset.translate(scrollOffset, axisYLength * axisAnimationFraction), getAxisPaint(yStyle)); }
+    //if (yStyle.visible) { canvas.drawLine(_axisYStartOffset, _axisYStartOffset.translate(0, axisYLength * axisAnimationFraction), getAxisPaint(yStyle)); }
     // Adjust size according to stroke taken by the axis
     _bottomLeft = _bottomLeft.translate(yStyle.strokeWidth / 2, 0);
     _topLeft = _topLeft.translate(yStyle.strokeWidth / 2, 0);
@@ -519,7 +585,7 @@ class BarChartPainter extends CustomPainter {
       final TickStyle tick = yStyle.tick;
       Offset py = Offset(0, 0).translate(
           endOffset.dy + titlePainter.height + 5 + actualLengthY / 2,
-          -(size.width - endOffset.dx - actualLengthX - tick.tickMargin - tick.tickLength - yStyle.strokeWidth / 2)
+          -(size.width - endOffset.dx - actualLengthX - tick.tickMargin - tick.tickLength - yStyle.strokeWidth / 2 + scrollOffset)
       );
       drawTicksOnYAxis(canvas, yStyle, py);
     }
@@ -536,6 +602,7 @@ class BarChartPainter extends CustomPainter {
         oldDelegate.axisAnimationFraction != axisAnimationFraction
         || oldDelegate.barAnimationFraction != barAnimationFraction
         || oldDelegate.type != type
+        || oldDelegate.scrollOffset != scrollOffset
     );
   }
 }

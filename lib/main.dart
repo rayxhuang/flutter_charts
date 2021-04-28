@@ -218,7 +218,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     isStacked: toggle2,
                     sortXAxis: true,
-                    gridAreaOffsetFromBottomLeft: const Offset(35, 35),
+                    gridAreaOffsetFromBottomLeft: const Offset(45, 45),
                     gridAreaOffsetFromTopRight: const Offset(10, 10),
                     groupMargin: 50,
                     xAxisStyle: const AxisStyle(
