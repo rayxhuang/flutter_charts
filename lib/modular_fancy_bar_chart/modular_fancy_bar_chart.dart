@@ -10,20 +10,43 @@ import 'components/chart_axis.dart';
 import 'components/chart_canvas.dart';
 import 'components/chart_legend.dart';
 
-enum BarChartType {Ungrouped, Grouped, GroupedStacked}
+enum BarChartType {Ungrouped, Grouped, GroupedStacked, GroupedSeparated, Grouped3D}
+
+abstract class AbstractModularBarChart {
+  final Map<String, double> rawDataUngrouped;
+  final Map<String, Map<String, double>> rawDataGrouped;
+  final Map<String, Map<String, Map<String, double>>> rawDataGrouped3D;
+  final double width;
+  final double height;
+  final BarChartStyle style;
+  final BarChartType type;
+
+  const  AbstractModularBarChart({
+    this.rawDataUngrouped,
+    this.rawDataGrouped,
+    this.rawDataGrouped3D,
+    this.width,
+    this.height,
+    this.style,
+    this.type,
+  });
+}
 
 class ModularFancyBarChart extends StatefulWidget {
-  final Map<String, dynamic> rawData;
+  final Map<String, double> rawDataUngrouped;
+  // TODO 2D data can have 3 styles
+  final Map<String, Map<String, double>> rawDataGrouped;
+  final Map<String, Map<String, Map<String, double>>> rawDataGrouped3D;
   final double width;
   final double height;
   final BarChartStyle style;
 
-  ModularFancyBarChart({
-    @required this.rawData,
+  ModularFancyBarChart.Ungrouped({
+    this.rawDataUngrouped,
     @required this.width,
     @required this.height,
     this.style,
-  }) : assert(rawData != null);
+  }) : assert(rawData != null) : su;
 
   @override
   _ModularFancyBarChartState createState() => _ModularFancyBarChartState();
