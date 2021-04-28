@@ -15,7 +15,7 @@ import 'modular_fancy_bar_chart/modular_fancy_bar_chart.dart';
 //   BarData(x1: 3, x2: 4, y1: 3.4),
 // ];
 
-Map<String, dynamic> sampleData2 =  {
+Map<String, double> sampleData2 =  {
   'A': 2,
   'C': 3,
   'B': 7,
@@ -24,7 +24,7 @@ Map<String, dynamic> sampleData2 =  {
   'F': 8,
 };
 
-Map<String, dynamic> sampleData3 =  {
+Map<String, Map<String, double>> sampleData3 =  {
   'A': {
     'a': 2,
     'b': 4,
@@ -166,13 +166,28 @@ class _MyHomePageState extends State<MyHomePage> {
               margin: const EdgeInsets.all(5),
               child: Center(
                 child: ModularFancyBarChart(
-                  rawData: sampleData3,
+                  rawData: ModularBarChartData.ungrouped(
+                    rawData: sampleData2
+                  ),
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height / 3,
                 ),
               ),
             ),
             const SizedBox(height: 40,),
+            Card(
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
+              margin: const EdgeInsets.all(5),
+              child: Center(
+                child: ModularFancyBarChart(
+                  rawData: ModularBarChartData.grouped(
+                      rawData: sampleData3
+                  ),
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height / 3,
+                ),
+              ),
+            ),
           ]
         ),
       ),

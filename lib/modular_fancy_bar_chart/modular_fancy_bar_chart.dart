@@ -12,41 +12,51 @@ import 'components/chart_legend.dart';
 
 enum BarChartType {Ungrouped, Grouped, GroupedStacked, GroupedSeparated, Grouped3D}
 
-abstract class AbstractModularBarChart {
-  final Map<String, double> rawDataUngrouped;
-  final Map<String, Map<String, double>> rawDataGrouped;
-  final Map<String, Map<String, Map<String, double>>> rawDataGrouped3D;
-  final double width;
-  final double height;
-  final BarChartStyle style;
+abstract class AbstractModularBarChartData {
+  final Map<String, dynamic> rawData;
   final BarChartType type;
 
-  const  AbstractModularBarChart({
-    this.rawDataUngrouped,
-    this.rawDataGrouped,
-    this.rawDataGrouped3D,
-    this.width,
-    this.height,
-    this.style,
+  const AbstractModularBarChartData._({
+    this.rawData,
     this.type,
   });
 }
 
+class ModularBarChartData extends AbstractModularBarChartData{
+  const ModularBarChartData.ungrouped({
+    @required Map<String, double> rawData,
+  }) : super._(
+    rawData: rawData ?? const {},
+    type: BarChartType.Ungrouped,
+  );
+
+  const ModularBarChartData.grouped({
+    @required Map<String, Map<String, double>> rawData,
+  }) : super._(
+    rawData: rawData ?? const {},
+    type: BarChartType.Grouped,
+  );
+
+  const ModularBarChartData.groupedStacked({
+    @required Map<String, Map<String, double>> rawData,
+  }) : super._(
+    rawData: rawData ?? const {},
+    type: BarChartType.GroupedStacked,
+  );
+}
+
 class ModularFancyBarChart extends StatefulWidget {
-  final Map<String, double> rawDataUngrouped;
-  // TODO 2D data can have 3 styles
-  final Map<String, Map<String, double>> rawDataGrouped;
-  final Map<String, Map<String, Map<String, double>>> rawDataGrouped3D;
+  final AbstractModularBarChartData rawData;
   final double width;
   final double height;
   final BarChartStyle style;
 
-  ModularFancyBarChart.Ungrouped({
-    this.rawDataUngrouped,
+  ModularFancyBarChart({
+    @required this.rawData,
     @required this.width,
     @required this.height,
-    this.style,
-  }) : assert(rawData != null) : su;
+    this.style = const BarChartStyle(),
+  }) : assert(rawData != null);
 
   @override
   _ModularFancyBarChartState createState() => _ModularFancyBarChartState();
@@ -82,6 +92,8 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
   @override
   void initState() {
     super.initState();
+    analyseData();
+
     parentSize = Size(widget.width, widget.height);
     chartTitle = ChartTitle(title: 'Bar Chart Title', parentSize: parentSize);
     titleSize = chartTitle.size;
@@ -155,55 +167,76 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
   }
 
   void analyseData() {
-    var valueType = widget.rawData.values;
-    if (valueType.isNotEmpty) {
-      var sampleValue = valueType.first;
-      if (sampleValue is Map) {
-        chartIsGrouped = true;
-      } else if (sampleValue is num) {
-        chartIsGrouped = false;
-      }
-      xGroups = widget.rawData.keys.toList();
-      if (style.sortXAxis) {
-        style.groupComparator != null
-            ? xGroups.sort(style.groupComparator)
-            : xGroups.sort();
-      }
-
-      double maxTotalValueOverall = 0;
-      if (!chartIsGrouped) {
-        for (String key in xGroups) {
-          // TODO Add try catch?
-          final double d = widget.rawData[key].toDouble();
-          _yValues.add(d);
-          _bars.add(BarChartDataDouble(group: key, data: d, style: style.barStyle));
-        }
-      } else {
-        for (String key in xGroups) {
-          double maxTotalValue = 0;
-          final Map<String, num> groupData = widget.rawData[key];
-          final List<BarChartDataDouble> dataInGroup = [];
-          groupData.forEach((subgroup, value) {
-            maxTotalValue += value;
-            subGroups.add(subgroup);
-            dataInGroup.add(BarChartDataDouble(group: subgroup, data: value.toDouble()));
-            _yValues.add(value.toDouble());
-          });
-          _groupedBars.add(BarChartDataDoubleGrouped(mainGroup: key, dataList: dataInGroup));
-          if (maxTotalValue >= maxTotalValueOverall) { maxTotalValueOverall = maxTotalValue; }
-        }
-        subGroups = subGroups.toSet().toList();
-        final List<String> existedGroupColor = subGroupColors.keys.toList();
-        for (String subGroup in subGroups) {
-          if (!existedGroupColor.contains(subGroup)) {
-            // Generate random color for subgroup if not specified
-            // TODO Better function?
-            subGroupColors[subGroup] = Colors.primaries[Random().nextInt(Colors.primaries.length)];
-          }
-        }
-      }
-      _yValueRange = [_yValues.reduce(min), _yValues.reduce(max), maxTotalValueOverall];
+    final AbstractModularBarChartData data = widget.rawData;
+    final BarChartType type = data.type;
+    final BarChartStyle style = widget.style;
+    List<String> xGroups = [], xSubGroups = [];
+    List<double> y1Values = [], y2Values = [], yValueRange = [0, 0, 0];
+    xGroups = data.rawData.keys.toList();
+    if (style.sortXAxis) {
+      style.groupComparator == null
+          ? xGroups.sort()
+          : xGroups.sort(style.groupComparator);
     }
+    switch (type) {
+      case BarChartType.Ungrouped:
+        for (String key in xGroups) { y1Values.add(data.rawData[key]); }
+        break;
+      case BarChartType.Grouped:
+        for (String key in xGroups) {
+          data.rawData.forEach((key, map) {
+            xSubGroups.addAll(map.keys.toList());
+          });
+        }
+        xSubGroups = xSubGroups.toSet().toList();
+        print(xSubGroups);
+        break;
+      case BarChartType.GroupedStacked:
+      // TODO: Handle this case.
+        break;
+      case BarChartType.GroupedSeparated:
+      // TODO: Handle this case.
+        break;
+      case BarChartType.Grouped3D:
+      // TODO: Handle this case.
+        break;
+    }
+
+
+    //   double maxTotalValueOverall = 0;
+    //   if (!chartIsGrouped) {
+    //     for (String key in xGroups) {
+    //       // TODO Add try catch?
+    //       final double d = widget.rawData[key].toDouble();
+    //       _yValues.add(d);
+    //       _bars.add(BarChartDataDouble(group: key, data: d, style: style.barStyle));
+    //     }
+    //   } else {
+    //     for (String key in xGroups) {
+    //       double maxTotalValue = 0;
+    //       final Map<String, num> groupData = widget.rawData[key];
+    //       final List<BarChartDataDouble> dataInGroup = [];
+    //       groupData.forEach((subgroup, value) {
+    //         maxTotalValue += value;
+    //         subGroups.add(subgroup);
+    //         dataInGroup.add(BarChartDataDouble(group: subgroup, data: value.toDouble()));
+    //         _yValues.add(value.toDouble());
+    //       });
+    //       _groupedBars.add(BarChartDataDoubleGrouped(mainGroup: key, dataList: dataInGroup));
+    //       if (maxTotalValue >= maxTotalValueOverall) { maxTotalValueOverall = maxTotalValue; }
+    //     }
+    //     subGroups = subGroups.toSet().toList();
+    //     final List<String> existedGroupColor = subGroupColors.keys.toList();
+    //     for (String subGroup in subGroups) {
+    //       if (!existedGroupColor.contains(subGroup)) {
+    //         // Generate random color for subgroup if not specified
+    //         // TODO Better function?
+    //         subGroupColors[subGroup] = Colors.primaries[Random().nextInt(Colors.primaries.length)];
+    //       }
+    //     }
+    //   }
+    //   _yValueRange = [_yValues.reduce(min), _yValues.reduce(max), maxTotalValueOverall];
+    // }
   }
 
   final Container a = Container(
