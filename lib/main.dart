@@ -5,6 +5,7 @@ import 'package:flutter_charts/bar_chart/fancy_bar_chart.dart';
 import 'bar_chart/bar_chart.dart';
 import 'bar_chart/bar_chart_style.dart';
 import 'bar_chart/bar_chart_unit_length.dart';
+import 'modular_fancy_bar_chart/modular_fancy_bar_chart.dart';
 
 // BarChartData data = BarChartDataNumber.double(data: sampleData);
 // List<BarData> sampleData = [
@@ -93,28 +94,50 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           children: [
             const SizedBox(height: 5,),
+            const SizedBox(height: 5,),
             // Card(
             //   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
             //   margin: const EdgeInsets.all(5),
             //   child: Center(
             //     child: FancyBarChart(
-            //       rawData: sampleData2,
+            //       rawData: sampleData3,
             //       width: MediaQuery.of(context).size.width,
             //       height: MediaQuery.of(context).size.height / 3,
             //       style: BarChartStyle(
+            //         title: BarChartLabel(
+            //           text: 'Random Bar Chart',
+            //           textStyle: TextStyle(
+            //             color: Colors.white,
+            //             fontSize: 20,
+            //             fontWeight: FontWeight.bold,
+            //           )
+            //         ),
             //         sortXAxis: true,
+            //         isStacked: toggle,
             //         gridAreaOffsetFromBottomLeft: const Offset(35, 35),
-            //         gridAreaOffsetFromTopRight: const Offset(15, 5),
+            //         gridAreaOffsetFromTopRight: const Offset(10, 10),
+            //         groupMargin: 50,
             //         xAxisStyle: const AxisStyle(
-            //           preferredEndValue: 30,
+            //           label: BarChartLabel(
+            //               text: 'X Axis',
+            //               textStyle: TextStyle(
+            //                 color: Colors.white,
+            //               )
+            //           ),
             //           axisColor: Colors.teal,
             //           tick: TickStyle(
             //             tickDecimal: 0,
             //             tickLength: 5,
             //             tickColor: Colors.teal,
-            //           )
+            //           ),
             //         ),
             //         yAxisStyle: const AxisStyle(
+            //           label: BarChartLabel(
+            //               text: 'Y Axis',
+            //               textStyle: TextStyle(
+            //                 color: Colors.white,
+            //               )
+            //           ),
             //           axisColor: Colors.teal,
             //           preferredStartValue: 0,
             //           numTicks: 8,
@@ -122,11 +145,16 @@ class _MyHomePageState extends State<MyHomePage> {
             //             tickDecimal: 0,
             //             tickLength: 5,
             //             tickColor: Colors.teal,
-            //           )
+            //           ),
+            //         ),
+            //         barStyle: const BarChartBarStyle(
+            //           shape: BarChartBarShape.RoundedRectangle,
+            //           topLeft: const Radius.circular(15),
+            //           topRight: const Radius.circular(15),
             //         ),
             //         animation: BarChartAnimation(
             //           animateData: true,
-            //           dataAnimationDuration: const Duration(milliseconds: 500),
+            //           dataAnimationDuration: const Duration(milliseconds: 800),
             //         ),
             //       ),
             //     ),
@@ -137,130 +165,10 @@ class _MyHomePageState extends State<MyHomePage> {
               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
               margin: const EdgeInsets.all(5),
               child: Center(
-                child: FancyBarChart(
+                child: ModularFancyBarChart(
                   rawData: sampleData3,
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height / 3,
-                  style: BarChartStyle(
-                    title: BarChartLabel(
-                      text: 'Random Bar Chart',
-                      textStyle: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      )
-                    ),
-                    sortXAxis: true,
-                    isStacked: toggle,
-                    gridAreaOffsetFromBottomLeft: const Offset(35, 35),
-                    gridAreaOffsetFromTopRight: const Offset(10, 10),
-                    groupMargin: 50,
-                    xAxisStyle: const AxisStyle(
-                      label: BarChartLabel(
-                          text: 'X Axis',
-                          textStyle: TextStyle(
-                            color: Colors.white,
-                          )
-                      ),
-                      axisColor: Colors.teal,
-                      tick: TickStyle(
-                        tickDecimal: 0,
-                        tickLength: 5,
-                        tickColor: Colors.teal,
-                      ),
-                    ),
-                    yAxisStyle: const AxisStyle(
-                      label: BarChartLabel(
-                          text: 'Y Axis',
-                          textStyle: TextStyle(
-                            color: Colors.white,
-                          )
-                      ),
-                      axisColor: Colors.teal,
-                      preferredStartValue: 0,
-                      numTicks: 8,
-                      tick: TickStyle(
-                        tickDecimal: 0,
-                        tickLength: 5,
-                        tickColor: Colors.teal,
-                      ),
-                    ),
-                    barStyle: const BarChartBarStyle(
-                      shape: BarChartBarShape.RoundedRectangle,
-                      topLeft: const Radius.circular(15),
-                      topRight: const Radius.circular(15),
-                    ),
-                    animation: BarChartAnimation(
-                      animateData: true,
-                      dataAnimationDuration: const Duration(milliseconds: 800),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 5,),
-            Card(
-              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-              margin: const EdgeInsets.all(5),
-              child: Center(
-                child: FancyBarChart(
-                  rawData: sampleData3,
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height / 3,
-                  style: BarChartStyle(
-                    title: BarChartLabel(
-                      text: 'Random Bar Chart',
-                      textStyle: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      )
-                    ),
-                    isStacked: toggle2,
-                    sortXAxis: true,
-                    gridAreaOffsetFromBottomLeft: const Offset(45, 45),
-                    gridAreaOffsetFromTopRight: const Offset(10, 10),
-                    groupMargin: 50,
-                    xAxisStyle: const AxisStyle(
-                      label: BarChartLabel(
-                          text: 'X Axis',
-                          textStyle: TextStyle(
-                            color: Colors.white,
-                          )
-                      ),
-                      axisColor: Colors.teal,
-                      tick: TickStyle(
-                        tickDecimal: 0,
-                        tickLength: 5,
-                        tickColor: Colors.teal,
-                      ),
-                    ),
-                    yAxisStyle: const AxisStyle(
-                      label: BarChartLabel(
-                          text: 'Y Axis',
-                          textStyle: TextStyle(
-                            color: Colors.white,
-                          )
-                      ),
-                      axisColor: Colors.teal,
-                      preferredStartValue: 0,
-                      numTicks: 8,
-                      tick: TickStyle(
-                        tickDecimal: 0,
-                        tickLength: 5,
-                        tickColor: Colors.teal,
-                      ),
-                    ),
-                    barStyle: const BarChartBarStyle(
-                      shape: BarChartBarShape.RoundedRectangle,
-                      topLeft: const Radius.circular(15),
-                      topRight: const Radius.circular(15),
-                    ),
-                    animation: BarChartAnimation(
-                      animateData: true,
-                      dataAnimationDuration: const Duration(milliseconds: 800),
-                    ),
-                  ),
                 ),
               ),
             ),
