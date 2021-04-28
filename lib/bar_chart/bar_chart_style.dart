@@ -1,29 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
 
 typedef Comparator<T> = int Function(T a, T b);
 enum BarChartBarShape {Rectangle, RoundedRectangle}
 
 class BarChartStyle {
+  final BarChartLabel title;
   final double groupMargin;
   final Map<String, Color> subGroupColors;
-  final bool sortXAxis;
+  final bool sortXAxis, isStacked, showLegends;
   final Comparator<String> groupComparator;
   final EdgeInsetsGeometry contentPadding;
-  final Offset gridAreaOffsetFromBottomLeft;
-  final Offset gridAreaOffsetFromTopRight;
-  final AxisStyle xAxisStyle;
-  final AxisStyle yAxisStyle;
+  final Offset gridAreaOffsetFromBottomLeft, gridAreaOffsetFromTopRight;
+  final AxisStyle xAxisStyle, yAxisStyle;
   final BarChartBarStyle barStyle;
   final BarChartAnimation animation;
 
   const BarChartStyle({
+    this.title = const BarChartLabel(),
     this.groupMargin = 10,
+    this.isStacked = false,
     this.sortXAxis = false,
     this.subGroupColors,
     this.groupComparator,
     this.contentPadding = const EdgeInsets.all(10),
     this.gridAreaOffsetFromBottomLeft = const Offset(20, 20),
     this.gridAreaOffsetFromTopRight = const Offset(5, 5),
+    this.showLegends = true,
     this.xAxisStyle = const AxisStyle(),
     this.yAxisStyle = const AxisStyle(),
     this.barStyle = const BarChartBarStyle(),
@@ -41,7 +44,7 @@ class AxisStyle {
   final StrokeCap strokeCap;
   final double preferredStartValue;
   final double preferredEndValue;
-  final String label;
+  final BarChartLabel label;
 
   const AxisStyle({
     this.shift = 0,
@@ -52,8 +55,8 @@ class AxisStyle {
     this.strokeWidth = 3,
     this.strokeCap = StrokeCap.round,
     this.preferredStartValue = 0,
-    this.preferredEndValue = 1,
-    this.label = '',
+    this.preferredEndValue = 10,
+    this.label = const BarChartLabel(),
   });
 }
 
@@ -82,6 +85,7 @@ class TickStyle {
 }
 
 class BarChartBarStyle {
+  final double inGroupMargin;
   final Color color;
   final BarChartBarShape shape;
   final Radius topLeft;
@@ -90,6 +94,7 @@ class BarChartBarStyle {
   final Radius bottomRight;
 
   const BarChartBarStyle({
+    this.inGroupMargin = 0,
     this.color = Colors.red,
     this.shape = BarChartBarShape.Rectangle,
     this.topLeft = const Radius.circular(0),

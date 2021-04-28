@@ -6,13 +6,13 @@ import 'bar_chart/bar_chart.dart';
 import 'bar_chart/bar_chart_style.dart';
 import 'bar_chart/bar_chart_unit_length.dart';
 
-BarChartData data = BarChartDataNumber.double(data: sampleData);
-List<BarData> sampleData = [
-  BarData(x1: 0, x2: 0.5, y1: 8, style: BarChartBarStyle(color: Colors.red)),
-  BarData(x1: 0.8, x2: 1.2, y1: 4),
-  BarData(x1: 1.5, x2: 2.5, y1: 8, style: BarChartBarStyle(color: Colors.blue)),
-  BarData(x1: 3, x2: 4, y1: 3.4),
-];
+// BarChartData data = BarChartDataNumber.double(data: sampleData);
+// List<BarData> sampleData = [
+//   BarData(x1: 0, x2: 0.5, y1: 8, style: BarChartBarStyle(color: Colors.red)),
+//   BarData(x1: 0.8, x2: 1.2, y1: 4),
+//   BarData(x1: 1.5, x2: 2.5, y1: 8, style: BarChartBarStyle(color: Colors.blue)),
+//   BarData(x1: 3, x2: 4, y1: 3.4),
+// ];
 
 Map<String, dynamic> sampleData2 =  {
   'A': 2,
@@ -29,6 +29,10 @@ Map<String, dynamic> sampleData3 =  {
     'b': 4,
     'c': 6,
     'd': 1,
+    'e': 2,
+    'f': 4,
+    'g': 6,
+    'h': 10,
   },
   'B': {
     'a': 1,
@@ -65,6 +69,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool toggle = false;
+  bool toggle2 = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,6 +81,10 @@ class _MyHomePageState extends State<MyHomePage> {
           IconButton(
             icon: Icon(Icons.play_arrow),
             onPressed: () {
+              setState(() {
+                toggle = !toggle;
+                toggle2 = !toggle2;
+              });
             },
           )
         ],
@@ -82,99 +93,6 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           children: [
             const SizedBox(height: 5,),
-            // Card(
-            //   shape: const RoundedRectangleBorder(
-            //     borderRadius: BorderRadius.all(Radius.circular(20)),
-            //   ),
-            //   margin: const EdgeInsets.all(5),
-            //   child: Center(
-            //     child: BarChart(
-            //       barChartData: BarChartDataNumber.double(
-            //         data: sampleData,
-            //         style: BarChartBarStyle(
-            //           color: Colors.orange,
-            //           shape: BarChartBarShape.RoundedRectangle,
-            //           topLeft: const Radius.circular(15),
-            //           topRight: const Radius.circular(15),
-            //         ),
-            //       ),
-            //       width: MediaQuery.of(context).size.width,
-            //       height: MediaQuery.of(context).size.height / 3,
-            //       gridAreaOffsetFromBottomLeft: const Offset(35, 35),
-            //       gridAreaOffsetFromTopRight: const Offset(15, 5),
-            //       xAxisStyle: const AxisStyle(
-            //         label: 'X Axis',
-            //         preferredEndValue: 5,
-            //         axisColor: Colors.teal,
-            //         numTicks: 11,
-            //         tick: Tick(
-            //           tickDecimal: 1,
-            //           tickLength: 5,
-            //           tickColor: Colors.teal,
-            //           unit: 'cm',
-            //         )
-            //       ),
-            //       yAxisStyle: const AxisStyle(
-            //         label: 'Y Axis',
-            //         preferredEndValue: 10,
-            //         axisColor: Colors.teal,
-            //         tick: Tick(
-            //           tickLength: 5,
-            //           tickColor: Colors.teal,
-            //         )
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            const SizedBox(height: 5,),
-            // Card(
-            //   shape: const RoundedRectangleBorder(
-            //     borderRadius: BorderRadius.all(Radius.circular(20)),
-            //   ),
-            //   margin: const EdgeInsets.all(5),
-            //   child: Center(
-            //     child: BarChartUnitLength(
-            //       barChartData: BarChartDataDoubleWithUnitLength(
-            //         data: [1,3,5,9,12,5,7,3,1,2,0,2,6,3,7.9,2,2.2,4,7,6,8,1,1,0,1.4,9],
-            //         style: BarChartBarStyle(
-            //           color: Colors.orange,
-            //           shape: BarChartBarShape.RoundedRectangle,
-            //           topLeft: const Radius.circular(15),
-            //           topRight: const Radius.circular(15),
-            //         ),
-            //       ),
-            //       width: MediaQuery.of(context).size.width,
-            //       height: MediaQuery.of(context).size.height / 3,
-            //       gridAreaOffsetFromBottomLeft: const Offset(35, 35),
-            //       gridAreaOffsetFromTopRight: const Offset(15, 5),
-            //       xAxisStyle: const AxisStyle(
-            //         label: 'X Axis',
-            //         preferredStartValue: 11,
-            //         preferredEndValue: 30,
-            //         axisColor: Colors.teal,
-            //         numTicks: 6,
-            //         tick: Tick(
-            //           tickDecimal: 0,
-            //           tickLength: 5,
-            //           tickColor: Colors.teal,
-            //         )
-            //       ),
-            //       yAxisStyle: const AxisStyle(
-            //         label: 'Y Axis',
-            //         preferredEndValue: 10,
-            //         axisColor: Colors.teal,
-            //         tick: Tick(
-            //           tickLength: 5,
-            //           tickColor: Colors.teal,
-            //         )
-            //       ),
-            //       animation: const BarChartAnimation(
-            //         dataAnimationDuration: Duration(milliseconds: 500),
-            //         animateData: true,
-            //       ),
-            //     ),
-            //   ),
-            // ),
             // Card(
             //   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
             //   margin: const EdgeInsets.all(5),
@@ -188,7 +106,6 @@ class _MyHomePageState extends State<MyHomePage> {
             //         gridAreaOffsetFromBottomLeft: const Offset(35, 35),
             //         gridAreaOffsetFromTopRight: const Offset(15, 5),
             //         xAxisStyle: const AxisStyle(
-            //           label: 'X Axis',
             //           preferredEndValue: 30,
             //           axisColor: Colors.teal,
             //           tick: TickStyle(
@@ -198,7 +115,6 @@ class _MyHomePageState extends State<MyHomePage> {
             //           )
             //         ),
             //         yAxisStyle: const AxisStyle(
-            //           label: 'Y Axis',
             //           axisColor: Colors.teal,
             //           preferredStartValue: 0,
             //           numTicks: 8,
@@ -226,12 +142,26 @@ class _MyHomePageState extends State<MyHomePage> {
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height / 3,
                   style: BarChartStyle(
+                    title: BarChartLabel(
+                      text: 'Random Bar Chart',
+                      textStyle: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      )
+                    ),
                     sortXAxis: true,
+                    isStacked: toggle,
                     gridAreaOffsetFromBottomLeft: const Offset(35, 35),
-                    gridAreaOffsetFromTopRight: const Offset(15, 5),
+                    gridAreaOffsetFromTopRight: const Offset(10, 10),
                     groupMargin: 50,
                     xAxisStyle: const AxisStyle(
-                      label: 'X Axis',
+                      label: BarChartLabel(
+                          text: 'X Axis',
+                          textStyle: TextStyle(
+                            color: Colors.white,
+                          )
+                      ),
                       axisColor: Colors.teal,
                       tick: TickStyle(
                         tickDecimal: 0,
@@ -240,7 +170,12 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
                     yAxisStyle: const AxisStyle(
-                      label: 'Y Axis',
+                      label: BarChartLabel(
+                          text: 'Y Axis',
+                          textStyle: TextStyle(
+                            color: Colors.white,
+                          )
+                      ),
                       axisColor: Colors.teal,
                       preferredStartValue: 0,
                       numTicks: 8,
@@ -257,13 +192,79 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     animation: BarChartAnimation(
                       animateData: true,
-                      dataAnimationDuration: const Duration(milliseconds: 500),
+                      dataAnimationDuration: const Duration(milliseconds: 800),
                     ),
                   ),
                 ),
               ),
             ),
             const SizedBox(height: 5,),
+            Card(
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
+              margin: const EdgeInsets.all(5),
+              child: Center(
+                child: FancyBarChart(
+                  rawData: sampleData3,
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height / 3,
+                  style: BarChartStyle(
+                    title: BarChartLabel(
+                      text: 'Random Bar Chart',
+                      textStyle: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      )
+                    ),
+                    isStacked: toggle2,
+                    sortXAxis: true,
+                    gridAreaOffsetFromBottomLeft: const Offset(35, 35),
+                    gridAreaOffsetFromTopRight: const Offset(10, 10),
+                    groupMargin: 50,
+                    xAxisStyle: const AxisStyle(
+                      label: BarChartLabel(
+                          text: 'X Axis',
+                          textStyle: TextStyle(
+                            color: Colors.white,
+                          )
+                      ),
+                      axisColor: Colors.teal,
+                      tick: TickStyle(
+                        tickDecimal: 0,
+                        tickLength: 5,
+                        tickColor: Colors.teal,
+                      ),
+                    ),
+                    yAxisStyle: const AxisStyle(
+                      label: BarChartLabel(
+                          text: 'Y Axis',
+                          textStyle: TextStyle(
+                            color: Colors.white,
+                          )
+                      ),
+                      axisColor: Colors.teal,
+                      preferredStartValue: 0,
+                      numTicks: 8,
+                      tick: TickStyle(
+                        tickDecimal: 0,
+                        tickLength: 5,
+                        tickColor: Colors.teal,
+                      ),
+                    ),
+                    barStyle: const BarChartBarStyle(
+                      shape: BarChartBarShape.RoundedRectangle,
+                      topLeft: const Radius.circular(15),
+                      topRight: const Radius.circular(15),
+                    ),
+                    animation: BarChartAnimation(
+                      animateData: true,
+                      dataAnimationDuration: const Duration(milliseconds: 800),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 40,),
           ]
         ),
       ),
