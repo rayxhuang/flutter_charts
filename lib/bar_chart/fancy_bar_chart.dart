@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
 import 'package:flutter_charts/bar_chart/bar_chart_style.dart';
+import 'package:flutter_charts/modular_fancy_bar_chart/modular_fancy_bar_chart.dart';
 
-enum BarChartType {Ungrouped, Grouped, GroupedStacked}
+//enum BarChartType {Ungrouped, Grouped, GroupedStacked}
 
 class FancyBarChart extends StatefulWidget {
   final Map<String, dynamic> rawData;

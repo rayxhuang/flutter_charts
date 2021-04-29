@@ -7,6 +7,8 @@ enum BarChartBarShape {Rectangle, RoundedRectangle}
 class BarChartStyle {
   final BarChartLabel title;
   final double groupMargin;
+  final double barMargin;
+  final double barWidth;
   final Map<String, Color> subGroupColors;
   final bool sortXAxis, isStacked, showLegends;
   final Comparator<String> groupComparator;
@@ -19,6 +21,8 @@ class BarChartStyle {
   const BarChartStyle({
     this.title = const BarChartLabel(),
     this.groupMargin = 10,
+    this.barMargin = 0,
+    this.barWidth = 30,
     this.isStacked = false,
     this.sortXAxis = false,
     this.subGroupColors,
@@ -85,7 +89,6 @@ class TickStyle {
 }
 
 class BarChartBarStyle {
-  final double inGroupMargin;
   final Color color;
   final BarChartBarShape shape;
   final Radius topLeft;
@@ -94,7 +97,6 @@ class BarChartBarStyle {
   final Radius bottomRight;
 
   const BarChartBarStyle({
-    this.inGroupMargin = 0,
     this.color = Colors.red,
     this.shape = BarChartBarShape.Rectangle,
     this.topLeft = const Radius.circular(0),

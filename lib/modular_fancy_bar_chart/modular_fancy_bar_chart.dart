@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
 import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
 import 'package:flutter_charts/bar_chart/bar_chart_style.dart';
@@ -64,21 +65,21 @@ class ModularFancyBarChart extends StatefulWidget {
 
 class _ModularFancyBarChartState extends State<ModularFancyBarChart> with TickerProviderStateMixin{
   BarChartStyle style;
-  List<String> xGroups = [], subGroups = [];
-  Map<String, Color> subGroupColors;
-  List<double> _yValues = [];
+  List<String> xGroups = [], xSubGroups = [];
+  List<double> y1Values = [], y2Values = [], yValueRange = [0, 0, 0];
+  Map<String, Color> subGroupColors = {};
+
   List<BarChartDataDouble> _bars = [];
   List<BarChartDataDoubleGrouped> _groupedBars = [];
-  bool chartIsGrouped;
 
-  List<double> _yValueRange = [];
+  // Var for scrolling and animation
+  LinkedScrollControllerGroup _linkedScrollControllerGroup;
+  ScrollController _scrollController1, _scrollController2;
+  double scrollOffset = 0;
   AnimationController _axisAnimationController, _dataAnimationController;
   double axisAnimationValue = 0, dataAnimationValue = 0;
 
-  ScrollController _scrollController;
-  double scrollOffset = 0;
-
-  Size leftAxisSize  = Size.zero, titleSize = Size.zero, canvasSize = Size.zero, bottomAxisSize = Size.zero,
+  Size leftLabelSize = Size.zero, leftAxisSize  = Size.zero, titleSize = Size.zero, canvasSize = Size.zero, bottomAxisSize = Size.zero,
       bottomLegendSize = Size.zero, rightAxisSize = Size.zero, rightLegendSize = Size.zero;
 
   Size parentSize;
@@ -86,6 +87,7 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
   ChartCanvas chartCanvas;
   ChartAxisHorizontal topAxis, bottomAxis;
   ChartAxisVertical leftAxis, rightAxis;
+  ChartLabelVertical leftLabel;
   ChartLegendHorizontal bottomLegend;
   ChartLegendVertical rightLegend;
 
@@ -93,26 +95,84 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
   void initState() {
     super.initState();
     analyseData();
+    adjustAxisValueRange();
+
+    // Scrolling actions
+    _linkedScrollControllerGroup = LinkedScrollControllerGroup();
+    _scrollController1 = _linkedScrollControllerGroup.addAndGet();
+    _scrollController2 = _linkedScrollControllerGroup.addAndGet();
 
     parentSize = Size(widget.width, widget.height);
     chartTitle = ChartTitle(title: 'Bar Chart Title', parentSize: parentSize);
     titleSize = chartTitle.size;
     // topAxis = ChartAxisHorizontal(parentSize: parentSize);
     // topAxisSize = topAxis.size;
-    chartCanvas = ChartCanvas(parentSize: parentSize);
-    canvasSize = chartCanvas.size;
-    bottomAxis = ChartAxisHorizontal(parentSize: parentSize);
+    int numInGroups = xSubGroups.length;
+    if (numInGroups <= 1) { numInGroups = 1; }
+    if (widget.rawData.type == BarChartType.GroupedStacked) { numInGroups = 1; }
+    bottomAxis = ChartAxisHorizontal(
+      parentSize: parentSize,
+      xGroups: xGroups,
+      barWidth: widget.style.barWidth,
+      numBarsInGroup: numInGroups,
+      style: widget.style,
+      scrollController: _scrollController2,
+    );
     bottomAxisSize = bottomAxis.size;
     bottomLegend = ChartLegendHorizontal(parentSize: parentSize);
     bottomLegendSize = bottomLegend.size;
 
-    leftAxis = ChartAxisVertical(parentSize: parentSize);
+    switch (widget.rawData.type) {
+      case BarChartType.Ungrouped:
+        chartCanvas = ChartCanvas.ungrouped(
+          parentSize: parentSize,
+          length: bottomAxis.length,
+          scrollController: _scrollController1,
+          xGroups: xGroups,
+          valueRange: yValueRange,
+          xSectionLength: bottomAxis.xSectionLength,
+          bars: _bars,
+          style: widget.style,
+        );
+        break;
+      case BarChartType.GroupedSeparated:
+        // TODO: Handle this case.
+        break;
+      case BarChartType.Grouped3D:
+        // TODO: Handle this case.
+        break;
+      default:
+        chartCanvas = ChartCanvas.grouped(
+          isStacked: widget.rawData.type == BarChartType.GroupedStacked ? true : false,
+          parentSize: parentSize,
+          length: bottomAxis.length,
+          scrollController: _scrollController1,
+          xGroups: xGroups,
+          subGroups: xSubGroups,
+          subGroupColors: subGroupColors,
+          valueRange: yValueRange,
+          xSectionLength: bottomAxis.xSectionLength,
+          groupedBars: _groupedBars,
+          style: widget.style,
+        );
+        break;
+    }
+    canvasSize = chartCanvas.size;
+
+    leftLabel = ChartLabelVertical(parentSize: parentSize, label: 'Y Axis',);
+    leftLabelSize = leftLabel.size;
+    leftAxis = ChartAxisVertical(
+      parentSize: parentSize,
+      yValueRange: yValueRange,
+      axisStyle: widget.style.yAxisStyle,
+    );
     leftAxisSize = leftAxis.size;
 
-    rightAxis = ChartAxisVertical(parentSize: parentSize);
+    rightAxis = ChartAxisVertical(parentSize: parentSize, yValueRange: yValueRange, axisStyle: widget.style.yAxisStyle);
     rightAxisSize = rightAxis.size;
     rightLegend = ChartLegendVertical(parentSize: parentSize);
     rightLegendSize = rightLegend.size;
+
     // _scrollController = ScrollController();
     // _scrollController.addListener(() {
     //   print(widget.width * 1.5);
@@ -170,8 +230,6 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
     final AbstractModularBarChartData data = widget.rawData;
     final BarChartType type = data.type;
     final BarChartStyle style = widget.style;
-    List<String> xGroups = [], xSubGroups = [];
-    List<double> y1Values = [], y2Values = [], yValueRange = [0, 0, 0];
     xGroups = data.rawData.keys.toList();
     if (style.sortXAxis) {
       style.groupComparator == null
@@ -180,19 +238,12 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
     }
     switch (type) {
       case BarChartType.Ungrouped:
-        for (String key in xGroups) { y1Values.add(data.rawData[key]); }
-        break;
-      case BarChartType.Grouped:
         for (String key in xGroups) {
-          data.rawData.forEach((key, map) {
-            xSubGroups.addAll(map.keys.toList());
-          });
+          y1Values.add(data.rawData[key]);
+          _bars.add(BarChartDataDouble(group: key, data: data.rawData[key]));
         }
-        xSubGroups = xSubGroups.toSet().toList();
-        print(xSubGroups);
-        break;
-      case BarChartType.GroupedStacked:
-      // TODO: Handle this case.
+        yValueRange[0] = y1Values.reduce(min);
+        yValueRange[1] = y1Values.reduce(max);
         break;
       case BarChartType.GroupedSeparated:
       // TODO: Handle this case.
@@ -200,8 +251,54 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
       case BarChartType.Grouped3D:
       // TODO: Handle this case.
         break;
+      default:
+        // default is shared by Grouped and GroupedStacked
+        // TODO Fix missing middle group shift
+        double localMaximum = double.negativeInfinity;
+        data.rawData.forEach((key, map) {
+          xSubGroups.addAll(map.keys.toList());
+          final List<BarChartDataDouble> dataInGroup = [];
+          double sum = 0;
+          map.forEach((subgroup, value) {
+            xSubGroups.add(subgroup);
+            dataInGroup.add(BarChartDataDouble(group: subgroup, data: value.toDouble()));
+            y1Values.add(value.toDouble());
+            sum += value.toDouble();
+          });
+          if (sum >= localMaximum) { localMaximum = sum; }
+          _groupedBars.add(BarChartDataDoubleGrouped(mainGroup: key, dataList: dataInGroup));
+        });
+        xSubGroups = xSubGroups.toSet().toList();
+        yValueRange[0] = y1Values.reduce(min);
+        yValueRange[1] = type == BarChartType.Grouped
+            ? y1Values.reduce(max)
+            : localMaximum;
+        break;
     }
+    // Generate color for subgroups
+    if (type != BarChartType.Ungrouped) {
+      for (String subGroup in xSubGroups) { subGroupColors[subGroup] = Colors.primaries[Random().nextInt(Colors.primaries.length)]; }
+    }
+  }
 
+  void adjustAxisValueRange() {
+    widget.style.yAxisStyle.preferredStartValue <= yValueRange[0]
+        ? yValueRange[0] = widget.style.yAxisStyle.preferredStartValue
+        : yValueRange[0] = yValueRange[0];
+
+    // if (type != BarChartType.GroupedStacked) {
+    //   yStyle.preferredEndValue >= yValueRange[1]
+    //       ? yMax = yStyle.preferredEndValue
+    //       : yMax = yValueRange[1];
+    // } else {
+    //   widget.style.yAxisStyle.preferredEndValue >= yValueRange[2]
+    //       ? yMax = widget.style.yAxisStyle.preferredEndValue
+    //       : yMax = yValueRange[2];
+    // }
+    widget.style.yAxisStyle.preferredEndValue >= yValueRange[1]
+        ? yValueRange[1] = widget.style.yAxisStyle.preferredEndValue
+        : yValueRange[1] = yValueRange[1];
+  }
 
     //   double maxTotalValueOverall = 0;
     //   if (!chartIsGrouped) {
@@ -237,7 +334,6 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
     //   }
     //   _yValueRange = [_yValues.reduce(min), _yValues.reduce(max), maxTotalValueOverall];
     // }
-  }
 
   final Container a = Container(
     width: 50,
@@ -255,8 +351,14 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
         padding: EdgeInsets.all(0),
         child: Stack(
           children: [
+            // Left Label
+            Positioned(
+              top: titleSize.height,
+              child: leftLabel,
+            ),
             // Left Axis
             Positioned(
+              left: leftLabelSize.width,
               top: titleSize.height,
               child: leftAxis,
             ),
@@ -270,32 +372,32 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
             // Canvas
             Positioned(
               top: titleSize.height,
-              left: leftAxisSize.width,
+              left: leftAxisSize.width + leftLabelSize.width,
               child: chartCanvas,
             ),
             // Bottom Axis
             Positioned(
-              top: titleSize.height + canvasSize.height,
-              left: leftAxisSize.width,
+              top: titleSize.height + canvasSize.height - widget.style.yAxisStyle.strokeWidth / 2,
+              left: leftAxisSize.width + leftLabelSize.width,
               child: bottomAxis,
             ),
             // Bottom Legends
             Positioned(
               top: titleSize.height + canvasSize.height + bottomAxisSize.height,
-              left: leftAxisSize.width,
+              left: leftAxisSize.width + leftLabelSize.width,
               child: bottomLegend,
             ),
 
             // Right Axis
             Positioned(
               top: titleSize.height,
-              left: leftAxisSize.width + canvasSize.width,
+              left: leftAxisSize.width + leftLabelSize.width + canvasSize.width,
               child: rightAxis,
             ),
             // Right Legends
             Positioned(
               top: titleSize.height,
-              left: leftAxisSize.width + canvasSize.width + rightAxisSize.width,
+              left: leftAxisSize.width + leftLabelSize.width + canvasSize.width + rightAxisSize.width,
               child: rightLegend,
             ),
           ]
@@ -306,7 +408,8 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    _scrollController1.dispose();
+    _scrollController2.dispose();
     _axisAnimationController.dispose();
     _dataAnimationController.dispose();
     super.dispose();
@@ -332,7 +435,7 @@ class ChartTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(border: Border.all(color: Colors.red)),
+      //decoration: BoxDecoration(border: Border.all(color: Colors.red)),
       width: parentSize.width * widthInPercentage,
       height: parentSize.height * heightInPercentage,
       child: Center(

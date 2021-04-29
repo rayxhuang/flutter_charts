@@ -16,7 +16,7 @@ import 'modular_fancy_bar_chart/modular_fancy_bar_chart.dart';
 // ];
 
 Map<String, double> sampleData2 =  {
-  'A': 2,
+  'A': 1,
   'C': 3,
   'B': 7,
   'D': 5.5,
@@ -31,9 +31,6 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 6,
     'd': 1,
     'e': 2,
-    'f': 4,
-    'g': 6,
-    'h': 10,
   },
   'B': {
     'a': 1,
@@ -169,22 +166,104 @@ class _MyHomePageState extends State<MyHomePage> {
                   rawData: ModularBarChartData.ungrouped(
                     rawData: sampleData2
                   ),
+                  style: BarChartStyle(
+                    sortXAxis: true,
+                    barWidth: 20,
+                    groupMargin: 20,
+                    xAxisStyle: AxisStyle(
+                      axisColor: Colors.teal,
+                      tick: TickStyle(
+                        tickLength: 5,
+                        tickColor: Colors.teal,
+                      ),
+                    ),
+                    yAxisStyle: AxisStyle(
+                      preferredEndValue: 20,
+                      axisColor: Colors.teal,
+                      tick: TickStyle(
+                        tickLength: 5,
+                        tickColor: Colors.teal,
+                      ),
+                    )
+                  ),
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height / 3,
                 ),
               ),
             ),
-            const SizedBox(height: 40,),
+            const SizedBox(height: 5,),
             Card(
               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
               margin: const EdgeInsets.all(5),
               child: Center(
                 child: ModularFancyBarChart(
                   rawData: ModularBarChartData.grouped(
-                      rawData: sampleData3
+                    rawData: sampleData3
+                  ),
+                  style: BarChartStyle(
+                      sortXAxis: true,
+                      barWidth: 20,
+                      groupMargin: 20,
+                      barMargin: 5,
+                      xAxisStyle: AxisStyle(
+                        axisColor: Colors.teal,
+                        tick: TickStyle(
+                          tickLength: 5,
+                          tickColor: Colors.teal,
+                        ),
+                      ),
+                      yAxisStyle: AxisStyle(
+                        preferredEndValue: 20,
+                        axisColor: Colors.teal,
+                        tick: TickStyle(
+                          tickLength: 5,
+                          tickColor: Colors.teal,
+                        ),
+                      )
                   ),
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height / 3,
+                ),
+              ),
+            ),
+            const SizedBox(height: 5,),
+            Card(
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
+              margin: const EdgeInsets.all(5),
+              child: Center(
+                child: Container(
+                  height: 2000,
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    child: ModularFancyBarChart(
+                      rawData: ModularBarChartData.groupedStacked(
+                          rawData: sampleData3
+                      ),
+                      style: BarChartStyle(
+                          sortXAxis: true,
+                          barWidth: 20,
+                          groupMargin: 20,
+                          barMargin: 5,
+                          xAxisStyle: AxisStyle(
+                            axisColor: Colors.teal,
+                            tick: TickStyle(
+                              tickLength: 5,
+                              tickColor: Colors.teal,
+                            ),
+                          ),
+                          yAxisStyle: AxisStyle(
+                            preferredEndValue: 20,
+                            axisColor: Colors.teal,
+                            tick: TickStyle(
+                              tickLength: 5,
+                              tickColor: Colors.teal,
+                            ),
+                          )
+                      ),
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height / 2,
+                    ),
+                  ),
                 ),
               ),
             ),
