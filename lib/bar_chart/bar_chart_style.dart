@@ -15,6 +15,7 @@ class BarChartStyle {
   final EdgeInsetsGeometry contentPadding;
   final Offset gridAreaOffsetFromBottomLeft, gridAreaOffsetFromTopRight;
   final AxisStyle xAxisStyle, yAxisStyle;
+  final TextStyle legendTextStyle;
   final BarChartBarStyle barStyle;
   final BarChartAnimation animation;
 
@@ -34,6 +35,7 @@ class BarChartStyle {
     this.xAxisStyle = const AxisStyle(),
     this.yAxisStyle = const AxisStyle(),
     this.barStyle = const BarChartBarStyle(),
+    this.legendTextStyle = const TextStyle(),
     this.animation = const BarChartAnimation(),
   });
 }

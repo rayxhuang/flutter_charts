@@ -2,7 +2,6 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_charts/modular_fancy_bar_chart/components/axis_plus_label.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
 import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
@@ -70,7 +69,7 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
 
   // Var for scrolling and animation
   LinkedScrollControllerGroup _linkedScrollControllerGroup;
-  ScrollController _scrollController1, _scrollController2;
+  ScrollController _scrollController1, _scrollController2, _scrollController3;
   double scrollOffset = 0;
   AnimationController _axisAnimationController, _dataAnimationController;
   double axisAnimationValue = 0, dataAnimationValue = 0;
@@ -80,11 +79,10 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
 
   Size parentSize;
   ChartTitle chartTitle, bottomLabel;
-  ChartCanvas chartCanvas;
+  ChartCanvas chartCanvas, chartCanvas2;
   ChartAxisHorizontal topAxis, bottomAxis;
-  ChartAxisVertical rightAxis;
-  AxisLabel leftAxis;
-  ChartLegendHorizontal bottomLegend;
+  ChartAxisVerticalWithLabel leftAxis;
+  SizedBox bottomLegend;
   ChartLegendVertical rightLegend;
 
   @override
@@ -97,6 +95,10 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
     _linkedScrollControllerGroup = LinkedScrollControllerGroup();
     _scrollController1 = _linkedScrollControllerGroup.addAndGet();
     _scrollController2 = _linkedScrollControllerGroup.addAndGet();
+    _linkedScrollControllerGroup.addOffsetChangedListener(() { setState(() {
+      scrollOffset = _linkedScrollControllerGroup.offset;
+    }); });
+    //_scrollController3 = _linkedScrollControllerGroup.addAndGet();
   }
 
   void analyseData() {
@@ -188,22 +190,24 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
           parentSize = Size(constraint.maxWidth, constraint.maxHeight);
           print(parentSize);
 
-          double leftAxisStaticWidth = AxisLabel.getWidth(widget.style.yAxisStyle.label.text, yValueRange[1], widget.style.yAxisStyle);
+          double leftAxisStaticWidth = ChartAxisVerticalWithLabel.getWidth(widget.style.yAxisStyle.label.text, yValueRange[1], widget.style.yAxisStyle);
           print('Static: leftAxis has ${leftAxisStaticWidth.toStringAsFixed(1)} width');
-          double titleStaticHeight = ChartTitle.getHeight(BarChartLabel(text: 'Title', textStyle: TextStyle(color: Colors.white)));
+          double titleStaticHeight = ChartTitle.getHeight(widget.style.title);
           print('Static: title has ${titleStaticHeight.toStringAsFixed(1)} height');
           double bottomAxisStaticHeight = ChartAxisHorizontal.getHeight(widget.style.xAxisStyle);
           print('Static: bottomAxis has ${bottomAxisStaticHeight.toStringAsFixed(1)} height');
           double bottomLabelStaticHeight = ChartTitle.getHeight(widget.style.xAxisStyle.label);
           print('Static: bottomLabel has ${bottomLabelStaticHeight.toStringAsFixed(1)} height');
+          double bottomLegendStaticHeight = ChartLegendHorizontal.getHeight(BarChartLabel(text: 'Title', textStyle: widget.style.legendTextStyle));
+          print('Static: bottomLegend has ${bottomLegendStaticHeight.toStringAsFixed(1)} height');
 
           double canvasWidth = parentSize.width - leftAxisStaticWidth;
-          double canvasHeight = parentSize.height - titleStaticHeight - bottomAxisStaticHeight - bottomLabelStaticHeight;
+          double canvasHeight = parentSize.height - titleStaticHeight - bottomAxisStaticHeight - bottomLabelStaticHeight - bottomLegendStaticHeight;
           canvasSize = Size(canvasWidth, canvasHeight);
           print(canvasSize);
 
           // Left Axis
-          leftAxis = AxisLabel(
+          leftAxis = ChartAxisVerticalWithLabel(
             axisHeight: canvasHeight,
             yValueRange: yValueRange,
             axisStyle: widget.style.yAxisStyle,
@@ -211,7 +215,7 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
           leftAxisSize = leftAxis.size;
 
           // Title
-          chartTitle = ChartTitle(title: BarChartLabel(text: 'Title', textStyle: TextStyle(color: Colors.white)), width: parentSize.width,);
+          chartTitle = ChartTitle(title: widget.style.title, width: parentSize.width,);
           titleSize = chartTitle.size;
 
           // Bottom Axis
@@ -227,13 +231,34 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
             scrollController: _scrollController2,
           );
           bottomAxisSize = bottomAxis.size;
+          // Bottom Label
           bottomLabel = ChartTitle(
             title: widget.style.xAxisStyle.label,
             width: canvasWidth,
           );
-          // bottomLegendSize = bottomLabel.size;
-          // bottomLegend = ChartLegendHorizontal(parentSize: parentSize);
-          // bottomLegendSize = bottomLegend.size;
+          bottomLabelSize = bottomLabel.size;
+          // Bottom Legend
+          bottomLegend = SizedBox(
+            width: canvasWidth,
+            height: bottomLegendStaticHeight,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              physics: ClampingScrollPhysics(),
+              itemCount: xSubGroups.length,
+              itemBuilder: (BuildContext context, int index) {
+                return ChartLegendHorizontal(
+                  // TODO width
+                  width: canvasWidth / 6,
+                  label: BarChartLabel(
+                    text: xSubGroups[index],
+                    textStyle: widget.style.legendTextStyle,
+                  ),
+                  color: subGroupColors[xSubGroups[index]],
+                );
+              },
+            ),
+          );
+          bottomLegendSize = Size(canvasWidth, bottomLegendStaticHeight);
 
           switch (widget.rawData.type) {
             case BarChartType.Ungrouped:
@@ -271,6 +296,23 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
               break;
           }
 
+          chartCanvas2 = ChartCanvas.mini(
+            isStacked: widget.rawData.type == BarChartType.GroupedStacked ? true : false,
+            canvasSize: Size(50, 30),
+            length: 50,
+            xGroups: xGroups,
+            subGroups: xSubGroups,
+            subGroupColors: subGroupColors,
+            valueRange: yValueRange,
+            xSectionLength: bottomAxis.xSectionLength * (50 / bottomAxis.length),
+            groupedBars: _groupedBars,
+            style: widget.style,
+            offset1: scrollOffset * ((50 / bottomAxis.length * canvasWidth)/(bottomAxis.length - canvasWidth)),
+            offset2: scrollOffset * ((50 / bottomAxis.length * canvasWidth)/(bottomAxis.length - canvasWidth)) + (canvasWidth / bottomAxis.length * 50),
+          );
+          print(scrollOffset * ((50 / bottomAxis.length * canvasWidth)/(bottomAxis.length - canvasWidth)));
+          print(scrollOffset * ((50 / bottomAxis.length * canvasWidth)/(bottomAxis.length - canvasWidth)) + (canvasWidth / bottomAxis.length * 50));
+
           // rightAxis = ChartAxisVertical(parentSize: parentSize, yValueRange: yValueRange, axisStyle: widget.style.yAxisStyle);
           // rightAxisSize = rightAxis.size;
           // rightLegend = ChartLegendVertical(parentSize: parentSize);
@@ -278,8 +320,6 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
 
           return (
             SizedBox(
-              // width: widget.width,
-              // height: widget.height,
               width: constraint.maxWidth,
               height: constraint.maxHeight,
               child: Padding(
@@ -287,23 +327,71 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
                 padding: EdgeInsets.all(0),
                 child: Stack(
                   children: [
+                    // Canvas
+                    Positioned(
+                      top: titleSize.height,
+                      left: leftAxisSize.width,
+                      child: chartCanvas,
+                    ),
+
+                    // mini Canvas
+                    Positioned(
+                      top: titleSize.height,
+                      left: leftAxisSize.width + canvasWidth - 50,
+                      child: chartCanvas2,
+                    ),
+
                     // Left Axis
                     Positioned(
                       top: titleSize.height,
                       child: leftAxis,
                     ),
 
+                    // Positioned(
+                    //   top: titleSize.height,
+                    //   left: leftAxisSize.width + 10,
+                    //   child: Container(
+                    //     height: 4,
+                    //     width: canvasWidth - 20,
+                    //     child: LinearProgressIndicator(
+                    //       color: Colors.grey,
+                    //       backgroundColor: Colors.grey,
+                    //       value: (scrollOffset + canvasWidth) / bottomAxis.length,
+                    //     ),
+                    //   ),
+                    // ),
+
+                    // Positioned(
+                    //   top: titleSize.height + 8,
+                    //   left: leftAxisSize.width,
+                    //   child: Container(
+                    //     height: 4,
+                    //     width: canvasWidth,
+                    //     child: SliderTheme(
+                    //       data: SliderThemeData(
+                    //         thumbColor: Colors.blue,
+                    //         activeTrackColor: Colors.grey,
+                    //         inactiveTrackColor: Colors.grey,
+                    //         overlayColor: Colors.transparent,
+                    //         trackHeight: 4,
+                    //         trackShape: RectangularSliderTrackShape(),
+                    //         thumbShape: RoundSliderThumbShape(enabledThumbRadius: 5),
+                    //       ),
+                    //       child: Slider(
+                    //         onChanged: (double value) { setState(() {
+                    //           _linkedScrollControllerGroup.jumpTo(value * (bottomAxis.length - canvasWidth));
+                    //         }); },
+                    //         value: (scrollOffset) / (bottomAxis.length - canvasWidth),
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
+
                     // Title
                     Positioned(
                       top: 0,
                       left: 0,
                       child: chartTitle,
-                    ),
-                    // Canvas
-                    Positioned(
-                      top: titleSize.height,
-                      left: leftAxisSize.width,
-                      child: chartCanvas,
                     ),
                     // Bottom Axis
                     Positioned(
@@ -317,12 +405,12 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
                       left: leftAxisSize.width,
                       child: bottomLabel,
                     ),
-                    // // Bottom Legends
-                    // Positioned(
-                    //   top: titleSize.height + canvasSize.height + bottomAxisSize.height + bottomLegendSize.height,
-                    //   left: leftAxisSize.width,
-                    //   child: bottomLegend,
-                    // ),
+                    // Bottom Legends
+                    Positioned(
+                      top: titleSize.height + canvasSize.height + bottomAxisSize.height + bottomLabelSize.height,
+                      left: leftAxisSize.width,
+                      child: bottomLegend,
+                    ),
 
                     // // Right Axis
                     // Positioned(
@@ -416,6 +504,7 @@ class _ModularFancyBarChartState extends State<ModularFancyBarChart> with Ticker
   void dispose() {
     _scrollController1.dispose();
     _scrollController2.dispose();
+    //_scrollController3.dispose();
     _axisAnimationController.dispose();
     _dataAnimationController.dispose();
     super.dispose();
@@ -449,7 +538,7 @@ class ChartTitle extends StatelessWidget {
 
   Size get size => Size(width, getHeight(title));
 
-  static getHeight(BarChartLabel title) {
+  static double getHeight(BarChartLabel title) {
     TextPainter painter = TextPainter(
       text: TextSpan(text: title.text, style: title.textStyle),
       textDirection: TextDirection.ltr,

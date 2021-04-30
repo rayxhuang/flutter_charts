@@ -16,6 +16,9 @@ class DataPainter extends CustomPainter {
   final List<BarChartDataDouble> bars;
   final List<BarChartDataDoubleGrouped> groupedBars;
 
+  final bool isMini;
+  final double offset1, offset2;
+
   final BarChartStyle style;
   final BarChartBarStyle barStyle;
 
@@ -30,6 +33,9 @@ class DataPainter extends CustomPainter {
     this.groupedBars,
     this.style = const BarChartStyle(),
     this.barStyle = const BarChartBarStyle(),
+    this.isMini = false,
+    this.offset1 = 0,
+    this.offset2 = 0,
   });
 
   factory DataPainter.ungrouped({
@@ -75,14 +81,44 @@ class DataPainter extends CustomPainter {
     );
   }
 
+  factory DataPainter.mini({
+    @required bool isStacked,
+    @required List<String> xGroups,
+    @required List<String> subGroups,
+    @required Map<String, Color> subGroupColors,
+    @required List<double> valueRange,
+    @required double xLength,
+    @required List<BarChartDataDoubleGrouped> groupedBars,
+    double offset1 = 0,
+    double offset2 = 0,
+    BarChartStyle style = const BarChartStyle(),
+    BarChartBarStyle barStyle = const BarChartBarStyle(),
+  }) {
+    return DataPainter._(
+      type: isStacked ? BarChartType.GroupedStacked : BarChartType.Grouped,
+      xGroups: xGroups,
+      subGroups: subGroups,
+      subGroupColors: subGroupColors,
+      groupedBars: groupedBars,
+      valueRange: valueRange,
+      xSectionLength: xLength / xGroups.length,
+      style: style,
+      barStyle: barStyle,
+      isMini: true,
+      offset1: offset1,
+      offset2: offset2,
+    );
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     final Paint p = Paint();
     p..color = Colors.white;
-    canvas.drawLine(Offset(0,0), Offset(size.width,size.height), p);
-    canvas.drawLine(Offset(0,size.height), Offset(size.width,0), p);
-
-    drawData(canvas, (valueRange[1] - valueRange[0]) / size.height, Offset(0, size.height));
+    // canvas.drawLine(Offset(0,0), Offset(size.width,size.height), p);
+    // canvas.drawLine(Offset(0,size.height), Offset(size.width,0), p);
+    isMini
+        ? drawDataMini(canvas, (valueRange[1] - valueRange[0]) / size.height, Offset(0, size.height))
+        : drawData(canvas, (valueRange[1] - valueRange[0]) / size.height, Offset(0, size.height));
   }
 
   @override
@@ -164,9 +200,75 @@ class DataPainter extends CustomPainter {
     }
   }
 
-  @override
-  bool hitTest(Offset position) {
-    // TODO: implement hitTest
-    return super.hitTest(position);
+  void drawDataMini(Canvas canvas, double yUnitPerPixel, Offset bottomLeft) {
+    // Paint op = Paint();
+    // op..color = Colors.black45;
+    // canvas.drawRect(Rect.fromPoints(Offset(0,0), Offset(50,30)), op);
+
+    //This is the bar paint
+    Paint paint = Paint();
+    //Draw data as bars on grid
+    if (type == BarChartType.Ungrouped) {
+      for (BarChartDataDouble bar in bars) {
+        BarChartBarStyle _barStyle = bar.style;
+        if (_barStyle == null) { _barStyle = barStyle; }
+        paint..color = _barStyle.color;
+        int i = xGroups.indexOf(bar.group);
+        double x1FromBottomLeft = i * xSectionLength + style.groupMargin;
+        double x2FromBottomLeft = x1FromBottomLeft + style.barWidth;
+        double y1FromBottomLeft = (bar.data - valueRange[0]) / yUnitPerPixel;
+        drawRect(canvas, bottomLeft, x1FromBottomLeft, x2FromBottomLeft, y1FromBottomLeft, _barStyle, paint);
+      }
+    } else if (type == BarChartType.Grouped) {
+      for (int j = 0; j < groupedBars.length; j++) {
+        int i = xGroups.indexOf(groupedBars[j].mainGroup);
+        List<BarChartDataDouble> data = groupedBars[j].dataList;
+        for (int i = 0; i < data.length; i++) {
+          BarChartBarStyle _barStyle = barStyle;
+
+          Color c = subGroupColors[data[i].group];
+
+          // Grouped Data must use grouped Color
+          paint..color = c;
+          double inGroupMargin = i == 0
+              ? 0
+              : style.barMargin;
+          double x1FromBottomLeft = j * xSectionLength + i * style.barWidth + style.groupMargin + inGroupMargin * i;
+          double x2FromBottomLeft = x1FromBottomLeft + style.barWidth;
+
+          //paint..color = c.withOpacity( x1FromBottomLeft > offset1 && x2FromBottomLeft < offset2 ? 1 : 0.2);
+          //paint..color = c.withOpacity( x2FromBottomLeft < offset2 ? 1 : 0.2);
+
+          double y1FromBottomLeft = (data[i].data - valueRange[0]) / yUnitPerPixel;
+          drawRect(canvas, bottomLeft, x1FromBottomLeft, x2FromBottomLeft, y1FromBottomLeft, _barStyle, paint);
+        }
+      }
+    } else if (type == BarChartType.GroupedStacked) {
+      // TODO Values cannot be negative
+      for (int j = 0; j < groupedBars.length; j++) {
+        int i = xGroups.indexOf(groupedBars[j].mainGroup);
+        List<BarChartDataDouble> data = groupedBars[j].dataList;
+        double totalHeight = 0;
+        data.forEach((data) { totalHeight += data.data; });
+        double previousYValue = 0;
+        for (int i = data.length - 1; i  >= 0; i--) {
+          BarChartBarStyle _barStyle = barStyle;
+          // Grouped Data must use grouped Color
+          paint..color = subGroupColors[data[i].group];
+          double x1FromBottomLeft = j * xSectionLength + style.groupMargin;
+          double x2FromBottomLeft = x1FromBottomLeft + style.barWidth;
+          double y1FromBottomLeft = (totalHeight - valueRange[0] - previousYValue) / yUnitPerPixel;
+          drawRect(canvas, bottomLeft, x1FromBottomLeft, x2FromBottomLeft, y1FromBottomLeft, _barStyle, paint, last: false);
+          previousYValue += data[i].data;
+        }
+      }
+    }
+
+    //Apply opacity
+    Paint op = Paint();
+    op..color = Colors.black12;
+    canvas.drawRect(Rect.fromPoints(Offset(0,0), Offset(50,30)), op);
+    op..color = Colors.white10;
+    canvas.drawRect(Rect.fromPoints(Offset(0,0), Offset(30,30)), op);
   }
 }

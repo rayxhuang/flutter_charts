@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
 import 'package:flutter_charts/bar_chart/fancy_bar_chart.dart';
-import 'package:flutter_charts/modular_fancy_bar_chart/components/axis_plus_label.dart';
 
 import 'bar_chart/bar_chart.dart';
 import 'bar_chart/bar_chart_style.dart';
@@ -31,7 +30,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'b': 4,
     'c': 6,
     'd': 1,
-    'e': 2,
+    'eeeeeeeeeeeeeee': 2,
   },
   'B': {
     'a': 1,
@@ -73,136 +72,142 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Charts'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.play_arrow),
-            onPressed: () {
-              setState(() {
-                toggle = !toggle;
-                toggle2 = !toggle2;
-              });
-            },
-          )
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 5,),
-            const SizedBox(height: 5,),
-            // Card(
-            //   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-            //   margin: const EdgeInsets.all(5),
-            //   child: Center(
-            //     child: FancyBarChart(
-            //       rawData: sampleData3,
-            //       width: MediaQuery.of(context).size.width,
-            //       height: MediaQuery.of(context).size.height / 3,
-            //       style: BarChartStyle(
-            //         title: BarChartLabel(
-            //           text: 'Random Bar Chart',
-            //           textStyle: TextStyle(
-            //             color: Colors.white,
-            //             fontSize: 20,
-            //             fontWeight: FontWeight.bold,
-            //           )
-            //         ),
-            //         sortXAxis: true,
-            //         isStacked: toggle,
-            //         gridAreaOffsetFromBottomLeft: const Offset(35, 35),
-            //         gridAreaOffsetFromTopRight: const Offset(10, 10),
-            //         groupMargin: 50,
-            //         xAxisStyle: const AxisStyle(
-            //           label: BarChartLabel(
-            //               text: 'X Axis',
-            //               textStyle: TextStyle(
-            //                 color: Colors.white,
-            //               )
-            //           ),
-            //           axisColor: Colors.teal,
-            //           tick: TickStyle(
-            //             tickDecimal: 0,
-            //             tickLength: 5,
-            //             tickColor: Colors.teal,
-            //           ),
-            //         ),
-            //         yAxisStyle: const AxisStyle(
-            //           label: BarChartLabel(
-            //               text: 'Y Axis',
-            //               textStyle: TextStyle(
-            //                 color: Colors.white,
-            //               )
-            //           ),
-            //           axisColor: Colors.teal,
-            //           preferredStartValue: 0,
-            //           numTicks: 8,
-            //           tick: TickStyle(
-            //             tickDecimal: 0,
-            //             tickLength: 5,
-            //             tickColor: Colors.teal,
-            //           ),
-            //         ),
-            //         barStyle: const BarChartBarStyle(
-            //           shape: BarChartBarShape.RoundedRectangle,
-            //           topLeft: const Radius.circular(15),
-            //           topRight: const Radius.circular(15),
-            //         ),
-            //         animation: BarChartAnimation(
-            //           animateData: true,
-            //           dataAnimationDuration: const Duration(milliseconds: 800),
-            //         ),
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            const SizedBox(height: 5,),
-            // Card(
-            //   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-            //   margin: const EdgeInsets.all(5),
-            //   child: Center(
-            //     child: ModularFancyBarChart(
-            //       rawData: ModularBarChartData.ungrouped(
-            //         rawData: sampleData2
-            //       ),
-            //       style: BarChartStyle(
-            //         sortXAxis: true,
-            //         barWidth: 20,
-            //         groupMargin: 20,
-            //         xAxisStyle: AxisStyle(
-            //           axisColor: Colors.teal,
-            //           tick: TickStyle(
-            //             tickLength: 5,
-            //             tickColor: Colors.teal,
-            //           ),
-            //         ),
-            //         yAxisStyle: AxisStyle(
-            //           preferredEndValue: 20,
-            //           axisColor: Colors.teal,
-            //           tick: TickStyle(
-            //             tickLength: 5,
-            //             tickColor: Colors.teal,
-            //           ),
-            //         )
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            const SizedBox(height: 5,),
-            Card(
-              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-              margin: const EdgeInsets.all(5),
-              child: Center(
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height / 3,
-                  child: ModularFancyBarChart(
-                    rawData: ModularBarChartData.grouped(
-                      rawData: sampleData3
-                    ),
-                    style: BarChartStyle(
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('Charts'),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.play_arrow),
+              onPressed: () {
+                setState(() {
+                  toggle = !toggle;
+                  toggle2 = !toggle2;
+                });
+              },
+            )
+          ],
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 5,),
+              const SizedBox(height: 5,),
+              // Card(
+              //   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
+              //   margin: const EdgeInsets.all(5),
+              //   child: Center(
+              //     child: FancyBarChart(
+              //       rawData: sampleData3,
+              //       width: MediaQuery.of(context).size.width,
+              //       height: MediaQuery.of(context).size.height / 3,
+              //       style: BarChartStyle(
+              //         title: BarChartLabel(
+              //           text: 'Random Bar Chart',
+              //           textStyle: TextStyle(
+              //             color: Colors.white,
+              //             fontSize: 20,
+              //             fontWeight: FontWeight.bold,
+              //           )
+              //         ),
+              //         sortXAxis: true,
+              //         isStacked: toggle,
+              //         gridAreaOffsetFromBottomLeft: const Offset(35, 35),
+              //         gridAreaOffsetFromTopRight: const Offset(10, 10),
+              //         groupMargin: 50,
+              //         xAxisStyle: const AxisStyle(
+              //           label: BarChartLabel(
+              //               text: 'X Axis',
+              //               textStyle: TextStyle(
+              //                 color: Colors.white,
+              //               )
+              //           ),
+              //           axisColor: Colors.teal,
+              //           tick: TickStyle(
+              //             tickDecimal: 0,
+              //             tickLength: 5,
+              //             tickColor: Colors.teal,
+              //           ),
+              //         ),
+              //         yAxisStyle: const AxisStyle(
+              //           label: BarChartLabel(
+              //               text: 'Y Axis',
+              //               textStyle: TextStyle(
+              //                 color: Colors.white,
+              //               )
+              //           ),
+              //           axisColor: Colors.teal,
+              //           preferredStartValue: 0,
+              //           numTicks: 8,
+              //           tick: TickStyle(
+              //             tickDecimal: 0,
+              //             tickLength: 5,
+              //             tickColor: Colors.teal,
+              //           ),
+              //         ),
+              //         barStyle: const BarChartBarStyle(
+              //           shape: BarChartBarShape.RoundedRectangle,
+              //           topLeft: const Radius.circular(15),
+              //           topRight: const Radius.circular(15),
+              //         ),
+              //         animation: BarChartAnimation(
+              //           animateData: true,
+              //           dataAnimationDuration: const Duration(milliseconds: 800),
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
+              const SizedBox(height: 5,),
+              // Card(
+              //   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
+              //   margin: const EdgeInsets.all(5),
+              //   child: Center(
+              //     child: ModularFancyBarChart(
+              //       rawData: ModularBarChartData.ungrouped(
+              //         rawData: sampleData2
+              //       ),
+              //       style: BarChartStyle(
+              //         sortXAxis: true,
+              //         barWidth: 20,
+              //         groupMargin: 20,
+              //         xAxisStyle: AxisStyle(
+              //           axisColor: Colors.teal,
+              //           tick: TickStyle(
+              //             tickLength: 5,
+              //             tickColor: Colors.teal,
+              //           ),
+              //         ),
+              //         yAxisStyle: AxisStyle(
+              //           preferredEndValue: 20,
+              //           axisColor: Colors.teal,
+              //           tick: TickStyle(
+              //             tickLength: 5,
+              //             tickColor: Colors.teal,
+              //           ),
+              //         )
+              //       ),
+              //     ),
+              //   ),
+              // ),
+              const SizedBox(height: 5,),
+              Card(
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
+                margin: const EdgeInsets.all(5),
+                child: Center(
+                  child: Container(
+                    padding: EdgeInsets.all(20),
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height / 3,
+                    child: ModularFancyBarChart(
+                      rawData: ModularBarChartData.grouped(
+                        rawData: sampleData3
+                      ),
+                      style: BarChartStyle(
+                        title: BarChartLabel(
+                          text: 'Boring Title',
+                          textStyle: TextStyle(color: Colors.white),
+                        ),
                         sortXAxis: true,
                         barWidth: 20,
                         groupMargin: 20,
@@ -223,59 +228,60 @@ class _MyHomePageState extends State<MyHomePage> {
                             text: 'Y Axis',
                             textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                           ),
-                          preferredEndValue: 20,
+                          //preferredEndValue: 20,
                           axisColor: Colors.teal,
                           tick: TickStyle(
                             tickLength: 5,
                             tickColor: Colors.teal,
                           ),
                         )
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 5,),
-            // Card(
-            //   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-            //   margin: const EdgeInsets.all(5),
-            //   child: Center(
-            //     child: Container(
-            //       width: MediaQuery.of(context).size.width,
-            //       height: MediaQuery.of(context).size.height / 2,
-            //       child: ModularFancyBarChart(
-            //         rawData: ModularBarChartData.groupedStacked(
-            //             rawData: sampleData3
-            //         ),
-            //         style: BarChartStyle(
-            //             sortXAxis: true,
-            //             barWidth: 20,
-            //             groupMargin: 20,
-            //             barMargin: 5,
-            //             xAxisStyle: AxisStyle(
-            //               axisColor: Colors.teal,
-            //               tick: TickStyle(
-            //                 tickLength: 5,
-            //                 tickColor: Colors.teal,
-            //               ),
-            //             ),
-            //             yAxisStyle: AxisStyle(
-            //               preferredEndValue: 20,
-            //               axisColor: Colors.teal,
-            //               tick: TickStyle(
-            //                 tickLength: 5,
-            //                 tickColor: Colors.teal,
-            //               ),
-            //             )
-            //         ),
-            //       ),
-            //     ),
-            //   ),
-            // ),
-          ]
+              const SizedBox(height: 5,),
+              // Card(
+              //   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
+              //   margin: const EdgeInsets.all(5),
+              //   child: Center(
+              //     child: Container(
+              //       width: MediaQuery.of(context).size.width,
+              //       height: MediaQuery.of(context).size.height / 2,
+              //       child: ModularFancyBarChart(
+              //         rawData: ModularBarChartData.groupedStacked(
+              //             rawData: sampleData3
+              //         ),
+              //         style: BarChartStyle(
+              //             sortXAxis: true,
+              //             barWidth: 20,
+              //             groupMargin: 20,
+              //             barMargin: 5,
+              //             xAxisStyle: AxisStyle(
+              //               axisColor: Colors.teal,
+              //               tick: TickStyle(
+              //                 tickLength: 5,
+              //                 tickColor: Colors.teal,
+              //               ),
+              //             ),
+              //             yAxisStyle: AxisStyle(
+              //               preferredEndValue: 20,
+              //               axisColor: Colors.teal,
+              //               tick: TickStyle(
+              //                 tickLength: 5,
+              //                 tickColor: Colors.teal,
+              //               ),
+              //             )
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
+            ]
+          ),
         ),
+        // body: BarChartSample1(),
       ),
-      // body: BarChartSample1(),
     );
   }
 }
