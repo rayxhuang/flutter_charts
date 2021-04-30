@@ -67,9 +67,8 @@ class AxisStyle {
 class TickStyle {
   final bool onlyShowTicksAtTwoSides;
   final bool lastTickWithUnit;
-  final double labelTextSize;
+  final TextStyle labelTextStyle;
   final String unit;
-  final Color textColor;
   final Color tickColor;
   final double tickMargin;
   final int tickDecimal;
@@ -78,9 +77,8 @@ class TickStyle {
   const TickStyle({
     this.onlyShowTicksAtTwoSides = false,
     this.lastTickWithUnit = true,
-    this.labelTextSize = 14,
+    this.labelTextStyle = const TextStyle(fontSize: 14, color: Colors.white),
     this.unit = '',
-    this.textColor = Colors.white,
     this.tickColor = Colors.white,
     this.tickMargin = 3,
     this.tickDecimal = 0,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
 import 'package:flutter_charts/bar_chart/fancy_bar_chart.dart';
+import 'package:flutter_charts/modular_fancy_bar_chart/components/axis_plus_label.dart';
 
 import 'bar_chart/bar_chart.dart';
 import 'bar_chart/bar_chart_style.dart';
@@ -158,115 +159,119 @@ class _MyHomePageState extends State<MyHomePage> {
             //   ),
             // ),
             const SizedBox(height: 5,),
-            Card(
-              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-              margin: const EdgeInsets.all(5),
-              child: Center(
-                child: ModularFancyBarChart(
-                  rawData: ModularBarChartData.ungrouped(
-                    rawData: sampleData2
-                  ),
-                  style: BarChartStyle(
-                    sortXAxis: true,
-                    barWidth: 20,
-                    groupMargin: 20,
-                    xAxisStyle: AxisStyle(
-                      axisColor: Colors.teal,
-                      tick: TickStyle(
-                        tickLength: 5,
-                        tickColor: Colors.teal,
-                      ),
-                    ),
-                    yAxisStyle: AxisStyle(
-                      preferredEndValue: 20,
-                      axisColor: Colors.teal,
-                      tick: TickStyle(
-                        tickLength: 5,
-                        tickColor: Colors.teal,
-                      ),
-                    )
-                  ),
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height / 3,
-                ),
-              ),
-            ),
-            const SizedBox(height: 5,),
-            Card(
-              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-              margin: const EdgeInsets.all(5),
-              child: Center(
-                child: ModularFancyBarChart(
-                  rawData: ModularBarChartData.grouped(
-                    rawData: sampleData3
-                  ),
-                  style: BarChartStyle(
-                      sortXAxis: true,
-                      barWidth: 20,
-                      groupMargin: 20,
-                      barMargin: 5,
-                      xAxisStyle: AxisStyle(
-                        axisColor: Colors.teal,
-                        tick: TickStyle(
-                          tickLength: 5,
-                          tickColor: Colors.teal,
-                        ),
-                      ),
-                      yAxisStyle: AxisStyle(
-                        preferredEndValue: 20,
-                        axisColor: Colors.teal,
-                        tick: TickStyle(
-                          tickLength: 5,
-                          tickColor: Colors.teal,
-                        ),
-                      )
-                  ),
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height / 3,
-                ),
-              ),
-            ),
+            // Card(
+            //   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
+            //   margin: const EdgeInsets.all(5),
+            //   child: Center(
+            //     child: ModularFancyBarChart(
+            //       rawData: ModularBarChartData.ungrouped(
+            //         rawData: sampleData2
+            //       ),
+            //       style: BarChartStyle(
+            //         sortXAxis: true,
+            //         barWidth: 20,
+            //         groupMargin: 20,
+            //         xAxisStyle: AxisStyle(
+            //           axisColor: Colors.teal,
+            //           tick: TickStyle(
+            //             tickLength: 5,
+            //             tickColor: Colors.teal,
+            //           ),
+            //         ),
+            //         yAxisStyle: AxisStyle(
+            //           preferredEndValue: 20,
+            //           axisColor: Colors.teal,
+            //           tick: TickStyle(
+            //             tickLength: 5,
+            //             tickColor: Colors.teal,
+            //           ),
+            //         )
+            //       ),
+            //     ),
+            //   ),
+            // ),
             const SizedBox(height: 5,),
             Card(
               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
               margin: const EdgeInsets.all(5),
               child: Center(
                 child: Container(
-                  height: 2000,
-                  child: FittedBox(
-                    fit: BoxFit.cover,
-                    child: ModularFancyBarChart(
-                      rawData: ModularBarChartData.groupedStacked(
-                          rawData: sampleData3
-                      ),
-                      style: BarChartStyle(
-                          sortXAxis: true,
-                          barWidth: 20,
-                          groupMargin: 20,
-                          barMargin: 5,
-                          xAxisStyle: AxisStyle(
-                            axisColor: Colors.teal,
-                            tick: TickStyle(
-                              tickLength: 5,
-                              tickColor: Colors.teal,
-                            ),
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height / 3,
+                  child: ModularFancyBarChart(
+                    rawData: ModularBarChartData.grouped(
+                      rawData: sampleData3
+                    ),
+                    style: BarChartStyle(
+                        sortXAxis: true,
+                        barWidth: 20,
+                        groupMargin: 20,
+                        barMargin: 5,
+                        xAxisStyle: AxisStyle(
+                          label: BarChartLabel(
+                            text: 'x Axis',
+                            textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                           ),
-                          yAxisStyle: AxisStyle(
-                            preferredEndValue: 20,
-                            axisColor: Colors.teal,
-                            tick: TickStyle(
-                              tickLength: 5,
-                              tickColor: Colors.teal,
-                            ),
-                          )
-                      ),
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height / 2,
+                          axisColor: Colors.teal,
+                          tick: TickStyle(
+                            tickLength: 5,
+                            tickColor: Colors.teal,
+                          ),
+                        ),
+                        yAxisStyle: AxisStyle(
+                          label: BarChartLabel(
+                            text: 'Y Axis',
+                            textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                          preferredEndValue: 20,
+                          axisColor: Colors.teal,
+                          tick: TickStyle(
+                            tickLength: 5,
+                            tickColor: Colors.teal,
+                          ),
+                        )
                     ),
                   ),
                 ),
               ),
             ),
+            const SizedBox(height: 5,),
+            // Card(
+            //   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
+            //   margin: const EdgeInsets.all(5),
+            //   child: Center(
+            //     child: Container(
+            //       width: MediaQuery.of(context).size.width,
+            //       height: MediaQuery.of(context).size.height / 2,
+            //       child: ModularFancyBarChart(
+            //         rawData: ModularBarChartData.groupedStacked(
+            //             rawData: sampleData3
+            //         ),
+            //         style: BarChartStyle(
+            //             sortXAxis: true,
+            //             barWidth: 20,
+            //             groupMargin: 20,
+            //             barMargin: 5,
+            //             xAxisStyle: AxisStyle(
+            //               axisColor: Colors.teal,
+            //               tick: TickStyle(
+            //                 tickLength: 5,
+            //                 tickColor: Colors.teal,
+            //               ),
+            //             ),
+            //             yAxisStyle: AxisStyle(
+            //               preferredEndValue: 20,
+            //               axisColor: Colors.teal,
+            //               tick: TickStyle(
+            //                 tickLength: 5,
+            //                 tickColor: Colors.teal,
+            //               ),
+            //             )
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ]
         ),
       ),

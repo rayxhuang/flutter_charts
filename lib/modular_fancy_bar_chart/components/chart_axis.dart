@@ -8,32 +8,38 @@ class ChartAxisHorizontal extends StatefulWidget {
   final int numBarsInGroup;
   final double barWidth;
   final BarChartStyle style;
-  final Size parentSize;
-  final double widthInPercentage;
-  final double heightInPercentage;
+  final double axisLength;
   final ScrollController scrollController;
 
   const ChartAxisHorizontal({
     @required this.xGroups,
     @required this.numBarsInGroup,
     @required this.barWidth,
-    @required this.parentSize,
+    @required this.axisLength,
     @required this.scrollController,
-    this.widthInPercentage = 0.7,
-    this.heightInPercentage = 0.1,
     this.style = const BarChartStyle(),
   });
 
   @override
   _ChartAxisHorizontalState createState() => _ChartAxisHorizontalState();
 
-  Size get size => Size(parentSize.width * widthInPercentage, parentSize.height * heightInPercentage);
+  Size get size => Size(axisLength, getHeight(style.xAxisStyle));
   double get xSectionLength => numBarsInGroup * barWidth + style.groupMargin * 2 + style.barMargin * (numBarsInGroup - 1);
   double get length {
-    double length = size.width;
+    double length = axisLength;
     final double lengthNeeded =  xSectionLength * xGroups.length;
     if (lengthNeeded >= length) { length = lengthNeeded; }
     return length;
+  }
+  double get height => getHeight(style.xAxisStyle);
+  static double getHeight(AxisStyle xAxisStyle) {
+    // TODO safe to use sample character?
+    TextPainter painter = TextPainter(
+      text: TextSpan(text: 'I', style: xAxisStyle.tick.labelTextStyle),
+      textDirection: TextDirection.ltr,
+    );
+    painter.layout();
+    return painter.height + xAxisStyle.tick.tickLength + xAxisStyle.tick.tickMargin;
   }
 }
 
@@ -50,8 +56,8 @@ class _ChartAxisHorizontalState extends State<ChartAxisHorizontal> {
   Widget build(BuildContext context) {
     return Container(
       //decoration: BoxDecoration(border: Border.all(color: Colors.red)),
-      width: widget.parentSize.width * widget.widthInPercentage,
-      height: widget.parentSize.height * widget.heightInPercentage,
+      width: widget.axisLength,
+      height: widget.height,
       child: SingleChildScrollView(
         physics: ClampingScrollPhysics(),
         scrollDirection: Axis.horizontal,
@@ -61,7 +67,7 @@ class _ChartAxisHorizontalState extends State<ChartAxisHorizontal> {
             xGroups: widget.xGroups,
             axisStyle: widget.style.xAxisStyle,
           ),
-          size: Size(length, widget.parentSize.height * widget.heightInPercentage),
+          size: Size(length, widget.height),
         ),
       ),
     );
@@ -98,7 +104,7 @@ class HorizontalAxisPainter extends CustomPainter {
       ..strokeWidth = axisStyle.strokeWidth
       ..strokeCap = axisStyle.strokeCap
       ..color = tick.tickColor;
-    final TextStyle tickTextStyle = TextStyle(color: tick.textColor, fontSize: tick.labelTextSize);
+    final TextStyle tickTextStyle = tick.labelTextStyle;
     final TextPainter _textPainter = TextPainter(
       text: TextSpan(),
       textDirection: TextDirection.ltr,
@@ -108,6 +114,8 @@ class HorizontalAxisPainter extends CustomPainter {
     final double xSectionLength = length / xGroupNum;
     Offset p1, p2, p3;
     List<Offset> tickPositions = [];
+    // This does not draw the start and ending tick
+    // TODO fix scrolling effect on tick
     for (int i = 1; i < xGroupNum; i++) {
       p1 = start.translate(i * xSectionLength, tickPaint.strokeWidth / 2);
       p2 = p1.translate(0, tick.tickLength);
@@ -191,8 +199,8 @@ class VerticalAxisPainter extends CustomPainter {
     axisPaint..strokeWidth = axisStyle.strokeWidth;
     axisPaint..strokeCap = axisStyle.strokeCap;
 
-    final Offset start = Offset(size.width - axisStyle.strokeWidth / 2, 0);
-    final Offset end = Offset(size.width - axisStyle.strokeWidth / 2, size.height);
+    final Offset start = Offset(size.width, 0);
+    final Offset end = Offset(size.width, size.height);
     canvas.drawLine(start, end, axisPaint);
     //canvas.drawLine(end, end.translate(0, axisStyle.strokeWidth / 2), axisPaint..strokeCap = StrokeCap.square);
 
@@ -204,7 +212,7 @@ class VerticalAxisPainter extends CustomPainter {
       ..strokeWidth = axisStyle.strokeWidth
       ..strokeCap = axisStyle.strokeCap
       ..color = tick.tickColor;
-    final TextStyle tickTextStyle = TextStyle(color: tick.textColor, fontSize: tick.labelTextSize);
+    final TextStyle tickTextStyle = tick.labelTextStyle;
     final TextPainter _textPainter = TextPainter(
       text: TextSpan(),
       textDirection: TextDirection.ltr,
@@ -215,7 +223,7 @@ class VerticalAxisPainter extends CustomPainter {
     if (!tick.onlyShowTicksAtTwoSides) {
       int _numTicksBetween = axisStyle.numTicks - 2;
       for (int i = 1; i < _numTicksBetween + 1; i++) {
-        p1 = end.translate(0, -(i * lengthPerTick));   // p1 is the point on axis
+        p1 = end.translate(0, -(i * lengthPerTick));    // p1 is the point on axis
         p2 = p1.translate(-tick.tickLength, 0);         // p2 is the point at the end of each tick
         p3 = p2.translate(-tick.tickMargin, 0);         // p3 is p2 + margin set by user
 
@@ -258,6 +266,39 @@ class VerticalAxisPainter extends CustomPainter {
 }
 
 @immutable
+class ChartLabelHorizontal extends StatelessWidget {
+  final String label;
+  final TextStyle textStyle;
+  final Size parentSize;
+  final double widthInPercentage;
+  final double heightInPercentage;
+
+  const ChartLabelHorizontal({
+    @required this.parentSize,
+    this.heightInPercentage = 0.05,
+    this.widthInPercentage = 0.7,
+    this.label = '',
+    this.textStyle = const TextStyle(),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: parentSize.width * widthInPercentage,
+      height: parentSize.height * heightInPercentage,
+      child: Center(
+        child: Text(
+          label,
+          style: textStyle,
+        ),
+      ),
+    );
+  }
+
+  Size get size => Size(parentSize.width * widthInPercentage, parentSize.height * heightInPercentage);
+}
+
+@immutable
 class ChartLabelVertical extends StatelessWidget {
   final String label;
   final TextStyle textStyle;
@@ -278,15 +319,16 @@ class ChartLabelVertical extends StatelessWidget {
     return RotatedBox(
       // TODO 1 or 3
       quarterTurns: 1,
-      child: SizedBox(
-        //padding: EdgeInsets.zero,
-        //decoration: BoxDecoration(border: Border.all(color: Colors.blue)),
-        width: parentSize.height * heightInPercentage,
-        height: parentSize.width * widthInPercentage,
-        child: CustomPaint(
-          painter: VerticalAxisLabelPainter(
-            axisLabel: label,
-            labelTextStyle: textStyle
+      child: FittedBox(
+        child: Container(
+          decoration: BoxDecoration(border: Border.all(color: Colors.blue)),
+          width: parentSize.height * heightInPercentage,
+          //height: parentSize.width * widthInPercentage,
+          child: Center(
+            child: Text(
+              label,
+              style: textStyle,
+            ),
           ),
         ),
       ),

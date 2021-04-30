@@ -7,9 +7,7 @@ import 'package:flutter_charts/modular_fancy_bar_chart/modular_fancy_bar_chart.d
 import 'chart_canvas_painter.dart';
 
 class ChartCanvas extends StatefulWidget {
-  final Size parentSize;
-  final double widthInPercentage;
-  final double heightInPercentage;
+  final Size canvasSize;
   final double length;
   final BarChartStyle style;
   final ScrollController scrollController;
@@ -29,11 +27,9 @@ class ChartCanvas extends StatefulWidget {
     @required this.xGroups,
     @required this.valueRange,
     @required this.xSectionLength,
-    @required this.parentSize,
+    @required this.canvasSize,
     @required this.length,
     @required this.scrollController,
-    this.widthInPercentage = 0.7,
-    this.heightInPercentage = 0.7,
     this.style = const BarChartStyle(),
     this.bars,
     this.groupedBars,
@@ -46,12 +42,10 @@ class ChartCanvas extends StatefulWidget {
     @required List<String> xGroups,
     @required List<double> valueRange,
     @required double xSectionLength,
-    @required Size parentSize,
+    @required Size canvasSize,
     @required double length,
     @required ScrollController scrollController,
     @required List<BarChartDataDouble> bars,
-    double widthInPercentage = 0.7,
-    double heightInPercentage = 0.7,
     BarChartStyle style = const BarChartStyle(),
   }) {
     return ChartCanvas._(
@@ -59,11 +53,9 @@ class ChartCanvas extends StatefulWidget {
       xGroups: xGroups,
       valueRange: valueRange,
       xSectionLength: xSectionLength,
-      parentSize: parentSize,
+      canvasSize: canvasSize,
       length: length,
       scrollController: scrollController,
-      widthInPercentage: widthInPercentage,
-      heightInPercentage: heightInPercentage,
       style: style,
       bars: bars,
     );
@@ -74,13 +66,11 @@ class ChartCanvas extends StatefulWidget {
     @required List<String> subGroups,
     @required List<double> valueRange,
     @required double xSectionLength,
-    @required Size parentSize,
+    @required Size canvasSize,
     @required double length,
     @required ScrollController scrollController,
     @required List<BarChartDataDoubleGrouped> groupedBars,
     @required Map<String, Color> subGroupColors,
-    double widthInPercentage = 0.7,
-    double heightInPercentage = 0.7,
     BarChartStyle style = const BarChartStyle(),
     bool isStacked = false,
   }) {
@@ -92,17 +82,15 @@ class ChartCanvas extends StatefulWidget {
       subGroupColors: subGroupColors,
       valueRange: valueRange,
       xSectionLength: xSectionLength,
-      parentSize: parentSize,
+      canvasSize: canvasSize,
       length: length,
       scrollController: scrollController,
-      widthInPercentage: widthInPercentage,
-      heightInPercentage: heightInPercentage,
       style: style,
       groupedBars: groupedBars,
     );
   }
 
-  Size get size => Size(parentSize.width * widthInPercentage, parentSize.height * heightInPercentage);
+  Size get size => canvasSize;
 
   @override
   _ChartCanvasState createState() => _ChartCanvasState();
@@ -118,8 +106,8 @@ class _ChartCanvasState extends State<ChartCanvas> {
   Widget build(BuildContext context) {
     return Container(
       //decoration: BoxDecoration(border: Border.all(color: Colors.red)),
-      width: widget.parentSize.width * widget.widthInPercentage,
-      height: widget.parentSize.height * widget.heightInPercentage,
+      width: widget.canvasSize.width,
+      height: widget.canvasSize.height,
       child: SingleChildScrollView(
         physics: ClampingScrollPhysics(),
         scrollDirection: Axis.horizontal,
@@ -142,19 +130,6 @@ class _ChartCanvasState extends State<ChartCanvas> {
           style: widget.style,
           bars: widget.bars,
         );
-      // case BarChartType.Grouped:
-      //   return DataPainter.grouped(
-      //     xGroups: widget.xGroups,
-      //     subGroups: widget.subGroups,
-      //     subGroupColors: widget.subGroupColors,
-      //     valueRange: widget.valueRange,
-      //     xSectionLength: widget.xSectionLength,
-      //     style: widget.style,
-      //     groupedBars: widget.groupedBars,
-      //   );
-      // case BarChartType.GroupedStacked:
-      //   // TODO: Handle this case.
-      //   break;
       case BarChartType.GroupedSeparated:
         // TODO: Handle this case.
         break;

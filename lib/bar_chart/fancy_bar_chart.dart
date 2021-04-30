@@ -310,7 +310,7 @@ class BarChartPainter extends CustomPainter {
       ..strokeWidth = style.strokeWidth
       ..strokeCap = style.strokeCap
       ..color = tick.tickColor;
-    final TextStyle tickTextStyle = TextStyle(color: tick.textColor, fontSize: tick.labelTextSize);
+    final TextStyle tickTextStyle = tick.labelTextStyle;
     final TextPainter _textPainter = TextPainter(
       text: TextSpan(),
       textDirection: TextDirection.ltr,
@@ -358,7 +358,7 @@ class BarChartPainter extends CustomPainter {
       ..strokeWidth = style.strokeWidth
       ..strokeCap = style.strokeCap
       ..color = tick.tickColor;
-    final TextStyle tickTextStyle = TextStyle(color: tick.textColor, fontSize: tick.labelTextSize);
+    final TextStyle tickTextStyle = tick.labelTextStyle;
     final TextPainter _textPainter = TextPainter(
       text: TextSpan(),
       textDirection: TextDirection.ltr,

@@ -80,6 +80,7 @@ class DataPainter extends CustomPainter {
     final Paint p = Paint();
     p..color = Colors.white;
     canvas.drawLine(Offset(0,0), Offset(size.width,size.height), p);
+    canvas.drawLine(Offset(0,size.height), Offset(size.width,0), p);
 
     drawData(canvas, (valueRange[1] - valueRange[0]) / size.height, Offset(0, size.height));
   }
