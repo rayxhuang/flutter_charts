@@ -238,6 +238,7 @@ class VerticalAxisPainter extends CustomPainter {
     axisPaint..color = axisStyle.axisColor;
     axisPaint..strokeWidth = axisStyle.strokeWidth;
     axisPaint..strokeCap = axisStyle.strokeCap;
+    axisPaint..strokeCap = StrokeCap.square;
 
     final Offset start = Offset(size.width, 0);
     final Offset end = Offset(size.width, size.height);

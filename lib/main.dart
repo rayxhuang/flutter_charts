@@ -28,7 +28,6 @@ Map<String, Map<String, double>> sampleData3 =  {
   'A': {
     'a': 2,
     'b': 4,
-    'c': 6,
     'd': 1,
     'eeeeeeeeeeeeeee': 2,
   },
@@ -39,6 +38,44 @@ Map<String, Map<String, double>> sampleData3 =  {
     'd': 6.9,
   },
   'C': {
+    'a': 7,
+    'b': 2,
+    'c': 5,
+    'd': 12
+  },
+  'D': {
+    'a': 2,
+    'b': 4,
+    'c': 6,
+    'd': 1,
+    'eeeeeeeeeeeeeee': 2,
+  },
+  'E': {
+    'a': 1,
+    'b': 3.5,
+    'c': 8.5,
+    'd': 6.9,
+  },
+  'G': {
+    'a': 7,
+    'b': 2,
+    'c': 5,
+    'd': 12
+  },
+  'Y': {
+    'a': 2,
+    'b': 4,
+    'c': 6,
+    'd': 1,
+    'eeeeeeeeeeeeeee': 188,
+  },
+  'H': {
+    'a': 1000,
+    'b': 3.5,
+    'c': 8.5,
+    'd': 6.9,
+  },
+  'Z': {
     'a': 7,
     'b': 2,
     'c': 5,
@@ -59,229 +96,159 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key}) : super(key: key);
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  bool toggle = false;
-  bool toggle2 = true;
+class MyHomePage extends StatelessWidget {
+//   MyHomePage({Key key}) : super(key: key);
+//
+//   @override
+//   _MyHomePageState createState() => _MyHomePageState();
+// }
+//
+// class _MyHomePageState extends State<MyHomePage> {
+//   bool toggle = false;
+//   bool toggle2 = true;
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('Charts'),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.play_arrow),
-              onPressed: () {
-                setState(() {
-                  toggle = !toggle;
-                  toggle2 = !toggle2;
-                });
-              },
-            )
-          ],
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(height: 5,),
-              const SizedBox(height: 5,),
-              // Card(
-              //   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-              //   margin: const EdgeInsets.all(5),
-              //   child: Center(
-              //     child: FancyBarChart(
-              //       rawData: sampleData3,
-              //       width: MediaQuery.of(context).size.width,
-              //       height: MediaQuery.of(context).size.height / 3,
-              //       style: BarChartStyle(
-              //         title: BarChartLabel(
-              //           text: 'Random Bar Chart',
-              //           textStyle: TextStyle(
-              //             color: Colors.white,
-              //             fontSize: 20,
-              //             fontWeight: FontWeight.bold,
-              //           )
-              //         ),
-              //         sortXAxis: true,
-              //         isStacked: toggle,
-              //         gridAreaOffsetFromBottomLeft: const Offset(35, 35),
-              //         gridAreaOffsetFromTopRight: const Offset(10, 10),
-              //         groupMargin: 50,
-              //         xAxisStyle: const AxisStyle(
-              //           label: BarChartLabel(
-              //               text: 'X Axis',
-              //               textStyle: TextStyle(
-              //                 color: Colors.white,
-              //               )
-              //           ),
-              //           axisColor: Colors.teal,
-              //           tick: TickStyle(
-              //             tickDecimal: 0,
-              //             tickLength: 5,
-              //             tickColor: Colors.teal,
-              //           ),
-              //         ),
-              //         yAxisStyle: const AxisStyle(
-              //           label: BarChartLabel(
-              //               text: 'Y Axis',
-              //               textStyle: TextStyle(
-              //                 color: Colors.white,
-              //               )
-              //           ),
-              //           axisColor: Colors.teal,
-              //           preferredStartValue: 0,
-              //           numTicks: 8,
-              //           tick: TickStyle(
-              //             tickDecimal: 0,
-              //             tickLength: 5,
-              //             tickColor: Colors.teal,
-              //           ),
-              //         ),
-              //         barStyle: const BarChartBarStyle(
-              //           shape: BarChartBarShape.RoundedRectangle,
-              //           topLeft: const Radius.circular(15),
-              //           topRight: const Radius.circular(15),
-              //         ),
-              //         animation: BarChartAnimation(
-              //           animateData: true,
-              //           dataAnimationDuration: const Duration(milliseconds: 800),
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
-              const SizedBox(height: 5,),
-              // Card(
-              //   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-              //   margin: const EdgeInsets.all(5),
-              //   child: Center(
-              //     child: ModularFancyBarChart(
-              //       rawData: ModularBarChartData.ungrouped(
-              //         rawData: sampleData2
-              //       ),
-              //       style: BarChartStyle(
-              //         sortXAxis: true,
-              //         barWidth: 20,
-              //         groupMargin: 20,
-              //         xAxisStyle: AxisStyle(
-              //           axisColor: Colors.teal,
-              //           tick: TickStyle(
-              //             tickLength: 5,
-              //             tickColor: Colors.teal,
-              //           ),
-              //         ),
-              //         yAxisStyle: AxisStyle(
-              //           preferredEndValue: 20,
-              //           axisColor: Colors.teal,
-              //           tick: TickStyle(
-              //             tickLength: 5,
-              //             tickColor: Colors.teal,
-              //           ),
-              //         )
-              //       ),
-              //     ),
-              //   ),
-              // ),
-              const SizedBox(height: 5,),
-              Card(
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-                margin: const EdgeInsets.all(5),
-                child: Center(
-                  child: Container(
-                    padding: EdgeInsets.all(20),
-                    width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.height / 3,
-                    child: ModularFancyBarChart(
-                      rawData: ModularBarChartData.grouped(
-                        rawData: sampleData3
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Charts'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.play_arrow),
+            onPressed: () {
+              // setState(() {
+              //   toggle = !toggle;
+              //   toggle2 = !toggle2;
+              // });
+            },
+          )
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 5,),
+            Card(
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
+              margin: const EdgeInsets.all(5),
+              child: Center(
+                child: Container(
+                  padding: EdgeInsets.all(20),
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height / 3,
+                  child: ModularFancyBarChart(
+                    rawData: ModularBarChartData.grouped(
+                      rawData: sampleData3
+                    ),
+                    style: BarChartStyle(
+                      title: BarChartLabel(
+                        text: 'Boring Title',
+                        textStyle: TextStyle(color: Colors.white),
                       ),
-                      style: BarChartStyle(
-                        title: BarChartLabel(
-                          text: 'Boring Title',
-                          textStyle: TextStyle(color: Colors.white),
+                      sortXAxis: true,
+                      barWidth: 35,
+                      groupMargin: 20,
+                      barMargin: 5,
+                      xAxisStyle: AxisStyle(
+                        label: BarChartLabel(
+                          text: 'x Axis',
+                          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         ),
-                        sortXAxis: true,
-                        barWidth: 20,
-                        groupMargin: 20,
-                        barMargin: 5,
-                        xAxisStyle: AxisStyle(
-                          label: BarChartLabel(
-                            text: 'x Axis',
-                            textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                          ),
-                          axisColor: Colors.teal,
-                          tick: TickStyle(
-                            tickLength: 5,
-                            tickColor: Colors.teal,
-                          ),
+                        axisColor: Colors.teal,
+                        tick: TickStyle(
+                          tickLength: 5,
+                          tickColor: Colors.teal,
                         ),
-                        yAxisStyle: AxisStyle(
-                          label: BarChartLabel(
-                            text: 'Y Axis',
-                            textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                          ),
-                          //preferredEndValue: 20,
-                          axisColor: Colors.teal,
-                          tick: TickStyle(
-                            tickLength: 5,
-                            tickColor: Colors.teal,
-                          ),
-                        )
                       ),
+                      yAxisStyle: AxisStyle(
+                        numTicks: 5,
+                        label: BarChartLabel(
+                          text: 'Y Axis',
+                          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
+                        ),
+                        //preferredEndValue: 20,
+                        axisColor: Colors.teal,
+                        tick: TickStyle(
+                          tickLength: 5,
+                          tickColor: Colors.teal,
+                        ),
+                      )
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 5,),
-              // Card(
-              //   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-              //   margin: const EdgeInsets.all(5),
-              //   child: Center(
-              //     child: Container(
-              //       width: MediaQuery.of(context).size.width,
-              //       height: MediaQuery.of(context).size.height / 2,
-              //       child: ModularFancyBarChart(
-              //         rawData: ModularBarChartData.groupedStacked(
-              //             rawData: sampleData3
-              //         ),
-              //         style: BarChartStyle(
-              //             sortXAxis: true,
-              //             barWidth: 20,
-              //             groupMargin: 20,
-              //             barMargin: 5,
-              //             xAxisStyle: AxisStyle(
-              //               axisColor: Colors.teal,
-              //               tick: TickStyle(
-              //                 tickLength: 5,
-              //                 tickColor: Colors.teal,
-              //               ),
-              //             ),
-              //             yAxisStyle: AxisStyle(
-              //               preferredEndValue: 20,
-              //               axisColor: Colors.teal,
-              //               tick: TickStyle(
-              //                 tickLength: 5,
-              //                 tickColor: Colors.teal,
-              //               ),
-              //             )
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
-            ]
-          ),
+            ),
+            const SizedBox(height: 5,),
+            // Card(
+            //   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
+            //   margin: const EdgeInsets.all(5),
+            //   child: Center(
+            //     child: Container(
+            //       padding: EdgeInsets.all(20),
+            //       width: MediaQuery.of(context).size.width,
+            //       height: MediaQuery.of(context).size.height / 3,
+            //       child: ModularFancyBarChart(
+            //         rawData: ModularBarChartData.groupedStacked(
+            //             rawData: sampleData3
+            //         ),
+            //         style: BarChartStyle(
+            //           title: BarChartLabel(
+            //             text: 'Boring Title',
+            //             textStyle: TextStyle(color: Colors.white),
+            //           ),
+            //           sortXAxis: true,
+            //           barWidth: 35,
+            //           groupMargin: 20,
+            //           barMargin: 5,
+            //           xAxisStyle: AxisStyle(
+            //             label: BarChartLabel(
+            //               text: 'x Axis',
+            //               textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            //             ),
+            //             axisColor: Colors.teal,
+            //             tick: TickStyle(
+            //               tickLength: 5,
+            //               tickColor: Colors.teal,
+            //             ),
+            //           ),
+            //           yAxisStyle: AxisStyle(
+            //             //preferredEndValue: 250,
+            //             label: BarChartLabel(
+            //               text: 'Y Axis',
+            //               textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
+            //             ),
+            //             //preferredEndValue: 20,
+            //             axisColor: Colors.teal,
+            //             tick: TickStyle(
+            //               tickLength: 5,
+            //               tickColor: Colors.teal,
+            //             ),
+            //           )
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
+            Card(
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
+              margin: const EdgeInsets.all(5),
+              child: Center(
+                child: Container(
+                  padding: EdgeInsets.all(20),
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height / 3,
+                  child: St(
+                    rawData: ModularBarChartData.groupedStacked(
+                        rawData: sampleData3
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ]
         ),
-        // body: BarChartSample1(),
       ),
+      // body: BarChartSample1(),
     );
   }
 }

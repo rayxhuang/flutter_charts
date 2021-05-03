@@ -10,7 +10,7 @@ class BarChartStyle {
   final double barMargin;
   final double barWidth;
   final Map<String, Color> subGroupColors;
-  final bool sortXAxis, isStacked, showLegends;
+  final bool sortXAxis, showLegends;
   final Comparator<String> groupComparator;
   final EdgeInsetsGeometry contentPadding;
   final Offset gridAreaOffsetFromBottomLeft, gridAreaOffsetFromTopRight;
@@ -24,7 +24,6 @@ class BarChartStyle {
     this.groupMargin = 10,
     this.barMargin = 0,
     this.barWidth = 30,
-    this.isStacked = false,
     this.sortXAxis = false,
     this.subGroupColors,
     this.groupComparator,

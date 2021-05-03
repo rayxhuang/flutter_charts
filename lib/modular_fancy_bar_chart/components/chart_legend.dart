@@ -15,8 +15,7 @@ class ChartLegendHorizontal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      //decoration: BoxDecoration(border: Border.all(color: Colors.red)),
+    return SizedBox(
       width: width,
       height: size.height,
       // TODO wrap in a tooltip
