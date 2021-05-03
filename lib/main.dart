@@ -97,16 +97,6 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatelessWidget {
-//   MyHomePage({Key key}) : super(key: key);
-//
-//   @override
-//   _MyHomePageState createState() => _MyHomePageState();
-// }
-//
-// class _MyHomePageState extends State<MyHomePage> {
-//   bool toggle = false;
-//   bool toggle2 = true;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -136,10 +126,8 @@ class MyHomePage extends StatelessWidget {
                   padding: EdgeInsets.all(20),
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height / 3,
-                  child: ModularFancyBarChart(
-                    rawData: ModularBarChartData.grouped(
-                      rawData: sampleData3
-                    ),
+                  child: ModularBarChart(
+                    data: sampleData3,
                     style: BarChartStyle(
                       title: BarChartLabel(
                         text: 'Boring Title',
@@ -237,9 +225,12 @@ class MyHomePage extends StatelessWidget {
                   padding: EdgeInsets.all(20),
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height / 3,
-                  child: St(
-                    rawData: ModularBarChartData.groupedStacked(
-                        rawData: sampleData3
+                  child: ModularBarChart(
+                    data: sampleData3,
+                    style: BarChartStyle(
+                      title: BarChartLabel(
+                        text: 'Boring Title'
+                      )
                     ),
                   ),
                 ),

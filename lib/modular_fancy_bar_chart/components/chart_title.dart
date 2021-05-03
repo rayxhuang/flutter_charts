@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
+
 import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
+import 'package:flutter_charts/bar_chart/bar_chart_style.dart';
 
 @immutable
 class ChartTitle extends StatelessWidget {
@@ -13,6 +16,7 @@ class ChartTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //final BarChartLabel title = context.read<BarChartStyle>().title;
     return SizedBox(
       width: width,
       height: size.height,
