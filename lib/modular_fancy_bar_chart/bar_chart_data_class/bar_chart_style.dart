@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
+import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/bar_chart_data.dart';
 
 typedef Comparator<T> = int Function(T a, T b);
 enum BarChartBarShape {Rectangle, RoundedRectangle}
@@ -7,60 +7,50 @@ enum BarChartBarShape {Rectangle, RoundedRectangle}
 class BarChartStyle {
   final BarChartLabel title;
   final double groupMargin;
-  final double barMargin;
-  final double barWidth;
   final Map<String, Color> subGroupColors;
-  final bool sortXAxis, showLegends;
+  final bool sortXAxis;
   final Comparator<String> groupComparator;
   final EdgeInsetsGeometry contentPadding;
-  final Offset gridAreaOffsetFromBottomLeft, gridAreaOffsetFromTopRight;
   final AxisStyle xAxisStyle, yAxisStyle;
-  final TextStyle legendTextStyle;
+  final BarChartLegendStyle legendStyle;
   final BarChartBarStyle barStyle;
   final BarChartAnimation animation;
 
   const BarChartStyle({
     this.title = const BarChartLabel(),
-    this.groupMargin = 10,
-    this.barMargin = 0,
-    this.barWidth = 30,
+    this.groupMargin = 12,
     this.sortXAxis = false,
     this.subGroupColors,
     this.groupComparator,
     this.contentPadding = const EdgeInsets.all(10),
-    this.gridAreaOffsetFromBottomLeft = const Offset(20, 20),
-    this.gridAreaOffsetFromTopRight = const Offset(5, 5),
-    this.showLegends = true,
     this.xAxisStyle = const AxisStyle(),
     this.yAxisStyle = const AxisStyle(),
     this.barStyle = const BarChartBarStyle(),
-    this.legendTextStyle = const TextStyle(),
+    this.legendStyle = const BarChartLegendStyle(),
     this.animation = const BarChartAnimation(),
   });
 }
 
 class AxisStyle {
-  final double shift;
   final bool visible;
   final int numTicks;
-  final TickStyle tick;
   final Color axisColor;
   final double strokeWidth;
   final StrokeCap strokeCap;
   final double preferredStartValue;
   final double preferredEndValue;
+  final TickStyle tickStyle;
   final BarChartLabel label;
 
   const AxisStyle({
-    this.shift = 0,
     this.visible = true,
     this.numTicks = 11,
-    this.tick = const TickStyle(),
     this.axisColor = Colors.black,
     this.strokeWidth = 3,
     this.strokeCap = StrokeCap.round,
     this.preferredStartValue = 0,
     this.preferredEndValue = 10,
+    this.tickStyle = const TickStyle(),
     this.label = const BarChartLabel(),
   });
 }
@@ -78,16 +68,19 @@ class TickStyle {
   const TickStyle({
     this.onlyShowTicksAtTwoSides = false,
     this.lastTickWithUnit = true,
-    this.labelTextStyle = const TextStyle(fontSize: 14, color: Colors.white),
+    this.labelTextStyle = const TextStyle(),
     this.unit = '',
     this.tickColor = Colors.white,
-    this.tickMargin = 3,
+    this.tickMargin = 4,
     this.tickDecimal = 0,
     this.tickLength = 0,
   });
 }
 
 class BarChartBarStyle {
+  final double barWidth;
+  final double barInGroupMargin;
+  final bool isStacked;
   final Color color;
   final BarChartBarShape shape;
   final Radius topLeft;
@@ -96,6 +89,9 @@ class BarChartBarStyle {
   final Radius bottomRight;
 
   const BarChartBarStyle({
+    this.barWidth = 28,
+    this.barInGroupMargin = 0,
+    this.isStacked = false,
     this.color = Colors.red,
     this.shape = BarChartBarShape.Rectangle,
     this.topLeft = const Radius.circular(0),
@@ -105,18 +101,32 @@ class BarChartBarStyle {
   });
 }
 
+class BarChartLegendStyle {
+  final bool visible;
+  final TextStyle legendTextStyle;
+  final int preferredNumLegendsOnScreen;
+  final double minimumSize;
+
+  const BarChartLegendStyle({
+    this.visible = true,
+    this.legendTextStyle = const TextStyle(),
+    this.preferredNumLegendsOnScreen = 5,
+    this.minimumSize = 20,
+  });
+}
+
 class BarChartAnimation {
-  final bool animateAxis;
+  //final bool animateAxis;
   final bool animateData;
-  final Duration axisAnimationDuration;
+  //final Duration axisAnimationDuration;
   final Duration dataAnimationDuration;
-  final bool animateDataAfterAxis;
+  //final bool animateDataAfterAxis;
 
   const BarChartAnimation({
-    this.animateAxis = false,
+    //this.animateAxis = false,
     this.animateData = false,
-    this.axisAnimationDuration = const Duration(milliseconds: 1000),
+    //this.axisAnimationDuration = const Duration(milliseconds: 1000),
     this.dataAnimationDuration = const Duration(milliseconds: 1000),
-    this.animateDataAfterAxis = true,
+    //this.animateDataAfterAxis = true,
   });
 }

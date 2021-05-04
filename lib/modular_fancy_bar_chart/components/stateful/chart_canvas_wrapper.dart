@@ -1,19 +1,20 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
-import 'package:flutter_charts/bar_chart/bar_chart_style.dart';
+import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/bar_chart_data.dart';
+import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/bar_chart_style.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
+import '../chart_canvas_mini.dart';
 import 'chart_axis.dart';
 import 'chart_canvas.dart';
 
-class ChartCanvasWithAxis extends StatefulWidget {
+class ChartCanvasWrapper extends StatefulWidget {
   final Size size;
   final Size canvasSize;
   final ModularBarChartData data;
   final BarChartStyle style;
 
-  ChartCanvasWithAxis({
+  ChartCanvasWrapper({
     @required this.size,
     @required this.canvasSize,
     @required this.data,
@@ -21,24 +22,23 @@ class ChartCanvasWithAxis extends StatefulWidget {
   });
 
   @override
-  _ChartCanvasWithAxisState createState() => _ChartCanvasWithAxisState();
+  _ChartCanvasWrapperState createState() => _ChartCanvasWrapperState();
 }
 
-class _ChartCanvasWithAxisState extends State<ChartCanvasWithAxis> {
+class _ChartCanvasWrapperState extends State<ChartCanvasWrapper>{
   ModularBarChartData data;
   BarChartStyle style;
   LinkedScrollControllerGroup _linkedScrollControllerGroup;
   ScrollController _scrollController1, _scrollController2;
   double scrollOffset = -1;
-  AnimationController _dataAnimationController;
-  double axisAnimationValue = 0, dataAnimationValue = 0;
 
   Size canvasSize;
-  var bottomAxis, chartCanvas, miniCanvas, miniCanvasData, inViewContainer, miniCanvasWidth, miniCanvasHeight;
+  var bottomAxis, chartCanvas, miniCanvas, miniCanvasDataBars, inViewContainerOnMiniCanvas, miniCanvasWidth, miniCanvasHeight;
 
   @override
   void initState() {
     super.initState();
+
     // Scrolling actions
     _linkedScrollControllerGroup = LinkedScrollControllerGroup();
     _scrollController1 = _linkedScrollControllerGroup.addAndGet();
@@ -46,7 +46,7 @@ class _ChartCanvasWithAxisState extends State<ChartCanvasWithAxis> {
     _linkedScrollControllerGroup.addOffsetChangedListener(() {
       final double offset = _linkedScrollControllerGroup.offset * 2 / (bottomAxis.length - canvasSize.width);
       final double res = (-1 + offset).toDouble();
-      setState(() { scrollOffset = res; });
+      // setState(() { scrollOffset = res; });
     });
 
     canvasSize = widget.canvasSize;
@@ -57,12 +57,22 @@ class _ChartCanvasWithAxisState extends State<ChartCanvasWithAxis> {
     bottomAxis = ChartAxisHorizontal(
       axisLength: canvasSize.width,
       xGroups: data.xGroups,
-      barWidth: style.barWidth,
+      barWidth: style.barStyle.barWidth,
       numBarsInGroup: data.numInGroups,
       style: style,
       scrollController: _scrollController1,
     );
 
+
+    miniCanvasWidth = canvasSize.width * 0.2;
+    miniCanvasHeight = canvasSize.height * 0.2 + 3;
+    final Size miniCanvasSize = Size(miniCanvasWidth, miniCanvasHeight);
+
+    inViewContainerOnMiniCanvas = Container(
+      width: (canvasSize.width / bottomAxis.length) * miniCanvasWidth,
+      height: miniCanvasHeight,
+      color: Colors.white12,
+    );
     // Canvas
     switch (data.type) {
       case BarChartType.Ungrouped:
@@ -75,6 +85,18 @@ class _ChartCanvasWithAxisState extends State<ChartCanvasWithAxis> {
           xSectionLength: bottomAxis.xSectionLength,
           bars: data.bars,
           style: style,
+        );
+        miniCanvasDataBars = Padding(
+          padding: const EdgeInsets.only(top: 3),
+          child: ChartCanvasMini.ungrouped(
+            canvasSize: miniCanvasSize,
+            length: canvasSize.width * 0.2,
+            xGroups: data.xGroups,
+            valueRange: data.yValueRange,
+            xSectionLength: bottomAxis.xSectionLength * (canvasSize.width * 0.2 / bottomAxis.length),
+            bars: data.bars,
+            style: style,
+          ),
         );
         break;
       case BarChartType.GroupedSeparated:
@@ -97,61 +119,48 @@ class _ChartCanvasWithAxisState extends State<ChartCanvasWithAxis> {
           groupedBars: data.groupedBars,
           style: style,
         );
+        miniCanvasDataBars = Padding(
+          padding: const EdgeInsets.only(top: 3),
+          child: ChartCanvasMini.grouped(
+            canvasSize: miniCanvasSize,
+            length: canvasSize.width * 0.2,
+            xGroups: data.xGroups,
+            subGroups: data.xSubGroups,
+            subGroupColors: data.subGroupColors,
+            valueRange: data.yValueRange,
+            xSectionLength: bottomAxis.xSectionLength * (canvasSize.width * 0.2 / bottomAxis.length),
+            groupedBars: data.groupedBars,
+            style: style,
+          ),
+        );
         break;
     }
-
-    miniCanvasWidth = canvasSize.width * 0.2;
-    miniCanvasHeight = canvasSize.height * 0.2 + 3;
-
-    inViewContainer = Container(
-      width: (canvasSize.width / bottomAxis.length) * canvasSize.width * 0.2,
-      height: canvasSize.height * 0.2 + 3,
-      color: Colors.white12,
-    );
-
-    miniCanvasData = Padding(
-      padding: const EdgeInsets.only(top: 3),
-      child: ChartCanvas.mini(
-        type: data.type,
-        canvasSize: Size(canvasSize.width * 0.2, canvasSize.height * 0.2),
-        length: canvasSize.width * 0.2,
-        xGroups: data.xGroups,
-        subGroups: data.xSubGroups,
-        subGroupColors: data.subGroupColors,
-        valueRange: data.yValueRange,
-        xSectionLength: bottomAxis.xSectionLength * (canvasSize.width * 0.2 / bottomAxis.length),
-        groupedBars: data.groupedBars,
-        style: style,
-      ),
-    );
   }
 
   @override
   void dispose() {
     _scrollController1.dispose();
     _scrollController2.dispose();
-    _dataAnimationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    print('called build in cp');
     //MiniCanvas
-    final miniCanvas = Container(
-      width: miniCanvasWidth,
-      height: miniCanvasHeight,
-      color: Colors.black12,
-      child: Stack(
-        children: [
-          Align(
-            alignment: Alignment(scrollOffset, 0),
-            child: inViewContainer,
-          ),
-          miniCanvasData,
-        ],
-      ),
-    );
+    // final miniCanvas = Container(
+    //   width: miniCanvasWidth,
+    //   height: miniCanvasHeight,
+    //   color: Colors.black12,
+    //   child: Stack(
+    //     children: [
+    //       Align(
+    //         alignment: Alignment(scrollOffset, 0),
+    //         child: inViewContainerOnMiniCanvas,
+    //       ),
+    //       miniCanvasDataBars,
+    //     ],
+    //   ),
+    // );
     return RepaintBoundary(
       child: SizedBox.fromSize(
         size: widget.size,
@@ -165,10 +174,10 @@ class _ChartCanvasWithAxisState extends State<ChartCanvasWithAxis> {
               ),
             ),
 
-            Align(
-              alignment: Alignment.topRight,
-              child: miniCanvas,
-            ),
+            // Align(
+            //   alignment: Alignment.topRight,
+            //   child: miniCanvas,
+            // ),
 
             Positioned(
               top: canvasSize.height - style.xAxisStyle.strokeWidth / 2,

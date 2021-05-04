@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_charts/bar_chart/bar_chart_style.dart';
+import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/bar_chart_style.dart';
 import 'package:provider/provider.dart';
 
-import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
-import 'package:flutter_charts/modular_fancy_bar_chart/textSizeInfo.dart';
+import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/bar_chart_data.dart';
+import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/textSizeInfo.dart';
 
 class ChartLegendHorizontal extends StatelessWidget {
   final double width;
@@ -17,7 +17,7 @@ class ChartLegendHorizontal extends StatelessWidget {
   Widget build(BuildContext context) {
     final ModularBarChartData data = context.read<ModularBarChartData>();
     final BarChartStyle style = context.read<BarChartStyle>();
-    final double height = getSizeOfString(data.xSubGroups.first, style.legendTextStyle, isHeight: true) + 4;
+    final double height = getSizeOfString(data.xSubGroups.first, style.legendStyle.legendTextStyle, isHeight: true) + 4;
     return SizedBox(
       width: width,
       height: height,
@@ -41,7 +41,7 @@ class ChartLegendHorizontal extends StatelessWidget {
                   Expanded(
                     child: Text(
                       groupName,
-                      style: style.legendTextStyle,
+                      style: style.legendStyle.legendTextStyle,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),

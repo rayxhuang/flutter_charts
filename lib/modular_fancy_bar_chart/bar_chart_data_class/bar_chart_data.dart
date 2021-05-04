@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_charts/modular_fancy_bar_chart/textSizeInfo.dart';
+import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/textSizeInfo.dart';
 
 import 'bar_chart_style.dart';
 
@@ -30,6 +30,17 @@ class ModularBarChartData{
     this.xGroupComparator,
   });
 
+  factory ModularBarChartData.ungrouped({
+    @required Map<String, double> rawData,
+    bool sortXAxis = false,
+    Comparator<String> xGroupComparator,
+  }) => ModularBarChartData._(
+    rawData: rawData,
+    type: BarChartType.Ungrouped,
+    sortXAxis: sortXAxis,
+    xGroupComparator: xGroupComparator,
+  );
+
   factory ModularBarChartData.grouped({
     @required Map<String, Map<String, double>> rawData,
     bool sortXAxis = false,
@@ -41,27 +52,26 @@ class ModularBarChartData{
     xGroupComparator: xGroupComparator,
   );
 
-  // ModularBarChartData.grouped({
-  //   @required Map<String, Map<String, double>> rawData,
-  // }) : super._(
-  //   rawData: rawData ?? const {},
-  //   type: BarChartType.Grouped,
-  // );
-  //
-  // ModularBarChartData.groupedStacked({
-  //   @required Map<String, Map<String, double>> rawData,
-  // }) : super._(
-  //   rawData: rawData ?? const {},
-  //   type: BarChartType.GroupedStacked,
-  // );
+  factory ModularBarChartData.groupedStacked({
+    @required Map<String, Map<String, double>> rawData,
+    bool sortXAxis = false,
+    Comparator<String> xGroupComparator,
+  }) => ModularBarChartData._(
+    rawData: rawData,
+    type: BarChartType.GroupedStacked,
+    sortXAxis: sortXAxis,
+    xGroupComparator: xGroupComparator,
+  );
 
   void analyseData() {
+    // Sort X Axis
     xGroups = rawData.keys.toList();
     if (sortXAxis) {
       xGroupComparator == null
           ? xGroups.sort()
           : xGroups.sort(xGroupComparator);
     }
+
     switch (type) {
       case BarChartType.Ungrouped:
         for (String key in xGroups) {
@@ -113,7 +123,7 @@ class ModularBarChartData{
     valueOnBarHeight = getSizeOfString('1', const TextStyle());
   }
 
-  void adjustAxisValueRange(double start, double yAxisHeight) {
+  void adjustAxisValueRange(double yAxisHeight, {double start = 0, double end = 0}) {
     start <= yValueRange[0]
         ? yValueRange[0] = start
         : yValueRange[0] = yValueRange[0];
@@ -122,9 +132,9 @@ class ModularBarChartData{
     int expInt = int.tryParse(max.substring(max.indexOf('e+') + 2));
     num exp = pow(10, expInt - 1);
     double value = (((yValueRange[1] * (1 + (valueOnBarHeight) / yAxisHeight) / exp).ceil() + 1) * exp).toDouble();
-    // print('Multiplier: ${(1 + valueOnBarHeight / yAxisHeight).toString()}');
-    // print('${yValueRange[1].toString()} -> ${value.toString()}');
-    yValueRange[2] = value;
+    end >= value
+        ? yValueRange[2] = end
+        : yValueRange[2] = value;
   }
 
   void populateDataWithMinimumValue() {

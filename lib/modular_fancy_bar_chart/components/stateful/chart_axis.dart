@@ -1,8 +1,8 @@
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
 
-import 'package:flutter_charts/bar_chart/bar_chart_style.dart';
-import 'package:flutter_charts/modular_fancy_bar_chart/textSizeInfo.dart';
+import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/bar_chart_style.dart';
+import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/textSizeInfo.dart';
 import '../chart_axis.dart';
 
 // class ChartAxisHorizontal extends StatefulWidget {
@@ -73,15 +73,15 @@ class ChartAxisHorizontal extends StatelessWidget {
   });
 
   Size get size => Size(axisLength, getHeight(style.xAxisStyle));
-  double get xSectionLength => numBarsInGroup * barWidth + style.groupMargin * 2 + style.barMargin * (numBarsInGroup - 1);
+  double get xSectionLength => numBarsInGroup * barWidth + style.groupMargin * 2 + style.barStyle.barInGroupMargin * (numBarsInGroup - 1);
   double get length => [xSectionLength * xGroups.length, axisLength].reduce(max);
   double get height => getHeight(style.xAxisStyle);
 
-  static double getHeight(AxisStyle xAxisStyle) => getSizeOfString('I', xAxisStyle.tick.labelTextStyle, isHeight: true) + xAxisStyle.tick.tickLength + xAxisStyle.tick.tickMargin;
+  static double getHeight(AxisStyle xAxisStyle) => getSizeOfString('I', xAxisStyle.tickStyle.labelTextStyle, isHeight: true) + xAxisStyle.tickStyle.tickLength + xAxisStyle.tickStyle.tickMargin;
 
   @override
   Widget build(BuildContext context) {
-    print('build in x axis');
+    print('build in stateless x axis');
     return SizedBox(
       width: axisLength,
       height: height,

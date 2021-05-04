@@ -3,9 +3,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
-import 'package:flutter_charts/bar_chart/bar_chart_style.dart';
-import 'package:flutter_charts/modular_fancy_bar_chart/textSizeInfo.dart';
+import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/bar_chart_data.dart';
+import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/bar_chart_style.dart';
+import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/textSizeInfo.dart';
 
 @immutable
 class HorizontalAxisPainter extends CustomPainter {
@@ -30,7 +30,7 @@ class HorizontalAxisPainter extends CustomPainter {
     final Offset end = Offset(length, axisStyle.strokeWidth / 2);
     canvas.drawLine(start, end, axisPaint);
 
-    final TickStyle tick = axisStyle.tick;
+    final TickStyle tick = axisStyle.tickStyle;
     final Paint tickPaint = Paint()
       ..strokeWidth = axisStyle.strokeWidth
       ..strokeCap = axisStyle.strokeCap
@@ -84,7 +84,7 @@ class ChartAxisVerticalWithLabel extends StatelessWidget {
 
   static double labelWidth(BarChartLabel label) => label.text == '' ? 0 : 5 + getSizeOfString(label.text, label.textStyle, isHeight: true);
 
-  static double axisWidth(double max, AxisStyle style) => getSizeOfString(max.toStringAsFixed(style.tick.tickDecimal), style.tick.labelTextStyle) + style.tick.tickMargin + style.tick.tickLength;
+  static double axisWidth(double max, AxisStyle style) => getSizeOfString(max.toStringAsFixed(style.tickStyle.tickDecimal), style.tickStyle.labelTextStyle) + style.tickStyle.tickMargin + style.tickStyle.tickLength;
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +150,7 @@ class VerticalAxisPainter extends CustomPainter {
     final Offset end = Offset(size.width, size.height);
     canvas.drawLine(start, end, axisPaint);
 
-    final TickStyle tick = axisStyle.tick;
+    final TickStyle tick = axisStyle.tickStyle;
     final double lengthPerTick = length / (axisStyle.numTicks - 1);
     final double yMax = valueRange[2], yMin = valueRange[0];
     final double valuePerTick = (yMax - yMin) / (axisStyle.numTicks - 1);
