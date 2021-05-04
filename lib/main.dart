@@ -1,19 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
-import 'package:flutter_charts/bar_chart/fancy_bar_chart.dart';
 
-import 'bar_chart/bar_chart.dart';
 import 'bar_chart/bar_chart_style.dart';
-import 'bar_chart/bar_chart_unit_length.dart';
+import 'modular_fancy_bar_chart/components/stateful/op.dart';
 import 'modular_fancy_bar_chart/modular_fancy_bar_chart.dart';
-
-// BarChartData data = BarChartDataNumber.double(data: sampleData);
-// List<BarData> sampleData = [
-//   BarData(x1: 0, x2: 0.5, y1: 8, style: BarChartBarStyle(color: Colors.red)),
-//   BarData(x1: 0.8, x2: 1.2, y1: 4),
-//   BarData(x1: 1.5, x2: 2.5, y1: 8, style: BarChartBarStyle(color: Colors.blue)),
-//   BarData(x1: 3, x2: 4, y1: 3.4),
-// ];
 
 Map<String, double> sampleData2 =  {
   'A': 1,
@@ -29,7 +19,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'a': 2,
     'b': 4,
     'd': 1,
-    'eeeeeeeeeeeeeee': 2,
+    'eeee': 2,
   },
   'B': {
     'a': 1,
@@ -48,7 +38,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'b': 4,
     'c': 6,
     'd': 1,
-    'eeeeeeeeeeeeeee': 2,
+    'eeee': 2,
   },
   'E': {
     'a': 1,
@@ -67,10 +57,10 @@ Map<String, Map<String, double>> sampleData3 =  {
     'b': 4,
     'c': 6,
     'd': 1,
-    'eeeeeeeeeeeeeee': 188,
+    'eeee': 23,
   },
   'H': {
-    'a': 1000,
+    'a': 10,
     'b': 3.5,
     'c': 8.5,
     'd': 6.9,
@@ -82,6 +72,34 @@ Map<String, Map<String, double>> sampleData3 =  {
     'd': 12
   },
 };
+
+// Map<String, Map<String, double>> sampleData4 =  {
+//   'A': {
+//     'a': 2,
+//     'b': 2,
+//     'd': 1,
+//     'eeee': 2,
+//   },
+//   'B': {
+//     'a': 1,
+//     'b': 0.5,
+//     'c': 2,
+//     'd': 1,
+//   },
+//   'C': {
+//     'a': 1,
+//     'b': 2,
+//     'c': 1,
+//     'd': 1
+//   },
+//   'D': {
+//     'a': 2,
+//     'b': 2,
+//     'c': 1,
+//     'd': 1,
+//     'eeee': 2,
+//   },
+// };
 
 void main() { runApp(MyApp()); }
 
@@ -105,30 +123,24 @@ class MyHomePage extends StatelessWidget {
         actions: [
           IconButton(
             icon: Icon(Icons.play_arrow),
-            onPressed: () {
-              // setState(() {
-              //   toggle = !toggle;
-              //   toggle2 = !toggle2;
-              // });
-            },
+            onPressed: () {},
           )
         ],
       ),
-      body: SingleChildScrollView(
+      body: Align(
+        alignment: Alignment.topCenter,
         child: Column(
           children: [
-            const SizedBox(height: 5,),
             Card(
               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
               margin: const EdgeInsets.all(5),
-              child: Center(
-                child: Container(
-                  padding: EdgeInsets.all(20),
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height / 3,
-                  child: ModularBarChart(
-                    data: sampleData3,
-                    style: BarChartStyle(
+              child: Container(
+                padding: EdgeInsets.all(20),
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height / 3,
+                child: ModularBarChart(
+                  data: sampleData3,
+                  style: BarChartStyle(
                       title: BarChartLabel(
                         text: 'Boring Title',
                         textStyle: TextStyle(color: Colors.white),
@@ -161,85 +173,60 @@ class MyHomePage extends StatelessWidget {
                           tickColor: Colors.teal,
                         ),
                       )
-                    ),
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 5,),
-            // Card(
-            //   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-            //   margin: const EdgeInsets.all(5),
-            //   child: Center(
-            //     child: Container(
-            //       padding: EdgeInsets.all(20),
-            //       width: MediaQuery.of(context).size.width,
-            //       height: MediaQuery.of(context).size.height / 3,
-            //       child: ModularFancyBarChart(
-            //         rawData: ModularBarChartData.groupedStacked(
-            //             rawData: sampleData3
-            //         ),
-            //         style: BarChartStyle(
-            //           title: BarChartLabel(
-            //             text: 'Boring Title',
-            //             textStyle: TextStyle(color: Colors.white),
-            //           ),
-            //           sortXAxis: true,
-            //           barWidth: 35,
-            //           groupMargin: 20,
-            //           barMargin: 5,
-            //           xAxisStyle: AxisStyle(
-            //             label: BarChartLabel(
-            //               text: 'x Axis',
-            //               textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            //             ),
-            //             axisColor: Colors.teal,
-            //             tick: TickStyle(
-            //               tickLength: 5,
-            //               tickColor: Colors.teal,
-            //             ),
-            //           ),
-            //           yAxisStyle: AxisStyle(
-            //             //preferredEndValue: 250,
-            //             label: BarChartLabel(
-            //               text: 'Y Axis',
-            //               textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
-            //             ),
-            //             //preferredEndValue: 20,
-            //             axisColor: Colors.teal,
-            //             tick: TickStyle(
-            //               tickLength: 5,
-            //               tickColor: Colors.teal,
-            //             ),
-            //           )
-            //         ),
-            //       ),
-            //     ),
-            //   ),
-            // ),
+            SizedBox(height: 20,),
             Card(
               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
               margin: const EdgeInsets.all(5),
-              child: Center(
-                child: Container(
-                  padding: EdgeInsets.all(20),
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height / 3,
-                  child: ModularBarChart(
-                    data: sampleData3,
-                    style: BarChartStyle(
+              child: Container(
+                padding: EdgeInsets.all(20),
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height / 3,
+                child: ModularBarChart(
+                  data: sampleData3,
+                  style: BarChartStyle(
                       title: BarChartLabel(
-                        text: 'Boring Title'
+                        text: 'Boring Title',
+                        textStyle: TextStyle(color: Colors.white),
+                      ),
+                      sortXAxis: true,
+                      barWidth: 35,
+                      groupMargin: 20,
+                      barMargin: 5,
+                      xAxisStyle: AxisStyle(
+                        label: BarChartLabel(
+                          text: 'x Axis',
+                          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                        axisColor: Colors.teal,
+                        tick: TickStyle(
+                          tickLength: 5,
+                          tickColor: Colors.teal,
+                        ),
+                      ),
+                      yAxisStyle: AxisStyle(
+                        numTicks: 5,
+                        label: BarChartLabel(
+                          text: 'Y Axis',
+                          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
+                        ),
+                        //preferredEndValue: 20,
+                        axisColor: Colors.teal,
+                        tick: TickStyle(
+                          tickLength: 5,
+                          tickColor: Colors.teal,
+                        ),
                       )
-                    ),
                   ),
                 ),
               ),
             ),
-          ]
+          ],
         ),
       ),
-      // body: BarChartSample1(),
     );
   }
 }

@@ -2,20 +2,11 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_charts/modular_fancy_bar_chart/textSizeInfo.dart';
 
 import 'bar_chart_style.dart';
 
 enum BarChartType {Ungrouped, Grouped, GroupedStacked, GroupedSeparated, Grouped3D}
-
-abstract class AbstractModularBarChartData {
-  final Map<String, dynamic> rawData;
-  final BarChartType type;
-
-  const AbstractModularBarChartData._({
-    this.rawData,
-    this.type,
-  });
-}
 
 class ModularBarChartData{
   final Map<String, dynamic> rawData;
@@ -25,11 +16,12 @@ class ModularBarChartData{
 
   // Data processing variables
   List<String> xGroups = [], xSubGroups = [];
-  List<double> _y1Values = [], _y2Values = [], yValueRange = [0, 0];
+  List<double> _y1Values = [], _y2Values = [], yValueRange = [0, 0, 0];
   Map<String, Color> subGroupColors = {};
   List<BarChartDataDouble> bars = [];
   List<BarChartDataDoubleGrouped> groupedBars = [];
   int numInGroups = 1;
+  double valueOnBarHeight;
 
   ModularBarChartData._({
     this.rawData,
@@ -63,13 +55,7 @@ class ModularBarChartData{
   //   type: BarChartType.GroupedStacked,
   // );
 
-  void init() {
-    _analyseData();
-    _adjustAxisValueRange();
-    _populateDataWithMinimumValue();
-  }
-
-  void _analyseData() {
+  void analyseData() {
     xGroups = rawData.keys.toList();
     if (sortXAxis) {
       xGroupComparator == null
@@ -123,28 +109,34 @@ class ModularBarChartData{
     numInGroups = xSubGroups.length;
     if (numInGroups <= 1) { numInGroups = 1; }
     if (type == BarChartType.GroupedStacked) { numInGroups = 1; }
+
+    valueOnBarHeight = getSizeOfString('1', const TextStyle());
   }
 
-  void _adjustAxisValueRange() {
+  void adjustAxisValueRange(double start, double yAxisHeight) {
+    start <= yValueRange[0]
+        ? yValueRange[0] = start
+        : yValueRange[0] = yValueRange[0];
+
     String max = yValueRange[1].toStringAsExponential();
-    int exp = int.tryParse(max.substring(max.indexOf('e+') + 2));
-    exp = pow(10, exp - 1);
-    double value = ((yValueRange[1] * 1.1 / exp).ceil() * exp).toDouble();
-    yValueRange[1] = value;
+    int expInt = int.tryParse(max.substring(max.indexOf('e+') + 2));
+    num exp = pow(10, expInt - 1);
+    double value = (((yValueRange[1] * (1 + (valueOnBarHeight) / yAxisHeight) / exp).ceil() + 1) * exp).toDouble();
+    // print('Multiplier: ${(1 + valueOnBarHeight / yAxisHeight).toString()}');
+    // print('${yValueRange[1].toString()} -> ${value.toString()}');
+    yValueRange[2] = value;
   }
 
-  void _populateDataWithMinimumValue() {
+  void populateDataWithMinimumValue() {
     if (type == BarChartType.Grouped || type == BarChartType.GroupedStacked) {
       // populate with data with min value
       rawData.forEach((key, map) {
         final List<BarChartDataDouble> dataInGroup = [];
         final List<String> keys = map.keys.toList();
         for (String key in xSubGroups) {
-          if (keys.contains(key)) {
-            dataInGroup.add(BarChartDataDouble(group: key, data: map[key].toDouble()));
-          } else {
-            dataInGroup.add(BarChartDataDouble(group: key, data: yValueRange[0]));
-          }
+          keys.contains(key)
+            ? dataInGroup.add(BarChartDataDouble(group: key, data: map[key].toDouble()))
+            : dataInGroup.add(BarChartDataDouble(group: key, data: yValueRange[0]));
         }
         groupedBars.add(BarChartDataDoubleGrouped(mainGroup: key, dataList: dataInGroup));
       });

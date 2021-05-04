@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
 import 'package:flutter_charts/bar_chart/bar_chart_style.dart';
 
-import '../modular_fancy_bar_chart.dart';
-
 @immutable
 class DataPainter extends CustomPainter {
   final List<String> xGroups;
@@ -116,7 +114,7 @@ class DataPainter extends CustomPainter {
     // p..color = Colors.white;
     // canvas.drawLine(Offset(0,0), Offset(size.width,size.height), p);
     // canvas.drawLine(Offset(0,size.height), Offset(size.width,0), p);
-    drawData(canvas, (valueRange[1] - valueRange[0]) / size.height, Offset(0, size.height));
+    drawData(canvas, (valueRange[2] - valueRange[0]) / size.height, Offset(0, size.height));
   }
 
   @override

@@ -1,10 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
 import 'package:flutter_charts/bar_chart/bar_chart_style.dart';
-import 'package:flutter_charts/modular_fancy_bar_chart/modular_fancy_bar_chart.dart';
-
-import 'chart_canvas_painter.dart';
+import '../chart_canvas_painter.dart';
 
 class ChartCanvas extends StatefulWidget {
   final Size canvasSize;
@@ -35,7 +34,6 @@ class ChartCanvas extends StatefulWidget {
     this.groupedBars,
     this.subGroups,
     this.subGroupColors,
-
     this.isMini = false,
   });
 
@@ -139,28 +137,36 @@ class _ChartCanvasState extends State<ChartCanvas> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.isMini) {
-      return SizedBox(
-        width: widget.canvasSize.width,
-        height: widget.canvasSize.height,
-        child: CustomPaint(
-          painter: DataPainter.mini(
-            type: widget.type,
-            xGroups: widget.xGroups,
-            subGroups: widget.subGroups,
-            subGroupColors: widget.subGroupColors,
-            valueRange: widget.valueRange,
-            xLength: widget.canvasSize.width,
-            style: BarChartStyle(
-              barWidth: barWidth,
-              groupMargin: 1,
-            ),
-            groupedBars: widget.groupedBars,
+    return widget.isMini
+        ? buildMiniCanvas()
+        : buildCanvas();
+  }
+
+  SizedBox buildMiniCanvas() {
+    print('redraw mini canvas');
+    return SizedBox(
+      width: widget.canvasSize.width,
+      height: widget.canvasSize.height,
+      child: CustomPaint(
+        painter: DataPainter.mini(
+          type: widget.type,
+          xGroups: widget.xGroups,
+          subGroups: widget.subGroups,
+          subGroupColors: widget.subGroupColors,
+          valueRange: widget.valueRange,
+          xLength: widget.canvasSize.width,
+          style: BarChartStyle(
+            barWidth: barWidth,
+            groupMargin: 1,
           ),
-          size: Size(widget.length, widget.size.height),
+          groupedBars: widget.groupedBars,
         ),
-      );
-    }
+        size: Size(widget.length, widget.size.height),
+      ),
+    );
+  }
+
+  SizedBox buildCanvas() {
     return SizedBox(
       width: widget.canvasSize.width,
       height: widget.canvasSize.height,

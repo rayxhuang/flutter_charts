@@ -1,79 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:flutter_charts/bar_chart/bar_chart_data.dart';
 import 'package:flutter_charts/bar_chart/bar_chart_style.dart';
-
-class ChartAxisHorizontal extends StatefulWidget {
-  final List<String> xGroups;
-  final int numBarsInGroup;
-  final double barWidth;
-  final BarChartStyle style;
-  final double axisLength;
-  final ScrollController scrollController;
-
-  const ChartAxisHorizontal({
-    @required this.xGroups,
-    @required this.numBarsInGroup,
-    @required this.barWidth,
-    @required this.axisLength,
-    @required this.scrollController,
-    this.style = const BarChartStyle(),
-  });
-
-  @override
-  _ChartAxisHorizontalState createState() => _ChartAxisHorizontalState();
-
-  Size get size => Size(axisLength, getHeight(style.xAxisStyle));
-  double get xSectionLength => numBarsInGroup * barWidth + style.groupMargin * 2 + style.barMargin * (numBarsInGroup - 1);
-  double get length {
-    double length = axisLength;
-    final double lengthNeeded =  xSectionLength * xGroups.length;
-    if (lengthNeeded >= length) { length = lengthNeeded; }
-    return length;
-  }
-  double get height => getHeight(style.xAxisStyle);
-  static double getHeight(AxisStyle xAxisStyle) {
-    // TODO safe to use sample character?
-    TextPainter painter = TextPainter(
-      text: TextSpan(text: 'I', style: xAxisStyle.tick.labelTextStyle),
-      textDirection: TextDirection.ltr,
-    );
-    painter.layout();
-    return painter.height + xAxisStyle.tick.tickLength + xAxisStyle.tick.tickMargin;
-  }
-}
-
-class _ChartAxisHorizontalState extends State<ChartAxisHorizontal> {
-  double length = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    length = widget.length;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      //decoration: BoxDecoration(border: Border.all(color: Colors.red)),
-      width: widget.axisLength,
-      height: widget.height,
-      child: SingleChildScrollView(
-        physics: ClampingScrollPhysics(),
-        scrollDirection: Axis.horizontal,
-        controller: widget.scrollController,
-        child: CustomPaint(
-          painter: HorizontalAxisPainter(
-            xGroups: widget.xGroups,
-            axisStyle: widget.style.xAxisStyle,
-          ),
-          size: Size(length, widget.height),
-        ),
-      ),
-    );
-  }
-}
+import 'package:flutter_charts/modular_fancy_bar_chart/textSizeInfo.dart';
 
 @immutable
 class HorizontalAxisPainter extends CustomPainter {
@@ -96,8 +28,6 @@ class HorizontalAxisPainter extends CustomPainter {
 
     final Offset start = Offset(0, axisStyle.strokeWidth / 2);
     final Offset end = Offset(length, axisStyle.strokeWidth / 2);
-    //final Offset start = Offset(0, 0);
-    //final Offset end = Offset(length, 0);
     canvas.drawLine(start, end, axisPaint);
 
     final TickStyle tick = axisStyle.tick;
@@ -131,90 +61,66 @@ class HorizontalAxisPainter extends CustomPainter {
       _textPainter.layout(maxWidth: xSectionLength);
       //Draw the tick value text
       _textPainter.paint(canvas, Offset(
-          i * xSectionLength + (xSectionLength - _textPainter.width) / 2,
-          tick.tickLength + tick.tickMargin
+        i * xSectionLength + (xSectionLength - _textPainter.width) / 2,
+        tick.tickLength + tick.tickMargin
       ));
     }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
-  }
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 @immutable
 class ChartAxisVerticalWithLabel extends StatelessWidget {
-  // This widget force display the label and data
-  final TextStyle textStyle;
+  // This widget display the label and data of a vertical axis
   final double axisHeight;
-  final List<double> yValueRange;
-  final AxisStyle axisStyle;
 
-  ChartAxisVerticalWithLabel({
-    @required this.axisHeight,
-    @required this.yValueRange,
-    this.axisStyle = const AxisStyle(),
-    this.textStyle
-  });
+  ChartAxisVerticalWithLabel({ @required this.axisHeight, });
 
-  Size get size => Size(getWidth(axisStyle.label.text, yValueRange[1], axisStyle), axisHeight);
+  Size size(double maxValue, AxisStyle axisStyle) => Size(getWidth(axisStyle.label.text, maxValue, axisStyle), axisHeight);
 
-  static double getWidth(String axisLabel, double axisData, AxisStyle style) {
-    return labelWidth(style.label) + axisWidth(axisData, style);
-  }
+  static double getWidth(String axisLabel, double axisData, AxisStyle style) => labelWidth(style.label) + axisWidth(axisData, style);
 
-  static double labelWidth(BarChartLabel label) {
-    TextPainter painter = TextPainter(
-      text: TextSpan(text: label.text, style: label.textStyle),
-      textDirection: TextDirection.ltr,
-    );
-    painter.layout();
-    return label.text == '' ? 0 : 5 + painter.height;
-  }
+  static double labelWidth(BarChartLabel label) => label.text == '' ? 0 : 5 + getSizeOfString(label.text, label.textStyle, isHeight: true);
 
-  static double axisWidth(double max, AxisStyle style) {
-    TextPainter painter = TextPainter(
-      text: TextSpan(text: max.toStringAsFixed(style.tick.tickDecimal), style: style.tick.labelTextStyle),
-      textDirection: TextDirection.ltr,
-    );
-    painter.layout();
-    return painter.width + style.tick.tickMargin + style.tick.tickLength;
-  }
+  static double axisWidth(double max, AxisStyle style) => getSizeOfString(max.toStringAsFixed(style.tick.tickDecimal), style.tick.labelTextStyle) + style.tick.tickMargin + style.tick.tickLength;
 
   @override
   Widget build(BuildContext context) {
+    final AxisStyle axisStyle = context.read<BarChartStyle>().yAxisStyle;
+    final List<double> yValueRange = context.read<ModularBarChartData>().yValueRange;
     return SizedBox(
-        height: axisHeight,
-        width: size.width,
-        child: Row(
-          children: [
-            RotatedBox(
-              // TODO 1 or 3
-              quarterTurns: 1,
-              child: SizedBox(
-                width: axisHeight,
-                height: labelWidth(axisStyle.label),
-                child: Center(
-                  child: Text(
-                    axisStyle.label.text,
-                    style: axisStyle.label.textStyle,
-                  ),
+      height: axisHeight,
+      width: getWidth(axisStyle.label.text, yValueRange[2], axisStyle),
+      child: Row(
+        children: [
+          RotatedBox(
+            // TODO 1 or 3
+            quarterTurns: 1,
+            child: SizedBox(
+              width: axisHeight,
+              height: labelWidth(axisStyle.label),
+              child: Center(
+                child: Text(
+                  axisStyle.label.text,
+                  style: axisStyle.label.textStyle,
                 ),
               ),
             ),
-            SizedBox(
-              width: axisWidth(yValueRange[1], axisStyle),
-              height: axisHeight,
-              child: CustomPaint(
-                  painter: VerticalAxisPainter(
-                    valueRange: yValueRange,
-                    axisStyle: axisStyle,
-                  )
+          ),
+          SizedBox(
+            width: axisWidth(yValueRange[2], axisStyle),
+            height: axisHeight,
+            child: CustomPaint(
+              painter: VerticalAxisPainter(
+                valueRange: yValueRange,
+                axisStyle: axisStyle,
               ),
             ),
-          ],
-        )
+          ),
+        ],
+      )
     );
   }
 }
@@ -243,11 +149,10 @@ class VerticalAxisPainter extends CustomPainter {
     final Offset start = Offset(size.width, 0);
     final Offset end = Offset(size.width, size.height);
     canvas.drawLine(start, end, axisPaint);
-    //canvas.drawLine(end, end.translate(0, axisStyle.strokeWidth / 2), axisPaint..strokeCap = StrokeCap.square);
 
     final TickStyle tick = axisStyle.tick;
     final double lengthPerTick = length / (axisStyle.numTicks - 1);
-    final double yMax = valueRange[1], yMin = valueRange[0];
+    final double yMax = valueRange[2], yMin = valueRange[0];
     final double valuePerTick = (yMax - yMin) / (axisStyle.numTicks - 1);
     final Paint tickPaint = Paint()
       ..strokeWidth = axisStyle.strokeWidth
@@ -300,106 +205,6 @@ class VerticalAxisPainter extends CustomPainter {
     _textPainter.layout();
     p4 = p3.translate(-(_textPainter.width), -(_textPainter.height / 2));
     _textPainter.paint(canvas, p4);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-@immutable
-class ChartLabelHorizontal extends StatelessWidget {
-  final String label;
-  final TextStyle textStyle;
-  final Size parentSize;
-  final double widthInPercentage;
-  final double heightInPercentage;
-
-  const ChartLabelHorizontal({
-    @required this.parentSize,
-    this.heightInPercentage = 0.05,
-    this.widthInPercentage = 0.7,
-    this.label = '',
-    this.textStyle = const TextStyle(),
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: parentSize.width * widthInPercentage,
-      height: parentSize.height * heightInPercentage,
-      child: Center(
-        child: Text(
-          label,
-          style: textStyle,
-        ),
-      ),
-    );
-  }
-
-  Size get size => Size(parentSize.width * widthInPercentage, parentSize.height * heightInPercentage);
-}
-
-@immutable
-class ChartLabelVertical extends StatelessWidget {
-  final String label;
-  final TextStyle textStyle;
-  final Size parentSize;
-  final double widthInPercentage;
-  final double heightInPercentage;
-
-  const ChartLabelVertical({
-    @required this.parentSize,
-    this.widthInPercentage = 0.05,
-    this.heightInPercentage = 0.7,
-    this.label = '',
-    this.textStyle = const TextStyle(),
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return RotatedBox(
-      // TODO 1 or 3
-      quarterTurns: 1,
-      child: FittedBox(
-        child: Container(
-          decoration: BoxDecoration(border: Border.all(color: Colors.blue)),
-          width: parentSize.height * heightInPercentage,
-          //height: parentSize.width * widthInPercentage,
-          child: Center(
-            child: Text(
-              label,
-              style: textStyle,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Size get size => Size(parentSize.width * widthInPercentage, parentSize.height * heightInPercentage);
-}
-
-@immutable
-class VerticalAxisLabelPainter extends CustomPainter {
-  final String axisLabel;
-  final TextStyle labelTextStyle;
-
-  const VerticalAxisLabelPainter({
-    this.axisLabel = '',
-    this.labelTextStyle = const TextStyle(),
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint labelPainter = Paint();
-    labelPainter..color = labelTextStyle.color ?? Colors.black;
-    final TextPainter _textPainter = TextPainter(
-      text: TextSpan(text: axisLabel, style: labelTextStyle,),
-      textDirection: TextDirection.ltr,
-    );
-    _textPainter.layout();
-    final Offset offset = Offset(size.width / 2 - _textPainter.width / 2, 0);
-    _textPainter.paint(canvas, offset);
   }
 
   @override
