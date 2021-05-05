@@ -80,32 +80,6 @@ class ChartCanvasMini extends StatelessWidget {
     );
   }
 
-  // factory ChartCanvasMini.mini({
-  //   @required BarChartType type,
-  //   @required List<String> xGroups,
-  //   @required List<String> subGroups,
-  //   @required List<double> valueRange,
-  //   @required double xSectionLength,
-  //   @required Size canvasSize,
-  //   @required double length,
-  //   @required List<BarChartDataDoubleGrouped> groupedBars,
-  //   @required Map<String, Color> subGroupColors,
-  //   BarChartStyle style = const BarChartStyle(),
-  // }) {
-  //   return ChartCanvasMini._(
-  //     type: type,
-  //     xGroups: xGroups,
-  //     subGroups: subGroups,
-  //     subGroupColors: subGroupColors,
-  //     valueRange: valueRange,
-  //     xSectionLength: xSectionLength,
-  //     canvasSize: canvasSize,
-  //     length: length,
-  //     style: style,
-  //     groupedBars: groupedBars,
-  //   );
-  // }
-
   Size get size => canvasSize;
 
   @override
