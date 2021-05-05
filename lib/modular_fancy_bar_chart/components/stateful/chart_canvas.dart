@@ -114,7 +114,7 @@ class _ChartCanvasState extends State<ChartCanvas> with SingleTickerProviderStat
         duration: animation.dataAnimationDuration,
       );
       _tween.animate(_dataAnimationController)..addListener(() {
-        setState(() { dataAnimationValue = _dataAnimationController.value; });
+        setState(() { dataAnimationValue = _dataAnimationController.value; print(dataAnimationValue); });
       });
       _dataAnimationController.forward();
     }

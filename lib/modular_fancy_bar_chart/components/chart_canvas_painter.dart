@@ -188,7 +188,7 @@ class DataPainter extends CustomPainter {
           drawRect(canvas, bottomLeft, x1FromBottomLeft, x2FromBottomLeft, y1FromBottomLeft, _barStyle, paint, last: false);
           previousYValue += data[i].data;
 
-          if (!isMini && i == data.length - 1) {
+          if (!isMini && i == data.length - 1 && barAnimationFraction == 1) {
             drawValueOnBar(canvas, totalHeight.toStringAsFixed(0), bottomLeft, x1FromBottomLeft, y1FromBottomLeft);
           }
         }

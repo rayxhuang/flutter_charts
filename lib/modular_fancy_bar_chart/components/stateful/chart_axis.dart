@@ -81,7 +81,6 @@ class ChartAxisHorizontal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('build in stateless x axis');
     return SizedBox(
       width: axisLength,
       height: height,
