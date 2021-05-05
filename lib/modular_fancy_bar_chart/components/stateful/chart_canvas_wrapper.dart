@@ -94,11 +94,11 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper>
     // Mini Canvas
     miniCanvasWidth = canvasSize.width * 0.2;
     miniCanvasHeight = canvasSize.height * 0.2 + 3;
-    final Size miniCanvasSize = Size(miniCanvasWidth, miniCanvasHeight);
+    final Size miniCanvasSize = Size(miniCanvasWidth, miniCanvasHeight - 3);
 
     inViewContainerOnMiniCanvas = Container(
       width: (canvasSize.width / bottomAxis.length) * miniCanvasWidth,
-      height: miniCanvasHeight + 3,
+      height: miniCanvasHeight,
       color: Colors.white12,
     );
 
@@ -111,8 +111,7 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper>
             length: canvasSize.width * 0.2,
             xGroups: data.xGroups,
             valueRange: data.yValueRange,
-            xSectionLength: bottomAxis.xSectionLength *
-                (canvasSize.width * 0.2 / bottomAxis.length),
+            xSectionLength: (canvasSize.width * 0.2 / bottomAxis.length) / data.xGroups.length,
             bars: data.bars,
             style: style,
           ),
@@ -135,8 +134,7 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper>
             subGroups: data.xSubGroups,
             subGroupColors: data.subGroupColors,
             valueRange: data.yValueRange,
-            xSectionLength: bottomAxis.xSectionLength *
-                (canvasSize.width * 0.2 / bottomAxis.length),
+            xSectionLength: (canvasSize.width * 0.2 / bottomAxis.length) / data.xGroups.length,
             groupedBars: data.groupedBars,
             style: style,
           ),

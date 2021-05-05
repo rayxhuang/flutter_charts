@@ -139,6 +139,7 @@ class ModularBarChartData{
 
   void populateDataWithMinimumValue() {
     if (type == BarChartType.Grouped || type == BarChartType.GroupedStacked) {
+      groupedBars = [];
       // populate with data with min value
       rawData.forEach((key, map) {
         final List<BarChartDataDouble> dataInGroup = [];
