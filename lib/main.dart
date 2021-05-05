@@ -594,7 +594,7 @@ class MyHomePage extends StatelessWidget {
                       ),
                       legendStyle: BarChartLegendStyle(visible: false),
                       animation: BarChartAnimation(
-                        animateData: true,
+                        animateData: false,
                       ),
                     ),
                   ),
@@ -647,7 +647,7 @@ class MyHomePage extends StatelessWidget {
                       ),
                       animation: BarChartAnimation(
                         animateData: true,
-                        dataAnimationDuration: const Duration(seconds: 2),
+                        dataAnimationDuration: const Duration(milliseconds: 300),
                       ),
                     ),
                   ),
@@ -700,7 +700,7 @@ class MyHomePage extends StatelessWidget {
                         isStacked: true,
                       ),
                       animation: BarChartAnimation(
-                        animateData: true,
+                        animateData: false,
                         //dataAnimationDuration: const Duration(seconds: 10),
                       ),
                     ),

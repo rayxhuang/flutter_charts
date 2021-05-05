@@ -34,6 +34,53 @@ class GroupedBars extends StatelessWidget {
   }
 }
 
+// class GroupedBars extends StatefulWidget {
+//   final Size size;
+//   final int groupIndex;
+//   //final double barAnimationFraction;
+//   final AnimationController animation;
+//
+//   const GroupedBars({
+//     this.size,
+//     this.groupIndex,
+//     //this.barAnimationFraction,
+//     this.animation,
+//   });
+//
+//   @override
+//   _GroupedBarsState createState() => _GroupedBarsState();
+// }
+//
+// class _GroupedBarsState extends State<GroupedBars> {
+//   double barAnimationFraction;
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     barAnimationFraction = widget.animation.value;
+//     widget.animation.addListener(() { setState(() {
+//       barAnimationFraction = widget.animation.value;
+//     }); });
+//   }
+//
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final ModularBarChartData dataModel = context.read<ModularBarChartData>();
+//     final BarChartStyle style = context.read<BarChartStyle>();
+//     return CustomPaint(
+//       painter: SingleGroupDataPainter(
+//         dataModel: dataModel,
+//         dataIndex: widget.groupIndex,
+//         style: style,
+//         xSectionLength: widget.size.width,
+//         barAnimationFraction: barAnimationFraction,
+//       ),
+//       size: widget.size,
+//     );
+//   }
+// }
+
 @immutable
 class SingleGroupDataPainter extends CustomPainter {
   final double xSectionLength;

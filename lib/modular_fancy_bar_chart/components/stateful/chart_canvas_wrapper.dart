@@ -34,7 +34,7 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper>
   ScrollController _scrollController1, _scrollController2;
   double scrollOffset = 0;
 
-  double dataAnimationValue = 0;
+  double dataAnimationValue = 1;
   AnimationController _dataAnimationController;
 
   Size canvasSize;
@@ -167,6 +167,7 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper>
             groupIndex: index,
             size: Size(bottomAxis.xSectionLength, canvasSize.height),
             barAnimationFraction: dataAnimationValue,
+            //animation: _dataAnimationController,
           );
         },
       ),
