@@ -555,12 +555,7 @@ class MyHomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Charts'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.play_arrow),
-            onPressed: () {},
-          )
-        ],
+        actions: [ IconButton(icon: Icon(Icons.play_arrow), onPressed: () {},) ],
       ),
       body: Align(
         alignment: Alignment.topCenter,
@@ -636,6 +631,13 @@ class MyHomePage extends StatelessWidget {
                       ),
                       sortXAxis: true,
                       groupMargin: 10,
+                      // TODO Fix custom color setting
+                      // TODO Fix mini canvas bar width < 1 pixel
+                      // TODO Allow subgroup comparator
+                      subGroupColors: {
+                        'Male': Colors.blue,
+                        'Female': Colors.red,
+                      },
                       xAxisStyle: AxisStyle(
                         label: BarChartLabel(
                           text: 'Age',

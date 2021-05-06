@@ -102,7 +102,6 @@ class ModularBarChartData{
           if (sum >= localMaximum) { localMaximum = sum; }
         });
         xSubGroups = xSubGroups.toSet().toList();
-        // TODO Allow subgroup comparator
         xSubGroups.sort();
         yValueRange[0] = _y1Values.reduce(min);
         // If data type is stacked, use local maximum
@@ -176,12 +175,10 @@ class BarChartDataDouble extends Equatable{
 class BarChartDataDoubleGrouped {
   final String mainGroup;
   final List<BarChartDataDouble> dataList;
-  final BarChartBarStyle sectionStyle;
 
   const BarChartDataDoubleGrouped({
     @required this.mainGroup,
     @required this.dataList,
-    this.sectionStyle = const BarChartBarStyle(),
   });
 }
 

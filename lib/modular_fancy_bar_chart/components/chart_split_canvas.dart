@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/textSizeInfo.dart';
 import 'package:provider/provider.dart';
 
 import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/bar_chart_data.dart';
@@ -207,17 +206,9 @@ class SingleGroupDataPainter extends CustomPainter {
     double y1FromBottomLeft = (bar.data - dataModel.yValueRange[0]) / yUnitPerPixel;
 
     if (bar == barSelected) {
-      print('I am selected $bar');
       double x1 = x1FromBottomLeft - 2;
       double x2 = x2FromBottomLeft + 2;
       double y = y1FromBottomLeft + 2;
-      // final Rect rect = Rect.fromPoints(
-      //     bottomLeft.translate(x1, -y * barAnimationFraction),
-      //     bottomLeft.translate(x2, 0)
-      // );
-      // final Color color = paint.color.withOpacity(0.5);
-      // paint..color = color;
-      // originCanvas.drawRect(rect, paint);
       drawHighlight(
         canvas: originCanvas,
         bottomLeft: bottomLeft,

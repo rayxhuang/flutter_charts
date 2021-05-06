@@ -107,9 +107,9 @@ class ModularBarChart extends StatelessWidget {
           // Adjust xSectionLength in case of data is too small
           final List<double> xSectionLength = calculateXSectionLength(data, style, canvasWidth);
           bool overrideInputBarWidth = false;
-          double overridedBarWidth;
+          double overrideBarWidth;
           // This means a new bar width is calculated
-          if (xSectionLength.length == 2) { overrideInputBarWidth = true; overridedBarWidth = xSectionLength[1];}
+          if (xSectionLength.length == 2) { overrideInputBarWidth = true; overrideBarWidth = xSectionLength[1];}
 
           // Adjust y Max to fit number on bar and populate data
           data.adjustAxisValueRange(canvasHeight, start: style.yAxisStyle.preferredStartValue, end: style.yAxisStyle.preferredEndValue);
@@ -121,7 +121,7 @@ class ModularBarChart extends StatelessWidget {
             canvasSize: canvasSize,
             data: data,
             style: style,
-            barWidth: overrideInputBarWidth ? overridedBarWidth : style.barStyle.barWidth,
+            barWidth: overrideInputBarWidth ? overrideBarWidth : style.barStyle.barWidth,
           );
           final Size chartCanvasWithAxisSize = chartCanvasWithAxis.size;
 
