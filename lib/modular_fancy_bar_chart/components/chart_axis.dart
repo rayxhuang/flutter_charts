@@ -46,7 +46,6 @@ class HorizontalAxisPainter extends CustomPainter {
     Offset p1, p2, p3;
     List<Offset> tickPositions = [];
     // This does not draw the start and ending tick
-    // TODO fix scrolling effect on tick
     for (int i = 1; i < xGroupNum; i++) {
       p1 = start.translate(i * xSectionLength, tickPaint.strokeWidth / 2);
       p2 = p1.translate(0, tick.tickLength);

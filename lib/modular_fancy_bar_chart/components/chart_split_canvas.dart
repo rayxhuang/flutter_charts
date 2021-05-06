@@ -350,6 +350,7 @@ class SingleGroupDataPainter extends CustomPainter {
           y1: y1FromBottomLeft,
           y2: y2FromBottomLeft,
           paint: Paint()..color = paint.color,
+          isLastInStack: i == 0 ? true : false,
         );
       }
 
@@ -374,7 +375,7 @@ class SingleGroupDataPainter extends CustomPainter {
           x1: savedBar.x1 - 2,
           x2: savedBar.x2 + 2,
           y1: savedBar.y1 + 2,
-          y2: savedBar.y2 - 2,
+          y2: savedBar.y2 - (savedBar.isLastInStack ? 0 : 2),
           isStacked: true,
         );
         drawBar(

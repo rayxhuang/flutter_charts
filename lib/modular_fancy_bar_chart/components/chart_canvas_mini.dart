@@ -102,7 +102,7 @@ class ChartCanvasMini extends StatelessWidget {
           xLength: canvasSize.width,
           style: BarChartStyle(
             barStyle: BarChartBarStyle(
-              barWidth: barWidth
+              barWidth: barWidth < 1 ? 1 : barWidth
             ),
             groupMargin: 1,
           ),

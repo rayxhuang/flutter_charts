@@ -631,7 +631,6 @@ class MyHomePage extends StatelessWidget {
                       ),
                       sortXAxis: true,
                       groupMargin: 10,
-                      // TODO Fix custom color setting
                       // TODO Fix mini canvas bar width < 1 pixel
                       // TODO Allow subgroup comparator
                       subGroupColors: {

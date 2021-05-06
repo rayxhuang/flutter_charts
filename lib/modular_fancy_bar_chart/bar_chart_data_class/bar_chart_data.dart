@@ -13,11 +13,11 @@ class ModularBarChartData{
   final BarChartType type;
   final bool sortXAxis;
   final Comparator<String> xGroupComparator;
+  Map<String, Color> subGroupColors;
 
   // Data processing variables
   List<String> xGroups = [], xSubGroups = [];
   List<double> _y1Values = [], _y2Values = [], yValueRange = [0, 0, 0];
-  Map<String, Color> subGroupColors = {};
   List<BarChartDataDouble> bars = [];
   List<BarChartDataDoubleGrouped> groupedBars = [];
   int numInGroups = 1;
@@ -28,6 +28,7 @@ class ModularBarChartData{
     this.type,
     this.sortXAxis = false,
     this.xGroupComparator,
+    this.subGroupColors,
   });
 
   factory ModularBarChartData.ungrouped({
@@ -39,28 +40,33 @@ class ModularBarChartData{
     type: BarChartType.Ungrouped,
     sortXAxis: sortXAxis,
     xGroupComparator: xGroupComparator,
+    subGroupColors: const {},
   );
 
   factory ModularBarChartData.grouped({
     @required Map<String, Map<String, double>> rawData,
     bool sortXAxis = false,
     Comparator<String> xGroupComparator,
+    Map<String, Color> subGroupColors,
   }) => ModularBarChartData._(
     rawData: rawData,
     type: BarChartType.Grouped,
     sortXAxis: sortXAxis,
     xGroupComparator: xGroupComparator,
+    subGroupColors: subGroupColors,
   );
 
   factory ModularBarChartData.groupedStacked({
     @required Map<String, Map<String, double>> rawData,
     bool sortXAxis = false,
     Comparator<String> xGroupComparator,
+    Map<String, Color> subGroupColors,
   }) => ModularBarChartData._(
     rawData: rawData,
     type: BarChartType.GroupedStacked,
     sortXAxis: sortXAxis,
     xGroupComparator: xGroupComparator,
+    subGroupColors: subGroupColors,
   );
 
   void analyseData() {
@@ -110,9 +116,16 @@ class ModularBarChartData{
             : localMaximum;
         break;
     }
+
     // Generate color for subgroups
     if (type != BarChartType.Ungrouped) {
-      for (String subGroup in xSubGroups) { subGroupColors[subGroup] = Colors.primaries[Random().nextInt(Colors.primaries.length)]; }
+      final List<String> inputColorList = subGroupColors.keys.toList();
+      print(subGroupColors);
+      xSubGroups.forEach((group) {
+        if (!inputColorList.contains(group)) {
+          subGroupColors[group] = Colors.primaries[Random().nextInt(Colors.primaries.length)];
+        }
+      });
     }
 
     numInGroups = xSubGroups.length;

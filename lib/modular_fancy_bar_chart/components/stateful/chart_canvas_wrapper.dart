@@ -15,6 +15,7 @@ class ChartCanvasWrapper extends StatefulWidget {
   final ModularBarChartData data;
   final BarChartStyle style;
   final double barWidth;
+  final bool displayMiniCanvas;
 
   ChartCanvasWrapper({
     @required this.size,
@@ -22,6 +23,7 @@ class ChartCanvasWrapper extends StatefulWidget {
     @required this.data,
     @required this.style,
     @required this.barWidth,
+    @required this.displayMiniCanvas,
   });
 
   @override
@@ -96,55 +98,57 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
       scrollController: _scrollController1,
     );
 
-    // Mini Canvas
-    miniCanvasWidth = canvasSize.width * 0.2;
-    miniCanvasHeight = canvasSize.height * 0.2 + 3;
-    final Size miniCanvasSize = Size(miniCanvasWidth, miniCanvasHeight - 3);
+    if (widget.displayMiniCanvas) {
+      // Mini Canvas
+      miniCanvasWidth = canvasSize.width * 0.2;
+      miniCanvasHeight = canvasSize.height * 0.2 + 3;
+      final Size miniCanvasSize = Size(miniCanvasWidth, miniCanvasHeight - 3);
 
-    inViewContainerOnMiniCanvas = Container(
-      width: (canvasSize.width / bottomAxis.length) * miniCanvasWidth,
-      height: miniCanvasHeight,
-      color: Colors.white12,
-    );
+      inViewContainerOnMiniCanvas = Container(
+        width: (canvasSize.width / bottomAxis.length) * miniCanvasWidth,
+        height: miniCanvasHeight,
+        color: Colors.white12,
+      );
 
-    switch (data.type) {
-      case BarChartType.Ungrouped:
-        miniCanvasDataBars = Padding(
-          padding: const EdgeInsets.only(top: 3),
-          child: ChartCanvasMini.ungrouped(
-            canvasSize: miniCanvasSize,
-            length: canvasSize.width * 0.2,
-            xGroups: data.xGroups,
-            valueRange: data.yValueRange,
-            xSectionLength: (canvasSize.width * 0.2 / bottomAxis.length) / data.xGroups.length,
-            bars: data.bars,
-            style: style,
-          ),
-        );
-        break;
-      case BarChartType.GroupedSeparated:
+      switch (data.type) {
+        case BarChartType.Ungrouped:
+          miniCanvasDataBars = Padding(
+            padding: const EdgeInsets.only(top: 3),
+            child: ChartCanvasMini.ungrouped(
+              canvasSize: miniCanvasSize,
+              length: canvasSize.width * 0.2,
+              xGroups: data.xGroups,
+              valueRange: data.yValueRange,
+              xSectionLength: canvasSize.width * 0.2  / data.xGroups.length,
+              bars: data.bars,
+              style: style,
+            ),
+          );
+          break;
+        case BarChartType.GroupedSeparated:
         // TODO: Handle this case.
-        break;
-      case BarChartType.Grouped3D:
+          break;
+        case BarChartType.Grouped3D:
         // TODO: Handle this case.
-        break;
-      default:
-        miniCanvasDataBars = Padding(
-          padding: const EdgeInsets.only(top: 3),
-          child: ChartCanvasMini.grouped(
-            isStacked: data.type == BarChartType.GroupedStacked ? true: false,
-            canvasSize: miniCanvasSize,
-            length: canvasSize.width * 0.2,
-            xGroups: data.xGroups,
-            subGroups: data.xSubGroups,
-            subGroupColors: data.subGroupColors,
-            valueRange: data.yValueRange,
-            xSectionLength: (canvasSize.width * 0.2 / bottomAxis.length) / data.xGroups.length,
-            groupedBars: data.groupedBars,
-            style: style,
-          ),
-        );
-        break;
+          break;
+        default:
+          miniCanvasDataBars = Padding(
+            padding: const EdgeInsets.only(top: 3),
+            child: ChartCanvasMini.grouped(
+              isStacked: data.type == BarChartType.GroupedStacked ? true: false,
+              canvasSize: miniCanvasSize,
+              length: canvasSize.width * 0.2,
+              xGroups: data.xGroups,
+              subGroups: data.xSubGroups,
+              subGroupColors: data.subGroupColors,
+              valueRange: data.yValueRange,
+              xSectionLength: canvasSize.width * 0.2  / data.xGroups.length,
+              groupedBars: data.groupedBars,
+              style: style,
+            ),
+          );
+          break;
+      }
     }
   }
 
@@ -234,7 +238,9 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
         },
       ),
     );
-    final double inViewContainerMovingDistance = (1 - canvasSize.width / bottomAxis.length) * miniCanvasWidth;
+    final double inViewContainerMovingDistance = widget.displayMiniCanvas
+        ? (1 - canvasSize.width / bottomAxis.length) * miniCanvasWidth
+        : 0;
     return RepaintBoundary(
       child: SizedBox.fromSize(
         size: widget.size,
@@ -253,25 +259,27 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
             Positioned(
               top: 0,
               right: 0,
-              child: Container(
-                width: miniCanvasWidth,
-                height: miniCanvasHeight,
-                color: Colors.black12,
-              )
+              child: widget.displayMiniCanvas
+                  ? Container(
+                    width: miniCanvasWidth,
+                    height: miniCanvasHeight,
+                    color: Colors.black12,
+                  )
+                  : SizedBox()
             ),
 
             // Mini Canvas Data Bars
             Positioned(
               top: 0,
               right: 0,
-              child: miniCanvasDataBars,
+              child: widget.displayMiniCanvas ? miniCanvasDataBars : SizedBox(),
             ),
 
             // Mini Canvas in View Container
             Positioned(
               top: 0,
               right: (1 - scrollOffset) * inViewContainerMovingDistance,
-              child: inViewContainerOnMiniCanvas,
+              child: widget.displayMiniCanvas ? inViewContainerOnMiniCanvas : SizedBox(),
             ),
 
             // Bottom Axis

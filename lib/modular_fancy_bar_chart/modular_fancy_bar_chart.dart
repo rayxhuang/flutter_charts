@@ -55,6 +55,7 @@ class ModularBarChart extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        Provider<BarChartStyle>(create: (_) => style),
         Provider<ModularBarChartData>(create: (_) {
           ModularBarChartData dataModel;
            switch (type) {
@@ -62,10 +63,20 @@ class ModularBarChart extends StatelessWidget {
               dataModel = ModularBarChartData.ungrouped(rawData: data, sortXAxis: style.sortXAxis, xGroupComparator: style.groupComparator);
               break;
             case BarChartType.Grouped:
-              dataModel = ModularBarChartData.grouped(rawData: data, sortXAxis: style.sortXAxis, xGroupComparator: style.groupComparator);
+              dataModel = ModularBarChartData.grouped(
+                rawData: data,
+                sortXAxis: style.sortXAxis,
+                xGroupComparator: style.groupComparator,
+                subGroupColors: style.subGroupColors ?? {},
+              );
               break;
             case BarChartType.GroupedStacked:
-              dataModel = ModularBarChartData.groupedStacked(rawData: data, sortXAxis: style.sortXAxis, xGroupComparator: style.groupComparator);
+              dataModel = ModularBarChartData.groupedStacked(
+                rawData: data,
+                sortXAxis: style.sortXAxis,
+                xGroupComparator: style.groupComparator,
+                subGroupColors: style.subGroupColors ?? {},
+              );
               break;
             case BarChartType.GroupedSeparated:
               // TODO: Handle this case.
@@ -77,7 +88,6 @@ class ModularBarChart extends StatelessWidget {
           dataModel.analyseData();
           return dataModel;
         }),
-        Provider<BarChartStyle>(create: (_) => style),
       ],
       child: LayoutBuilder(
         builder: (context, constraint) {
@@ -122,6 +132,7 @@ class ModularBarChart extends StatelessWidget {
             data: data,
             style: style,
             barWidth: overrideInputBarWidth ? overrideBarWidth : style.barStyle.barWidth,
+            displayMiniCanvas: overrideInputBarWidth ? false : true,
           );
           final Size chartCanvasWithAxisSize = chartCanvasWithAxis.size;
 
