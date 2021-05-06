@@ -73,7 +73,10 @@ class ChartAxisHorizontal extends StatelessWidget {
   });
 
   Size get size => Size(axisLength, getHeight(style.xAxisStyle));
-  double get xSectionLength => numBarsInGroup * barWidth + style.groupMargin * 2 + style.barStyle.barInGroupMargin * (numBarsInGroup - 1);
+  double get xSectionLength {
+    double xSectionLengthCalculatedFromData = numBarsInGroup * barWidth + style.groupMargin * 2 + style.barStyle.barInGroupMargin * (numBarsInGroup - 1);
+    return xSectionLengthCalculatedFromData;
+  }
   double get length => [xSectionLength * xGroups.length, axisLength].reduce(max);
   double get height => getHeight(style.xAxisStyle);
 

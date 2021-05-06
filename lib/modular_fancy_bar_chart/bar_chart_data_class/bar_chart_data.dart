@@ -1,9 +1,9 @@
 import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/textSizeInfo.dart';
+import 'package:equatable/equatable.dart';
 
+import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/textSizeInfo.dart';
 import 'bar_chart_style.dart';
 
 enum BarChartType {Ungrouped, Grouped, GroupedStacked, GroupedSeparated, Grouped3D}
@@ -131,7 +131,7 @@ class ModularBarChartData{
     String max = yValueRange[1].toStringAsExponential();
     int expInt = int.tryParse(max.substring(max.indexOf('e+') + 2));
     num exp = pow(10, expInt - 1);
-    double value = (((yValueRange[1] * (1 + (valueOnBarHeight) / yAxisHeight) / exp).ceil() + 1) * exp).toDouble();
+    double value = (((yValueRange[1] * (1 + (valueOnBarHeight) / yAxisHeight) / exp).ceil() + 2) * exp).toDouble();
     end >= value
         ? yValueRange[2] = end
         : yValueRange[2] = value;
@@ -155,7 +155,7 @@ class ModularBarChartData{
   }
 }
 
-class BarChartDataDouble {
+class BarChartDataDouble extends Equatable{
   final String group;
   final double data;
   final BarChartBarStyle style;
@@ -165,6 +165,12 @@ class BarChartDataDouble {
     @required this.data,
     this.style,
   });
+
+  @override
+  String toString() => '${this.group.toString()}: ${this.data.toStringAsFixed(2)}';
+
+  @override
+  List<Object> get props => [this.group, this.data, this.style];
 }
 
 class BarChartDataDoubleGrouped {

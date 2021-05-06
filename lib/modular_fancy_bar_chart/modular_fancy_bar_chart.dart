@@ -81,7 +81,8 @@ class ModularBarChart extends StatelessWidget {
       ],
       child: LayoutBuilder(
         builder: (context, constraint) {
-          final ModularBarChartData data = context.read<ModularBarChartData>();
+          ModularBarChartData data = context.read<ModularBarChartData>();
+          BarChartStyle style = context.read<BarChartStyle>();
           // Size data
           Size leftAxisSize = Size.zero, titleSize = Size.zero, canvasSize = Size.zero, bottomLabelSize = Size.zero;
           final double parentHeight = constraint.maxHeight < double.infinity ? constraint.maxHeight : MediaQuery.of(context).size.height;
@@ -103,6 +104,13 @@ class ModularBarChart extends StatelessWidget {
           if (canvasHeight < 0) { canvasHeight = 0; }
           canvasSize = Size(canvasWidth, canvasHeight);
 
+          // Adjust xSectionLength in case of data is too small
+          final List<double> xSectionLength = calculateXSectionLength(data, style, canvasWidth);
+          bool overrideInputBarWidth = false;
+          double overridedBarWidth;
+          // This means a new bar width is calculated
+          if (xSectionLength.length == 2) { overrideInputBarWidth = true; overridedBarWidth = xSectionLength[1];}
+
           // Adjust y Max to fit number on bar and populate data
           data.adjustAxisValueRange(canvasHeight, start: style.yAxisStyle.preferredStartValue, end: style.yAxisStyle.preferredEndValue);
           data.populateDataWithMinimumValue();
@@ -113,6 +121,7 @@ class ModularBarChart extends StatelessWidget {
             canvasSize: canvasSize,
             data: data,
             style: style,
+            barWidth: overrideInputBarWidth ? overridedBarWidth : style.barStyle.barWidth,
           );
           final Size chartCanvasWithAxisSize = chartCanvasWithAxis.size;
 
@@ -183,5 +192,22 @@ class ModularBarChart extends StatelessWidget {
         }),
       )
     ;
+  }
+
+  List<double> calculateXSectionLength(ModularBarChartData data, BarChartStyle style, double canvasWidth) {
+    int numBarsInGroup = (data.type == BarChartType.Ungrouped || data.type == BarChartType.GroupedStacked)
+        ? 1
+        : data.xSubGroups.length;
+    double totalBarWidth = numBarsInGroup * style.barStyle.barWidth;
+    double totalGroupMargin = style.groupMargin * 2;
+    double totalInGroupMargin = style.barStyle.barInGroupMargin * (numBarsInGroup - 1);
+    double xSectionLengthCalculatedFromData = totalBarWidth + totalGroupMargin + totalInGroupMargin;
+    double xSectionLengthAvailable = canvasWidth / data.xGroups.length;
+    if (xSectionLengthCalculatedFromData >= xSectionLengthAvailable) {
+      return [xSectionLengthCalculatedFromData];
+    } else {
+      double newBarWidth = (xSectionLengthAvailable - totalGroupMargin - totalInGroupMargin) / numBarsInGroup;
+      return [xSectionLengthAvailable, newBarWidth];
+    }
   }
 }

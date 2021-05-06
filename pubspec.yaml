@@ -25,6 +25,8 @@ dependencies:
     sdk: flutter
   linked_scroll_controller: ^0.1.2
   provider: 5.0.0
+  touchable: 1.0.0
+  equatable: ^2.0.0
   fl_chart: ^0.35.0
 
 

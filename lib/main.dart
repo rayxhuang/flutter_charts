@@ -517,6 +517,25 @@ Map<String, Map<String, double>> sampleData4 =  {
   },
 };
 
+Map<String, Map<String, double>> sampleData5 = {
+  '10': {
+    'Male': 120,
+    'Female': 130,
+  },
+  '13': {
+    'Male': 150,
+    'Female': 155,
+  },
+  '16': {
+    'Male': 170,
+    'Female': 165,
+  },
+  '20': {
+    'Male': 180,
+    'Female': 165,
+  },
+};
+
 void main() { runApp(MyApp()); }
 
 class MyApp extends StatelessWidget {
@@ -609,7 +628,7 @@ class MyHomePage extends StatelessWidget {
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height / 3,
                   child: ModularBarChart.grouped(
-                    data: sampleData3,
+                    data: sampleData5,
                     style: BarChartStyle(
                       title: BarChartLabel(
                         text: 'Boring Title',
@@ -619,7 +638,7 @@ class MyHomePage extends StatelessWidget {
                       groupMargin: 10,
                       xAxisStyle: AxisStyle(
                         label: BarChartLabel(
-                          text: 'x Axis',
+                          text: 'Age',
                           textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                         axisColor: Colors.teal,
@@ -631,7 +650,7 @@ class MyHomePage extends StatelessWidget {
                       yAxisStyle: AxisStyle(
                         numTicks: 5,
                         label: BarChartLabel(
-                          text: 'Y Axis',
+                          text: 'Height in cm',
                           textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
                         ),
                         //preferredEndValue: 20,
@@ -643,7 +662,7 @@ class MyHomePage extends StatelessWidget {
                       ),
                       barStyle: BarChartBarStyle(
                         barWidth: 10,
-                        barInGroupMargin: 0,
+                        barInGroupMargin: 4,
                       ),
                       animation: BarChartAnimation(
                         animateData: true,
@@ -662,7 +681,7 @@ class MyHomePage extends StatelessWidget {
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height / 3,
                   child: ModularBarChart.groupedStacked(
-                    data: sampleData3,
+                    data: sampleData5,
                     style: BarChartStyle(
                       title: BarChartLabel(
                         text: 'Boring Title',
@@ -672,7 +691,7 @@ class MyHomePage extends StatelessWidget {
                       groupMargin: 20,
                       xAxisStyle: AxisStyle(
                         label: BarChartLabel(
-                          text: 'x Axis',
+                          text: 'Age',
                           textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                         axisColor: Colors.teal,
@@ -684,7 +703,7 @@ class MyHomePage extends StatelessWidget {
                       yAxisStyle: AxisStyle(
                         numTicks: 5,
                         label: BarChartLabel(
-                          text: 'Y Axis',
+                          text: 'Height in cm',
                           textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
                         ),
                         //preferredEndValue: 20,
@@ -695,7 +714,7 @@ class MyHomePage extends StatelessWidget {
                         ),
                       ),
                       barStyle: BarChartBarStyle(
-                        barWidth: 35,
+                        barWidth: 10,
                         barInGroupMargin: 5,
                         isStacked: true,
                       ),

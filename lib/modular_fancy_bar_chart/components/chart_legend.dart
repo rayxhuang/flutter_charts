@@ -18,6 +18,18 @@ class ChartLegendHorizontal extends StatelessWidget {
     final ModularBarChartData data = context.read<ModularBarChartData>();
     final BarChartStyle style = context.read<BarChartStyle>();
     final double height = getSizeOfString(data.xSubGroups.first, style.legendStyle.legendTextStyle, isHeight: true) + 4;
+    double maxWidthOfOneLegend = double.negativeInfinity;
+    data.xSubGroups.forEach((name) {
+      double singleLegendWidth = getSizeOfString(name, style.legendStyle.legendTextStyle);
+      if ( singleLegendWidth >= maxWidthOfOneLegend) { maxWidthOfOneLegend = singleLegendWidth; }
+    });
+    double legendWidth;
+    if (maxWidthOfOneLegend * data.xSubGroups.length <= width) {
+      legendWidth = width / data.xSubGroups.length;
+    } else {
+      int numLegendOnScreen = width ~/ 50;
+      legendWidth = width / numLegendOnScreen;
+    }
     return SizedBox(
       width: width,
       height: height,
@@ -28,8 +40,7 @@ class ChartLegendHorizontal extends StatelessWidget {
         itemBuilder: (BuildContext context, int index) {
           final String groupName = data.xSubGroups[index];
           return SizedBox(
-            // TODO Width
-            width: width / 6,
+            width: legendWidth,
             height: height,
             child: Tooltip(
               message: groupName,
