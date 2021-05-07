@@ -59,9 +59,6 @@ class MyHomePage extends StatelessWidget {
         barInGroupMargin: 1,
       ),
       legendStyle: BarChartLegendStyle(visible: false),
-      animation: BarChartAnimation(
-        animateData: true,
-      ),
     ),
   );
   final ModularBarChart chartGroupedSeparated = ModularBarChart.groupedSeparated(
@@ -102,9 +99,6 @@ class MyHomePage extends StatelessWidget {
         barInGroupMargin: 1,
       ),
       legendStyle: BarChartLegendStyle(visible: false),
-      animation: BarChartAnimation(
-        animateData: true,
-      ),
     ),
   );
   final ModularBarChart chartGrouped = ModularBarChart.grouped(
@@ -144,9 +138,6 @@ class MyHomePage extends StatelessWidget {
       barStyle: BarChartBarStyle(
         barWidth: 10,
         barInGroupMargin: 0,
-      ),
-      animation: BarChartAnimation(
-        animateData: true,
       ),
     ),
   );
@@ -188,9 +179,6 @@ class MyHomePage extends StatelessWidget {
         barInGroupMargin: 0,
         isStacked: true,
       ),
-      animation: BarChartAnimation(
-        animateData: true,
-      ),
     ),
   );
   
@@ -209,7 +197,15 @@ class MyHomePage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => HorizontalChartViewPage(chart: chartUngrouped)),
+                  MaterialPageRoute(builder: (context) =>
+                    HorizontalChartViewPage(chart: chartUngrouped.copyWith(
+                      style: chartUngrouped.style.copyWith(
+                        animation: BarChartAnimation(
+                          animateData: true,
+                        )
+                      )
+                    ))
+                  ),
                 );
               },
               child: Card(
@@ -225,7 +221,15 @@ class MyHomePage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => HorizontalChartViewPage(chart: chartGroupedSeparated)),
+                  MaterialPageRoute(builder: (context) =>
+                    HorizontalChartViewPage(chart: chartGroupedSeparated.copyWith(
+                      style: chartGroupedSeparated.style.copyWith(
+                        animation: BarChartAnimation(
+                          animateData: true,
+                        )
+                      )
+                    ))
+                  ),
                 );
               },
               child: Card(
@@ -241,7 +245,15 @@ class MyHomePage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => HorizontalChartViewPage(chart: chartGrouped)),
+                  MaterialPageRoute(builder: (context) =>
+                    HorizontalChartViewPage(chart: chartGrouped.copyWith(
+                      style: chartGrouped.style.copyWith(
+                        animation: BarChartAnimation(
+                          animateData: true,
+                        )
+                      )
+                    ))
+                  ),
                 );
               },
               child: Card(
@@ -257,7 +269,15 @@ class MyHomePage extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => HorizontalChartViewPage(chart: chartGroupedStacked)),
+                  MaterialPageRoute(builder: (context) =>
+                    HorizontalChartViewPage(chart: chartGroupedStacked.copyWith(
+                      style: chartGroupedStacked.style.copyWith(
+                        animation: BarChartAnimation(
+                          animateData: true,
+                        )
+                      )
+                    ))
+                  ),
                 );
               },
               child: Card(

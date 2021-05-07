@@ -238,7 +238,6 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
       }
 
       if (groupSelected && data[i] == barSelected) {
-        print('I am selected ${data[i]}');
         double y2FromBottomLeft = (y1FromBottomLeft - data[i].data / y1UnitPerPixel);
         savedBar = DataForBarToBeDrawnLast(
           data: data[i],

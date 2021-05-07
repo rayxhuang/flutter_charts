@@ -207,31 +207,35 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
             ),
 
             // Mini Canvas background
-            Positioned(
-              top: 0,
-              right: 0,
-              child: widget.displayMiniCanvas
-                  ? Container(
+            widget.displayMiniCanvas
+                ? Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
                     width: miniCanvasWidth,
                     height: miniCanvasHeight,
                     color: Colors.black12,
                   )
-                  : SizedBox()
-            ),
+                )
+                : SizedBox(),
 
             // Mini Canvas Data Bars
-            Positioned(
-              top: 0,
-              right: 0,
-              child: widget.displayMiniCanvas ? miniCanvasDataBars : SizedBox(),
-            ),
+            widget.displayMiniCanvas
+                ? Positioned(
+                  top: 0,
+                  right: 0,
+                  child:  miniCanvasDataBars,
+                )
+                : SizedBox(),
 
             // Mini Canvas in View Container
-            Positioned(
-              top: 0,
-              right: inViewContainerOffset * inViewContainerMovingDistance,
-              child: widget.displayMiniCanvas ? inViewContainerOnMiniCanvas : SizedBox(),
-            ),
+            widget.displayMiniCanvas
+                ? Positioned(
+                  top: 0,
+                  right: inViewContainerOffset * inViewContainerMovingDistance,
+                  child:  inViewContainerOnMiniCanvas,
+                )
+                : SizedBox(),
 
             // Bottom Axis
             Positioned(

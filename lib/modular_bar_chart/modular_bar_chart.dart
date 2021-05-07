@@ -23,6 +23,14 @@ class ModularBarChart extends StatelessWidget {
     this.style = const BarChartStyle(),
   }) : assert(data != null);
 
+  ModularBarChart copyWith({
+    BarChartStyle style,
+  }) => ModularBarChart._(
+    data: this.data,
+    style: style ?? this.style,
+    type: this.type
+  );
+
   factory ModularBarChart.ungrouped({
     @required Map<String, double> data,
     BarChartStyle style,
