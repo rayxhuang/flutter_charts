@@ -5,6 +5,18 @@ Map<String, double> sampleData2 =  {
   'D': 5.5,
   'G': 10.5,
   'F': 8,
+  'A1': 12,
+  'C1': 34,
+  'B1': 17,
+  'D1': 25.5,
+  'G1': 10.5,
+  'F1': 28,
+  'A2': 22,
+  'C2': 14,
+  'B2': 27,
+  'D2': 35.5,
+  'G2': 20.5,
+  'F2': 18,
 };
 
 Map<String, Map<String, double>> sampleData3 =  {

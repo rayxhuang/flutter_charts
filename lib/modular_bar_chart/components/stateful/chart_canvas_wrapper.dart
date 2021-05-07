@@ -6,7 +6,7 @@ import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 import 'package:flutter_charts/modular_bar_chart/data/textSizeInfo.dart';
 import 'package:flutter_charts/modular_bar_chart/components/chart_single_group_canvas.dart';
-import '../chart_canvas_mini.dart';
+import '../chart_mini_canvas.dart';
 import 'chart_axis.dart';
 
 class ChartCanvasWrapper extends StatefulWidget {
@@ -158,10 +158,10 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
                   builder: (context) {
                     final String separatedGroupName = data.type == BarChartType.GroupedSeparated
                         ? bar.separatedGroupName
-                        : data.xGroups[index];
+                        : bar.group;
                     final String detailString = (data.type == BarChartType.Ungrouped)
                         ? '${bar.group}: ${bar.data.toStringAsFixed(2)}'
-                        : '${bar.group}\n$separatedGroupName: ${bar.data.toStringAsFixed(2)}';
+                        : '$separatedGroupName\n${data.xGroups[index]}: ${bar.data.toStringAsFixed(2)}';
                     final TextStyle detailTextStyle = const TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.normal,

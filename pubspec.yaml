@@ -27,8 +27,6 @@ dependencies:
   provider: 5.0.0
   touchable: 1.0.0
   equatable: ^2.0.0
-  vector_math: ^2.1.0
-  fl_chart: ^0.35.0
 
 
   # The following adds the Cupertino Icons font to your application.

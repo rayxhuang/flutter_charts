@@ -5,6 +5,7 @@ import 'package:flutter_charts/modular_bar_chart/data/sample_data.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 import 'package:flutter_charts/modular_bar_chart/modular_bar_chart.dart';
+import 'package:touchable/touchable.dart';
 
 void main() { runApp(MyApp()); }
 
@@ -268,9 +269,37 @@ class MyHomePage extends StatelessWidget {
                 ),
               ),
             ),
+            // TODO fix bug in not touchable when not in scroll view
+            // Container(
+            //   child: CanvasTouchDetector(
+            //     builder: (BuildContext context) {
+            //       return CustomPaint(
+            //         painter: c(context),
+            //       );
+            //     },
+            //   ),
+            // )
           ],
         ),
       ),
     );
   }
+}
+
+// TODO fix bug in not touchable when not in scroll view
+class c extends CustomPainter {
+  final BuildContext context;
+
+  c(this.context);
+  @override
+  void paint(Canvas canvas, Size size) {
+    Rect r = Rect.fromPoints(Offset(0,0), Offset(size.width, size.height));
+    var ca = TouchyCanvas(context, canvas);
+    ca.drawRect(r, Paint()..color = Colors.blue,
+    onTapDown: (details){ print(details.globalPosition); });
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  
 }
