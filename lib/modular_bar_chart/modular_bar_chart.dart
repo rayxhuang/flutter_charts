@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
-import 'package:flutter_charts/modular_bar_chart/mixin/stringSizeMixin.dart';
+import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
 import 'package:provider/provider.dart';
 import 'components/chart_axis.dart';
 import 'components/chart_legend.dart';
@@ -124,8 +124,7 @@ class ModularBarChart extends StatelessWidget with StringSize {
         Size leftAxisSize = Size.zero,
             titleSize = Size.zero,
             canvasSize = Size.zero,
-            bottomLabelSize = Size.zero,
-            rightAxisSize = Size.zero;
+            bottomLabelSize = Size.zero;
         final double parentHeight = constraint.maxHeight < double.infinity
             ? constraint.maxHeight
             : MediaQuery.of(context).size.height;
@@ -198,8 +197,8 @@ class ModularBarChart extends StatelessWidget with StringSize {
           data.adjustAxisValueRange(
             canvasHeight,
             valueRangeToBeAdjusted: data.y2ValueRange,
-            start: style.y1AxisStyle.preferredStartValue,
-            end: style.y1AxisStyle.preferredEndValue,
+            start: style.y2AxisStyle.preferredStartValue,
+            end: style.y2AxisStyle.preferredEndValue,
           );
         }
         data.populateDataWithMinimumValue();
@@ -244,7 +243,6 @@ class ModularBarChart extends StatelessWidget with StringSize {
           axisHeight: canvasHeight,
           isRightAxis: true,
         );
-        rightAxisSize = rightAxis.size(data.y2ValueRange[2], style.y2AxisStyle);
 
         // TODO Too small to have a canvas?
         return SizedBox(

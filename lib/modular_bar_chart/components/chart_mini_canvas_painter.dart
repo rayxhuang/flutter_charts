@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
-import 'package:flutter_charts/modular_bar_chart/mixin/drawingMixin.dart';
+import 'package:flutter_charts/modular_bar_chart/mixin/drawing_mixin.dart';
 
 @immutable
 class MiniCanvasPainter extends CustomPainter with Drawing{

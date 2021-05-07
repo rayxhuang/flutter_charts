@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:equatable/equatable.dart';
 
-import 'package:flutter_charts/modular_bar_chart/mixin/stringSizeMixin.dart';
+import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
 import 'bar_chart_style.dart';
 
 enum BarChartType {Ungrouped, Grouped, GroupedStacked, GroupedSeparated, Grouped3D}
