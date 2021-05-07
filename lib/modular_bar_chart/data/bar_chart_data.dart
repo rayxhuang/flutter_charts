@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:equatable/equatable.dart';
 
-import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/textSizeInfo.dart';
+import 'textSizeInfo.dart';
 import 'bar_chart_style.dart';
 
 enum BarChartType {Ungrouped, Grouped, GroupedStacked, GroupedSeparated, Grouped3D}
@@ -14,14 +14,6 @@ class ModularBarChartData{
   final bool sortXAxis;
   final Comparator<String> xGroupComparator;
   Map<String, Color> subGroupColors;
-
-  // Data processing variables
-  List<String> xGroups = [], xSubGroups = [];
-  List<double> _y1Values = [], _y2Values = [], y1ValueRange = [0, 0, 0], y2ValueRange = [0, 0, 0];
-  List<BarChartDataDouble> bars = [], points = [];
-  List<BarChartDataDoubleGrouped> groupedBars = [];
-  int numInGroups = 1;
-  double valueOnBarHeight;
 
   ModularBarChartData._({
     this.rawData,
@@ -82,6 +74,14 @@ class ModularBarChartData{
     subGroupColors: subGroupColors,
   );
 
+  // Data processing variables
+  List<String> xGroups = [], xSubGroups = [];
+  List<double> _y1Values = [], _y2Values = [], y1ValueRange = [0, 0, 0], y2ValueRange = [0, 0, 0];
+  List<BarChartDataDouble> bars = [], points = [];
+  List<BarChartDataDoubleGrouped> groupedBars = [];
+  int numInGroups = 1;
+  double valueOnBarHeight;
+
   void analyseData() {
     // Sort X Axis
     xGroups = rawData.keys.toList();
@@ -109,10 +109,10 @@ class ModularBarChartData{
           for (int i = 0; i < 2; i++) {
             if (i == 0) {
               _y1Values.add(map[xSubGroups[i]]);
-              bars.add(BarChartDataDouble(group: xSubGroups[i], data: map[xSubGroups[i]]));
+              bars.add(BarChartDataDouble(group: key, data: map[xSubGroups[i]], separatedGroupName: xSubGroups[i]));
             } else {
               _y2Values.add(map[xSubGroups[i]]);
-              points.add(BarChartDataDouble(group: xSubGroups[i], data: map[xSubGroups[i]]));
+              points.add(BarChartDataDouble(group: key, data: map[xSubGroups[i]], separatedGroupName: xSubGroups[i]));
             }
           }
         });
@@ -172,7 +172,7 @@ class ModularBarChartData{
     String max = valueRangeToBeAdjusted[1].toStringAsExponential();
     int expInt = int.tryParse(max.substring(max.indexOf('e+') + 2));
     num exp = pow(10, expInt - 1);
-    double value = (((valueRangeToBeAdjusted[1] * (1 + (valueOnBarHeight) / yAxisHeight) / exp).ceil() + 2) * exp).toDouble();
+    double value = (((valueRangeToBeAdjusted[1] * (1 + (valueOnBarHeight) / yAxisHeight) / exp).ceil() + 5) * exp).toDouble();
     end >= value
         ? valueRangeToBeAdjusted[2] = end
         : valueRangeToBeAdjusted[2] = value;
@@ -196,8 +196,10 @@ class ModularBarChartData{
   }
 }
 
+@immutable
 class BarChartDataDouble extends Equatable{
   final String group;
+  final String separatedGroupName;
   final double data;
   final BarChartBarStyle style;
 
@@ -205,6 +207,7 @@ class BarChartDataDouble extends Equatable{
     @required this.group,
     @required this.data,
     this.style,
+    this.separatedGroupName = '',
   });
 
   @override
@@ -214,6 +217,7 @@ class BarChartDataDouble extends Equatable{
   List<Object> get props => [this.group, this.data, this.style];
 }
 
+@immutable
 class BarChartDataDoubleGrouped {
   final String mainGroup;
   final List<BarChartDataDouble> dataList;
@@ -224,6 +228,28 @@ class BarChartDataDoubleGrouped {
   });
 }
 
+@immutable
+class DataForBarToBeDrawnLast {
+  final BarChartDataDouble data;
+  final double x1;
+  final double x2;
+  final double y1;
+  final double y2;
+  final Paint paint;
+  final bool isLastInStack;
+
+  const DataForBarToBeDrawnLast({
+    this.data,
+    this.x1,
+    this.x2,
+    this.y1,
+    this.y2 = 0,
+    this.paint,
+    this.isLastInStack = false,
+  });
+}
+
+@immutable
 class BarChartLabel {
   final String text;
   final TextStyle textStyle;

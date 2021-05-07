@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/bar_chart_data.dart';
-import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/bar_chart_style.dart';
-import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/textSizeInfo.dart';
-import 'package:flutter_charts/modular_fancy_bar_chart/components/chart_split_canvas.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
+import 'package:flutter_charts/modular_bar_chart/data/textSizeInfo.dart';
+import 'package:flutter_charts/modular_bar_chart/components/chart_single_group_canvas.dart';
 import '../chart_canvas_mini.dart';
 import 'chart_axis.dart';
 
@@ -31,42 +31,37 @@ class ChartCanvasWrapper extends StatefulWidget {
 }
 
 class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTickerProviderStateMixin {
-  ModularBarChartData data;
-  BarChartStyle style;
-  int indexSelected;
+  // Interaction
+  int indexSelected, previousIndex;
   BarChartDataDouble barSelected;
   TapDownDetails tapDownDetails;
-  List<OverlayEntry> barDetailOverlay = [];
-  List<bool> needsRemoval = [];
-  int previousIndex = 0;
+  List<OverlayEntry> barDetailOverlay;
+  List<bool> needsRemoval;
 
-
+  // Controllers
   LinkedScrollControllerGroup _linkedScrollControllerGroup;
   ScrollController _scrollController1, _scrollController2;
-  double scrollOffset = 0;
-  double dataAnimationValue = 1;
+  double scrollOffset, dataAnimationValue;
   AnimationController _dataAnimationController;
-
-  Size canvasSize;
-  ChartAxisHorizontal bottomAxis;
-  Widget chartCanvas, miniCanvas, miniCanvasDataBars, inViewContainerOnMiniCanvas;
-  double miniCanvasWidth, miniCanvasHeight, xSectionLength;
 
   @override
   void initState() {
     super.initState();
+    barDetailOverlay = [];
+    needsRemoval = [];
+    previousIndex = 0;
+    scrollOffset = 0;
+    dataAnimationValue = 1;
 
     // Scrolling actions
     _linkedScrollControllerGroup = LinkedScrollControllerGroup();
     _scrollController1 = _linkedScrollControllerGroup.addAndGet();
     _scrollController2 = _linkedScrollControllerGroup.addAndGet();
     _linkedScrollControllerGroup.addOffsetChangedListener(() {
-      final double offset = _linkedScrollControllerGroup.offset / (bottomAxis.length - canvasSize.width);
-      setState(() {
-        scrollOffset = offset;
-      });
+      setState(() { scrollOffset = _linkedScrollControllerGroup.offset; });
     });
 
+    // Animation
     final BarChartAnimation animation = widget.style.animation;
     final Tween<double> _tween = Tween(begin: 0, end: 1);
     if (animation.animateData) {
@@ -82,91 +77,6 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
         });
       _dataAnimationController.forward();
     }
-
-    canvasSize = widget.canvasSize;
-    print('canvasSize: ${canvasSize.width}');
-    data = widget.data;
-    style = widget.style;
-    xSectionLength = getXSectionLengthFromBarWidth(data, widget.barWidth);
-    print(xSectionLength);
-
-    // Bottom Axis
-    bottomAxis = ChartAxisHorizontal(
-      axisLength: canvasSize.width,
-      xGroups: data.xGroups,
-      barWidth: style.barStyle.barWidth,
-      numBarsInGroup: data.numInGroups,
-      style: style,
-      scrollController: _scrollController1,
-    );
-
-    if (widget.displayMiniCanvas) {
-      // Mini Canvas
-      miniCanvasWidth = canvasSize.width * 0.2;
-      miniCanvasHeight = canvasSize.height * 0.2 + 3;
-      final Size miniCanvasSize = Size(miniCanvasWidth, miniCanvasHeight - 3);
-
-      inViewContainerOnMiniCanvas = Container(
-        width: (canvasSize.width / bottomAxis.length) * miniCanvasWidth,
-        height: miniCanvasHeight,
-        color: Colors.white12,
-      );
-
-      switch (data.type) {
-        case BarChartType.Ungrouped:
-          miniCanvasDataBars = Padding(
-            padding: const EdgeInsets.only(top: 3),
-            child: ChartCanvasMini.ungrouped(
-              canvasSize: miniCanvasSize,
-              length: canvasSize.width * 0.2,
-              xGroups: data.xGroups,
-              valueRange: data.y1ValueRange,
-              xSectionLength: canvasSize.width * 0.2  / data.xGroups.length,
-              bars: data.bars,
-              style: style,
-            ),
-          );
-          break;
-        case BarChartType.GroupedSeparated:
-          // TODO
-          miniCanvasDataBars = Padding(
-            padding: const EdgeInsets.only(top: 3),
-            child: ChartCanvasMini.grouped(
-              isStacked: data.type == BarChartType.GroupedStacked ? true: false,
-              canvasSize: miniCanvasSize,
-              length: canvasSize.width * 0.2,
-              xGroups: data.xGroups,
-              subGroups: data.xSubGroups,
-              subGroupColors: data.subGroupColors,
-              valueRange: data.y1ValueRange,
-              xSectionLength: canvasSize.width * 0.2  / data.xGroups.length,
-              groupedBars: data.groupedBars,
-              style: style,
-            ),
-          );
-          break;
-        case BarChartType.Grouped3D:
-        // TODO: Handle this case.
-          break;
-        default:
-          miniCanvasDataBars = Padding(
-            padding: const EdgeInsets.only(top: 3),
-            child: ChartCanvasMini.grouped(
-              isStacked: data.type == BarChartType.GroupedStacked ? true: false,
-              canvasSize: miniCanvasSize,
-              length: canvasSize.width * 0.2,
-              xGroups: data.xGroups,
-              subGroups: data.xSubGroups,
-              subGroupColors: data.subGroupColors,
-              valueRange: data.y1ValueRange,
-              xSectionLength: canvasSize.width * 0.2  / data.xGroups.length,
-              groupedBars: data.groupedBars,
-              style: style,
-            ),
-          );
-          break;
-      }
-    }
   }
 
   @override
@@ -178,6 +88,43 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
 
   @override
   Widget build(BuildContext context) {
+    final Size canvasSize = widget.canvasSize;
+    final ModularBarChartData data = widget.data;
+    final BarChartStyle style = widget.style;
+    final double xSectionLength = getXSectionLengthFromBarWidth(data: widget.data, style: widget.style, barWidth: widget.barWidth);
+    final double miniCanvasWidth = canvasSize.width * 0.2;
+    final double miniCanvasHeight = canvasSize.height * 0.2 + 3;
+    final Size miniCanvasContainerSize = Size(miniCanvasWidth, miniCanvasHeight - 3);
+
+    // Bottom Axis
+    final ChartAxisHorizontal bottomAxis = ChartAxisHorizontal(
+      axisLength: canvasSize.width,
+      xGroups: data.xGroups,
+      barWidth: style.barStyle.barWidth,
+      numBarsInGroup: data.numInGroups,
+      style: style,
+      scrollController: _scrollController1,
+    );
+
+    final double inViewContainerOffset = (1 - scrollOffset / (bottomAxis.length - widget.canvasSize.width));
+    Widget inViewContainerOnMiniCanvas, miniCanvasDataBars, chartCanvas;
+    if (widget.displayMiniCanvas) {
+      // Mini Canvas
+      inViewContainerOnMiniCanvas = Container(
+        width: (canvasSize.width / bottomAxis.length) * miniCanvasWidth,
+        height: miniCanvasHeight,
+        color: Colors.white12,
+      );
+
+      miniCanvasDataBars = Padding(
+        padding: const EdgeInsets.only(top: 3),
+        child: ChartCanvasMini(
+          containerSize: miniCanvasContainerSize,
+          canvasSize: Size(bottomAxis.length, widget.canvasSize.height),
+        ),
+      );
+    }
+
     chartCanvas = SizedBox.fromSize(
       size: canvasSize,
       child: ListView.builder(
@@ -196,7 +143,7 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
             onBarSelected: (index, bar, details) async {
               setState(() {
                 OverlayState overlayState = Overlay.of(context);
-                //print('Selected index: $index, group:${data.xGroups[index]}, $bar');
+                // Remove all the previous overlays
                 for (int i = previousIndex; i < barDetailOverlay.length; i++) {
                   if (needsRemoval[i]) {
                     barDetailOverlay[i].remove();
@@ -209,38 +156,25 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
                 tapDownDetails = details;
                 final currentBarDetailOverlay = OverlayEntry(
                   builder: (context) {
-                    final String detail = (data.type == BarChartType.Ungrouped)
+                    final String separatedGroupName = data.type == BarChartType.GroupedSeparated
+                        ? bar.separatedGroupName
+                        : data.xGroups[index];
+                    final String detailString = (data.type == BarChartType.Ungrouped)
                         ? '${bar.group}: ${bar.data.toStringAsFixed(2)}'
-                        : '${bar.group}\n${data.xGroups[index]}: ${bar.data.toStringAsFixed(2)}';
+                        : '${bar.group}\n$separatedGroupName: ${bar.data.toStringAsFixed(2)}';
                     final TextStyle detailTextStyle = const TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.normal,
                       fontSize: 14,
                     );
-                    final double width = getSizeOfString(detail, detailTextStyle) + 16;
-                    final double height = getSizeOfString(detail, detailTextStyle, isHeight: true) + 10;
-                    return Positioned(
-                      top: details.globalPosition.dy - height - 5,
-                      left: details.globalPosition.dx - width / 2,
-                      child: FittedBox(
-                        child: Material(
-                          type: MaterialType.canvas,
-                          color: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 5,
-                              horizontal: 8,
-                            ),
-                            child: Text(
-                              detail,
-                              style: detailTextStyle,
-                            ),
-                          ),
-                        ),
-                      ),
+                    final double width = getSizeOfString(detailString, detailTextStyle) + 16;
+                    final double height = getSizeOfString(detailString, detailTextStyle, isHeight: true) + 10;
+                    return _buildOverlay(
+                      tapDownDetails: details,
+                      height: height,
+                      width: width,
+                      detailString: detailString,
+                      detailTextStyle: detailTextStyle,
                     );
                   }
                 );
@@ -263,7 +197,7 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
         size: widget.size,
         child: Stack(
           children: [
-            // Canvas
+            // Main Canvas
             Positioned(
               top: 0,
               left: 0,
@@ -295,7 +229,7 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
             // Mini Canvas in View Container
             Positioned(
               top: 0,
-              right: (1 - scrollOffset) * inViewContainerMovingDistance,
+              right: inViewContainerOffset * inViewContainerMovingDistance,
               child: widget.displayMiniCanvas ? inViewContainerOnMiniCanvas : SizedBox(),
             ),
 
@@ -311,6 +245,38 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
     );
   }
 
+  Widget _buildOverlay({
+    TapDownDetails tapDownDetails,
+    double height,
+    double width,
+    String detailString,
+    TextStyle detailTextStyle,
+  }) {
+    return Positioned(
+      top: tapDownDetails.globalPosition.dy - height - 5,
+      left: tapDownDetails.globalPosition.dx - width / 2,
+      child: FittedBox(
+        child: Material(
+          type: MaterialType.canvas,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: 5,
+              horizontal: 8,
+            ),
+            child: Text(
+              detailString,
+              style: detailTextStyle,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  
   void registerRemoval(int i) async {
     await Future.delayed(const Duration(seconds: 2)).then((_) => {
       if (needsRemoval[i]) {
@@ -320,7 +286,11 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
     });
   }
 
-  double getXSectionLengthFromBarWidth(ModularBarChartData data, double barWidth) {
+  double getXSectionLengthFromBarWidth({
+    @required ModularBarChartData data,
+    @required BarChartStyle style,
+    @required double barWidth,
+  }) {
     int numBarsInGroup = (data.type == BarChartType.Ungrouped || data.type == BarChartType.GroupedStacked || data.type == BarChartType.GroupedSeparated)
         ? 1
         : data.xSubGroups.length;

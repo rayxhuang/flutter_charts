@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/bar_chart_data.dart';
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 
 typedef Comparator<T> = int Function(T a, T b);
 enum BarChartBarShape {Rectangle, RoundedRectangle}

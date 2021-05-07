@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
-import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/bar_chart_data.dart';
-import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/bar_chart_style.dart';
 import 'package:touchable/touchable.dart';
+
+import 'package:flutter_charts/modular_bar_chart/mixin/drawingMixin.dart';
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 
 @immutable
 class GroupedBars extends StatelessWidget {
@@ -54,82 +55,8 @@ class GroupedBars extends StatelessWidget {
   }
 }
 
-// class GroupedBars extends StatefulWidget {
-//   final Size size;
-//   final int groupIndex;
-//   final bool isSelected;
-//   final BarChartDataDouble barSelected;
-//   //final double barAnimationFraction;
-//   final AnimationController animation;
-//   final Function(int, BarChartDataDouble, TapDownDetails) onBarSelected;
-//
-//   const GroupedBars({
-//     this.size,
-//     this.groupIndex,
-//     this.isSelected,
-//     this.barSelected,
-//     //this.barAnimationFraction,
-//     this.animation,
-//     this.onBarSelected,
-//   });
-//
-//   @override
-//   _GroupedBarsState createState() => _GroupedBarsState();
-// }
-//
-// class _GroupedBarsState extends State<GroupedBars> {
-//   double barAnimationFraction;
-//   BarChartDataDouble selectedBar;
-//   final key = GlobalKey();
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     barAnimationFraction = widget.animation.value;
-//     widget.animation.addListener(() {
-//       setState(() {
-//         barAnimationFraction = widget.animation.value;
-//       });
-//     });
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final ModularBarChartData dataModel = context.read<ModularBarChartData>();
-//     final BarChartStyle style = context.read<BarChartStyle>();
-//     return Tooltip(
-//       key: key,
-//       //message: barSelected.toString(),
-//       message: 'hi',
-//       child: CanvasTouchDetector(
-//         builder: (BuildContext context) {
-//           return CustomPaint(
-//             painter: SingleGroupDataPainter(
-//               context: context,
-//               dataModel: dataModel,
-//               dataIndex: widget.groupIndex,
-//               style: style,
-//               xSectionLength: widget.size.width,
-//               barAnimationFraction: barAnimationFraction,
-//               onBarSelected: (data, details) {
-//                 widget.onBarSelected(widget.groupIndex, data, details);
-//                 print('called');
-//                 final dynamic tooltip = key.currentState;
-//                 tooltip.ensureTooltipVisible();
-//               },
-//               groupSelected: widget.isSelected ? true : false,
-//               barSelected: widget.barSelected,
-//             ),
-//             size: widget.size,
-//           );
-//         },
-//       ),
-//     );
-//   }
-// }
-
 @immutable
-class SingleGroupDataPainter extends CustomPainter {
+class SingleGroupDataPainter extends CustomPainter with Drawing{
   final BuildContext context;
   final double xSectionLength;
   final double barWidth;
@@ -197,13 +124,6 @@ class SingleGroupDataPainter extends CustomPainter {
     }
   }
 
-  @override
-  bool shouldRepaint(covariant SingleGroupDataPainter oldDelegate) {
-    return oldDelegate.barAnimationFraction != barAnimationFraction
-    || oldDelegate.groupSelected != groupSelected
-    || oldDelegate.barSelected != barSelected;
-  }
-
   void drawUngroupedData({
     @required Canvas originCanvas,
     @required TouchyCanvas canvas,
@@ -222,15 +142,16 @@ class SingleGroupDataPainter extends CustomPainter {
       double x1 = x1FromBottomLeft - 2;
       double x2 = x2FromBottomLeft + 2;
       double y = y1FromBottomLeft + 2;
-      drawHighlight(
+      drawBarHighlight(
         canvas: originCanvas,
         bottomLeft: bottomLeft,
         x1: x1,
         x2: x2,
         y1: y,
+        barAnimationFraction: barAnimationFraction,
       );
     }
-    drawBar(
+    drawTouchableBar(
       canvas: canvas,
       data: bar,
       bottomLeft: bottomLeft,
@@ -239,6 +160,10 @@ class SingleGroupDataPainter extends CustomPainter {
       y1: y1FromBottomLeft,
       style: style.barStyle,
       paint: paint,
+      barAnimationFraction: barAnimationFraction,
+      onBarSelected: (data, details) {
+        onBarSelected(data, details);
+      },
     );
 
     if (barAnimationFraction == 1) {
@@ -248,6 +173,7 @@ class SingleGroupDataPainter extends CustomPainter {
         bottomLeft: bottomLeft,
         x1: x1FromBottomLeft,
         y1: y1FromBottomLeft,
+        barWidth: barWidth,
       );
     }
   }
@@ -274,7 +200,6 @@ class SingleGroupDataPainter extends CustomPainter {
       double y1FromBottomLeft = (data[i].data - dataModel.y1ValueRange[0]) / y1UnitPerPixel;
 
       if (groupSelected && data[i] == barSelected) {
-        print('I am selected ${data[i]}');
         savedBar = DataForBarToBeDrawnLast(
           data: data[i],
           x1: x1FromBottomLeft,
@@ -284,7 +209,7 @@ class SingleGroupDataPainter extends CustomPainter {
         );
       }
 
-      drawBar(
+      drawTouchableBar(
         canvas: canvas,
         data: data[i],
         bottomLeft: bottomLeft,
@@ -293,6 +218,10 @@ class SingleGroupDataPainter extends CustomPainter {
         y1: y1FromBottomLeft,
         style: style.barStyle,
         paint: paint,
+        barAnimationFraction: barAnimationFraction,
+        onBarSelected: (data, details) {
+          onBarSelected(data, details);
+        },
       );
 
       if (barAnimationFraction == 1) {
@@ -302,19 +231,21 @@ class SingleGroupDataPainter extends CustomPainter {
           bottomLeft: bottomLeft,
           x1: x1FromBottomLeft,
           y1: y1FromBottomLeft,
+          barWidth: barWidth,
         );
       }
     }
 
     if (savedBar != null) {
-      drawHighlight(
+      drawBarHighlight(
         canvas: originCanvas,
         bottomLeft: bottomLeft,
         x1: savedBar.x1 - 2,
         x2: savedBar.x2 + 2,
         y1: savedBar.y1 + 2,
+        barAnimationFraction: barAnimationFraction,
       );
-      drawBar(
+      drawTouchableBar(
         canvas: canvas,
         data: savedBar.data,
         bottomLeft: bottomLeft,
@@ -323,6 +254,10 @@ class SingleGroupDataPainter extends CustomPainter {
         y1: savedBar.y1,
         style: style.barStyle,
         paint: savedBar.paint,
+        barAnimationFraction: barAnimationFraction,
+        onBarSelected: (data, details) {
+          onBarSelected(data, details);
+        },
       );
     }
   }
@@ -338,8 +273,7 @@ class SingleGroupDataPainter extends CustomPainter {
     //Draw data as bars on grid
     final List<BarChartDataDouble> data = dataModel.groupedBars[dataIndex].dataList;
     DataForBarToBeDrawnLast savedBar;
-    bool lastBarIsHighlighted = false;
-    double totalHeight = 0, previousYValue = 0, lastBarX1, lastBarY1, valueOnBarDistanceUp = 0;
+    double totalHeight = 0, previousYValue = 0, lastBarX1, lastBarY1;
     data.forEach((data) { totalHeight += data.data; });
     for (int i = data.length - 1; i >= 0; i--) {
       // Grouped Data must use grouped Color
@@ -366,7 +300,7 @@ class SingleGroupDataPainter extends CustomPainter {
         );
       }
 
-      drawBar(
+      drawTouchableBar(
         canvas: canvas,
         data: data[i],
         bottomLeft: bottomLeft,
@@ -376,12 +310,16 @@ class SingleGroupDataPainter extends CustomPainter {
         style: style.barStyle,
         paint: paint,
         last: false,
+        barAnimationFraction: barAnimationFraction,
+        onBarSelected: (data, details) {
+          onBarSelected(data, details);
+        },
       );
 
       previousYValue += data[i].data;
 
       if (savedBar != null) {
-        drawHighlight(
+        drawBarHighlight(
           canvas: originCanvas,
           bottomLeft: bottomLeft,
           x1: savedBar.x1 - 2,
@@ -389,8 +327,9 @@ class SingleGroupDataPainter extends CustomPainter {
           y1: savedBar.y1 + 2,
           y2: savedBar.y2 - (savedBar.isLastInStack ? 0 : 2),
           isStacked: true,
+          barAnimationFraction: barAnimationFraction,
         );
-        drawBar(
+        drawTouchableBar(
           canvas: canvas,
           data: savedBar.data,
           bottomLeft: bottomLeft,
@@ -400,6 +339,10 @@ class SingleGroupDataPainter extends CustomPainter {
           y2: savedBar.y2,
           style: style.barStyle,
           paint: savedBar.paint,
+          barAnimationFraction: barAnimationFraction,
+          onBarSelected: (data, details) {
+            onBarSelected(data, details);
+          },
         );
       }
     }
@@ -411,6 +354,7 @@ class SingleGroupDataPainter extends CustomPainter {
         bottomLeft: bottomLeft,
         x1: lastBarX1,
         y1: lastBarY1,
+        barWidth: barWidth,
       );
     }
   }
@@ -434,7 +378,6 @@ class SingleGroupDataPainter extends CustomPainter {
     Paint paint = Paint();
     final BarChartDataDouble current = dataModel.points[dataIndex];
     //Draw data as bars on grid
-    //paint..color = style.barStyle.color;
     paint..color = Colors.blue;
     paint..strokeWidth = 2;
     double x1FromBottomLeft = style.groupMargin + barWidth / 2;
@@ -446,6 +389,7 @@ class SingleGroupDataPainter extends CustomPainter {
       center: currentPosition,
       radius: 4,
       paint: paint,
+      onBarSelected: (data, details) { onBarSelected(data, details); },
     );
 
     BarChartDataDouble previous, next;
@@ -480,119 +424,15 @@ class SingleGroupDataPainter extends CustomPainter {
         center: currentPosition,
         radius: 6,
         paint: paint,
+        onBarSelected: (data, details) { onBarSelected(data, details); },
       );
     }
   }
 
-  void drawBar({
-    @required TouchyCanvas canvas,
-    @required BarChartDataDouble data,
-    @required Offset bottomLeft,
-    @required double x1,
-    @required double x2,
-    @required double y1,
-    @required BarChartBarStyle style,
-    @required Paint paint,
-    double y2 = 0,
-    bool last = true,
-  }) {
-    Rect rect = Rect.fromPoints(
-      bottomLeft.translate(x1, -y1 * barAnimationFraction),
-      //bottomLeft.translate(x1, -y1 * 1),
-      bottomLeft.translate(x2, -y2)
-    );
-    if (style.shape == BarChartBarShape.RoundedRectangle && last) {
-      canvas.drawRRect(
-        RRect.fromRectAndCorners(
-          rect,
-          topLeft: style.topLeft,
-          topRight: style.topRight,
-          bottomLeft: style.bottomLeft,
-          bottomRight: style.bottomRight,
-        ),
-        paint,
-      );
-    } else {
-      canvas.drawRect(
-        rect,
-        paint,
-        onTapDown: (details) {
-          onBarSelected(data, details);
-        }
-      );
-    }
+  @override
+  bool shouldRepaint(covariant SingleGroupDataPainter oldDelegate) {
+    return oldDelegate.barAnimationFraction != barAnimationFraction
+        || oldDelegate.groupSelected != groupSelected
+        || oldDelegate.barSelected != barSelected;
   }
-
-  void drawValueOnBar({
-    @required Canvas canvas,
-    @required String value,
-    @required Offset bottomLeft,
-    @required double x1,
-    @required double y1, 
-    TextStyle textStyle = const TextStyle(color: Colors.white),
-  }) {
-    TextPainter valuePainter = TextPainter(
-      text: TextSpan(
-        text: value,
-        // TODO style
-        style: textStyle,
-      ),
-      ellipsis: '..',
-      textDirection: TextDirection.ltr,
-    );
-    valuePainter.layout(maxWidth: barWidth);
-    valuePainter.paint(canvas, bottomLeft.translate(x1 + barWidth / 2 - valuePainter.width / 2, -y1 - valuePainter.height));
-  }
-
-  void drawPoint({
-    @required TouchyCanvas canvas,
-    @required BarChartDataDouble data,
-    @required Offset center,
-    @required double radius,
-    @required Paint paint,
-  }) {
-    canvas.drawCircle(
-      center,
-      radius,
-      paint,
-      onTapDown: (details) { onBarSelected(data, details); }
-    );
-  }
-
-  void drawHighlight({
-    @required Canvas canvas,
-    @required Offset bottomLeft,
-    @required double x1,
-    @required double x2,
-    @required double y1,
-    double y2 = 0,
-    bool isStacked = false,
-  }) {
-    final Rect rect = Rect.fromPoints(
-      bottomLeft.translate(x1, -y1 * barAnimationFraction),
-      bottomLeft.translate(x2, -y2)
-    );
-    canvas.drawRect(rect, Paint()..color = Colors.lightBlueAccent);
-  }
-}
-
-@immutable
-class DataForBarToBeDrawnLast {
-  final BarChartDataDouble data;
-  final double x1;
-  final double x2;
-  final double y1;
-  final double y2;
-  final Paint paint;
-  final bool isLastInStack;
-
-  const DataForBarToBeDrawnLast({
-    this.data,
-    this.x1,
-    this.x2,
-    this.y1,
-    this.y2 = 0,
-    this.paint,
-    this.isLastInStack = false,
-  });
 }
