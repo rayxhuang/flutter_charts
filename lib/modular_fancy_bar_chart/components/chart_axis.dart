@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/bar_chart_data.dart';
 import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/bar_chart_style.dart';
 import 'package:flutter_charts/modular_fancy_bar_chart/bar_chart_data_class/textSizeInfo.dart';
+import 'package:vector_math/vector_math_64.dart' as matrix;
 
 @immutable
 class HorizontalAxisPainter extends CustomPainter {
@@ -74,8 +75,9 @@ class HorizontalAxisPainter extends CustomPainter {
 class ChartAxisVerticalWithLabel extends StatelessWidget {
   // This widget display the label and data of a vertical axis
   final double axisHeight;
+  final bool isRightAxis;
 
-  ChartAxisVerticalWithLabel({ @required this.axisHeight, });
+  ChartAxisVerticalWithLabel({ @required this.axisHeight, this.isRightAxis = false });
 
   Size size(double maxValue, AxisStyle axisStyle) => Size(getWidth(axisStyle.label.text, maxValue, axisStyle), axisHeight);
 
@@ -88,26 +90,29 @@ class ChartAxisVerticalWithLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AxisStyle axisStyle = context.read<BarChartStyle>().yAxisStyle;
-    final List<double> yValueRange = context.read<ModularBarChartData>().yValueRange;
+    final List<double> yValueRange = isRightAxis
+        ? context.read<ModularBarChartData>().y2ValueRange
+        : context.read<ModularBarChartData>().y1ValueRange;
     return SizedBox(
       height: axisHeight,
       width: getWidth(axisStyle.label.text, yValueRange[2], axisStyle),
       child: Row(
         children: [
-          RotatedBox(
-            // TODO 1 or 3
-            quarterTurns: 1,
-            child: SizedBox(
-              width: axisHeight,
-              height: labelWidth(axisStyle.label),
-              child: Center(
-                child: Text(
-                  axisStyle.label.text,
-                  style: axisStyle.label.textStyle,
+          isRightAxis
+              ? SizedBox()
+              : RotatedBox(
+                quarterTurns: 1,
+                child: SizedBox(
+                  width: axisHeight,
+                  height: labelWidth(axisStyle.label),
+                  child: Center(
+                    child: Text(
+                      axisStyle.label.text,
+                      style: axisStyle.label.textStyle,
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
           SizedBox(
             width: axisWidth(yValueRange[2], axisStyle),
             height: axisHeight,
@@ -115,9 +120,25 @@ class ChartAxisVerticalWithLabel extends StatelessWidget {
               painter: VerticalAxisPainter(
                 valueRange: yValueRange,
                 axisStyle: axisStyle,
+                isLeft: isRightAxis ? false : true,
               ),
             ),
           ),
+          isRightAxis
+              ? RotatedBox(
+                quarterTurns: 3,
+                child: SizedBox(
+                  width: axisHeight,
+                  height: labelWidth(axisStyle.label),
+                  child: Center(
+                    child: Text(
+                      axisStyle.label.text,
+                      style: axisStyle.label.textStyle,
+                    ),
+                  ),
+                ),
+              )
+              : SizedBox(),
         ],
       )
     );
@@ -133,7 +154,7 @@ class VerticalAxisPainter extends CustomPainter {
   const VerticalAxisPainter({
     @required this.valueRange,
     @required this.axisStyle,
-    this.isLeft = true,
+    @required this.isLeft,
   }) : assert(valueRange != null);
 
   @override
@@ -145,8 +166,8 @@ class VerticalAxisPainter extends CustomPainter {
     axisPaint..strokeCap = axisStyle.strokeCap;
     axisPaint..strokeCap = StrokeCap.square;
 
-    final Offset start = Offset(size.width, 0);
-    final Offset end = Offset(size.width, size.height);
+    final Offset start = Offset(isLeft ? size.width : 0, 0);
+    final Offset end = Offset(isLeft ? size.width : 0, size.height);
     canvas.drawLine(start, end, axisPaint);
 
     final TickStyle tick = axisStyle.tickStyle;
@@ -168,9 +189,9 @@ class VerticalAxisPainter extends CustomPainter {
     if (!tick.onlyShowTicksAtTwoSides) {
       int _numTicksBetween = axisStyle.numTicks - 2;
       for (int i = 1; i < _numTicksBetween + 1; i++) {
-        p1 = end.translate(0, -(i * lengthPerTick));    // p1 is the point on axis
-        p2 = p1.translate(-tick.tickLength, 0);         // p2 is the point at the end of each tick
-        p3 = p2.translate(-tick.tickMargin, 0);         // p3 is p2 + margin set by user
+        p1 = end.translate(0, -1 * i * lengthPerTick);                     // p1 is the point on axis
+        p2 = p1.translate((isLeft ? -1 : 1) * tick.tickLength, 0);         // p2 is the point at the end of each tick
+        p3 = p2.translate((isLeft ? -1 : 1) * tick.tickMargin, 0);         // p3 is p2 + margin set by user
 
         //Draw the tick line
         canvas.drawLine(p1, p2, tickPaint);
@@ -178,31 +199,31 @@ class VerticalAxisPainter extends CustomPainter {
         _textPainter.text = TextSpan(text: '$value', style: tickTextStyle,);
         _textPainter.layout();
         //Draw the tick value text
-        _textPainter.paint(canvas, p3.translate(-(_textPainter.width), -(_textPainter.height / 2)));
+        _textPainter.paint(canvas, p3.translate((isLeft ? -1 : 0) * _textPainter.width, -(_textPainter.height / 2)));
       }
     }
 
     //Draw start value
     p1 = end;
-    p2 = p1.translate(-(tick.tickLength), 0);
-    p3 = p2.translate(-tick.tickMargin, 0);
+    p2 = p1.translate((isLeft ? -1 : 1) * tick.tickLength, 0);
+    p3 = p2.translate((isLeft ? -1 : 1) * tick.tickMargin, 0);
     canvas.drawLine(p1, p2, tickPaint);
     final String startText = yMin.toStringAsFixed(tick.tickDecimal);
     _textPainter.text = TextSpan(text: '$startText', style: tickTextStyle,);
     _textPainter.layout();
-    _textPainter.paint(canvas, p3.translate(-(_textPainter.width), -(_textPainter.height / 2)));
+    _textPainter.paint(canvas, p3.translate((isLeft ? -1 : 0) * _textPainter.width, -(_textPainter.height / 2)));
 
     //Draw end value
     p1 = start;
-    p2 = p1.translate(-(tick.tickLength), 0);
-    p3 = p2.translate(-tick.tickMargin, 0);
+    p2 = p1.translate((isLeft ? -1 : 1) * tick.tickLength, 0);
+    p3 = p2.translate((isLeft ? -1 : 1) * tick.tickMargin, 0);
     canvas.drawLine(p1, p2, tickPaint);
     String endText;
     //If the user want last tick to show unit as text
     endText = yMax.toStringAsFixed(tick.tickDecimal);
     _textPainter.text = TextSpan(text: '$endText', style: tickTextStyle,);
     _textPainter.layout();
-    p4 = p3.translate(-(_textPainter.width), -(_textPainter.height / 2));
+    p4 = p3.translate((isLeft ? -1 : 0) * _textPainter.width, -(_textPainter.height / 2));
     _textPainter.paint(canvas, p4);
   }
 

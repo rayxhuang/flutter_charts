@@ -17,8 +17,8 @@ class ModularBarChartData{
 
   // Data processing variables
   List<String> xGroups = [], xSubGroups = [];
-  List<double> _y1Values = [], _y2Values = [], yValueRange = [0, 0, 0];
-  List<BarChartDataDouble> bars = [];
+  List<double> _y1Values = [], _y2Values = [], y1ValueRange = [0, 0, 0], y2ValueRange = [0, 0, 0];
+  List<BarChartDataDouble> bars = [], points = [];
   List<BarChartDataDoubleGrouped> groupedBars = [];
   int numInGroups = 1;
   double valueOnBarHeight;
@@ -69,6 +69,19 @@ class ModularBarChartData{
     subGroupColors: subGroupColors,
   );
 
+  factory ModularBarChartData.groupedSeparated({
+    @required Map<String, Map<String, double>> rawData,
+    bool sortXAxis = false,
+    Comparator<String> xGroupComparator,
+    Map<String, Color> subGroupColors,
+  }) => ModularBarChartData._(
+    rawData: rawData,
+    type: BarChartType.GroupedSeparated,
+    sortXAxis: sortXAxis,
+    xGroupComparator: xGroupComparator,
+    subGroupColors: subGroupColors,
+  );
+
   void analyseData() {
     // Sort X Axis
     xGroups = rawData.keys.toList();
@@ -84,21 +97,38 @@ class ModularBarChartData{
           _y1Values.add(rawData[key]);
           bars.add(BarChartDataDouble(group: key, data: rawData[key]));
         }
-        yValueRange[0] = _y1Values.reduce(min);
-        yValueRange[1] = _y1Values.reduce(max);
+        y1ValueRange[0] = _y1Values.reduce(min);
+        y1ValueRange[1] = _y1Values.reduce(max);
         break;
       case BarChartType.GroupedSeparated:
-      // TODO: Handle this case.
+        rawData.forEach((key, map) {
+          if (map.keys.toList().length != 2) {
+            throw Exception(['Type: Grouped Separated must have only one subgroup']);
+          }
+          xSubGroups = map.keys.toList();
+          for (int i = 0; i < 2; i++) {
+            if (i == 0) {
+              _y1Values.add(map[xSubGroups[i]]);
+              bars.add(BarChartDataDouble(group: xSubGroups[i], data: map[xSubGroups[i]]));
+            } else {
+              _y2Values.add(map[xSubGroups[i]]);
+              points.add(BarChartDataDouble(group: xSubGroups[i], data: map[xSubGroups[i]]));
+            }
+          }
+        });
+        y1ValueRange[0] = _y1Values.reduce(min);
+        y1ValueRange[1] = _y1Values.reduce(max);
+        y2ValueRange[0] = _y2Values.reduce(min);
+        y2ValueRange[1] = _y2Values.reduce(max);
         break;
       case BarChartType.Grouped3D:
       // TODO: Handle this case.
         break;
       default:
-      // default is shared by Grouped and GroupedStacked
+        // default is shared by Grouped and GroupedStacked
         double localMaximum = double.negativeInfinity;
         rawData.forEach((key, map) {
           xSubGroups.addAll(map.keys.toList());
-          //final List<BarChartDataDouble> dataInGroup = [];
           double sum = 0;
           map.forEach((subgroup, value) {
             xSubGroups.add(subgroup);
@@ -109,18 +139,17 @@ class ModularBarChartData{
         });
         xSubGroups = xSubGroups.toSet().toList();
         xSubGroups.sort();
-        yValueRange[0] = _y1Values.reduce(min);
+        y1ValueRange[0] = _y1Values.reduce(min);
         // If data type is stacked, use local maximum
-        yValueRange[1] = type == BarChartType.Grouped
+        y1ValueRange[1] = type == BarChartType.Grouped
             ? _y1Values.reduce(max)
             : localMaximum;
         break;
     }
 
     // Generate color for subgroups
-    if (type != BarChartType.Ungrouped) {
+    if (type != BarChartType.Ungrouped && type != BarChartType.GroupedSeparated) {
       final List<String> inputColorList = subGroupColors.keys.toList();
-      print(subGroupColors);
       xSubGroups.forEach((group) {
         if (!inputColorList.contains(group)) {
           subGroupColors[group] = Colors.primaries[Random().nextInt(Colors.primaries.length)];
@@ -130,23 +159,23 @@ class ModularBarChartData{
 
     numInGroups = xSubGroups.length;
     if (numInGroups <= 1) { numInGroups = 1; }
-    if (type == BarChartType.GroupedStacked) { numInGroups = 1; }
+    if (type == BarChartType.GroupedStacked || type == BarChartType.GroupedSeparated) { numInGroups = 1; }
 
     valueOnBarHeight = getSizeOfString('1', const TextStyle());
   }
 
-  void adjustAxisValueRange(double yAxisHeight, {double start = 0, double end = 0}) {
-    start <= yValueRange[0]
-        ? yValueRange[0] = start
-        : yValueRange[0] = yValueRange[0];
+  void adjustAxisValueRange(double yAxisHeight, {@required List<double> valueRangeToBeAdjusted, double start = 0, double end = 0,}) {
+    start <= valueRangeToBeAdjusted[0]
+        ? valueRangeToBeAdjusted[0] = start
+        : valueRangeToBeAdjusted[0] = valueRangeToBeAdjusted[0];
 
-    String max = yValueRange[1].toStringAsExponential();
+    String max = valueRangeToBeAdjusted[1].toStringAsExponential();
     int expInt = int.tryParse(max.substring(max.indexOf('e+') + 2));
     num exp = pow(10, expInt - 1);
-    double value = (((yValueRange[1] * (1 + (valueOnBarHeight) / yAxisHeight) / exp).ceil() + 2) * exp).toDouble();
+    double value = (((valueRangeToBeAdjusted[1] * (1 + (valueOnBarHeight) / yAxisHeight) / exp).ceil() + 2) * exp).toDouble();
     end >= value
-        ? yValueRange[2] = end
-        : yValueRange[2] = value;
+        ? valueRangeToBeAdjusted[2] = end
+        : valueRangeToBeAdjusted[2] = value;
   }
 
   void populateDataWithMinimumValue() {
@@ -159,7 +188,7 @@ class ModularBarChartData{
         for (String key in xSubGroups) {
           keys.contains(key)
             ? dataInGroup.add(BarChartDataDouble(group: key, data: map[key].toDouble()))
-            : dataInGroup.add(BarChartDataDouble(group: key, data: yValueRange[0]));
+            : dataInGroup.add(BarChartDataDouble(group: key, data: y1ValueRange[0]));
         }
         groupedBars.add(BarChartDataDoubleGrouped(mainGroup: key, dataList: dataInGroup));
       });

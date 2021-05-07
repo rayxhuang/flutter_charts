@@ -84,9 +84,11 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
     }
 
     canvasSize = widget.canvasSize;
+    print('canvasSize: ${canvasSize.width}');
     data = widget.data;
     style = widget.style;
     xSectionLength = getXSectionLengthFromBarWidth(data, widget.barWidth);
+    print(xSectionLength);
 
     // Bottom Axis
     bottomAxis = ChartAxisHorizontal(
@@ -118,7 +120,7 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
               canvasSize: miniCanvasSize,
               length: canvasSize.width * 0.2,
               xGroups: data.xGroups,
-              valueRange: data.yValueRange,
+              valueRange: data.y1ValueRange,
               xSectionLength: canvasSize.width * 0.2  / data.xGroups.length,
               bars: data.bars,
               style: style,
@@ -126,7 +128,22 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
           );
           break;
         case BarChartType.GroupedSeparated:
-        // TODO: Handle this case.
+          // TODO
+          miniCanvasDataBars = Padding(
+            padding: const EdgeInsets.only(top: 3),
+            child: ChartCanvasMini.grouped(
+              isStacked: data.type == BarChartType.GroupedStacked ? true: false,
+              canvasSize: miniCanvasSize,
+              length: canvasSize.width * 0.2,
+              xGroups: data.xGroups,
+              subGroups: data.xSubGroups,
+              subGroupColors: data.subGroupColors,
+              valueRange: data.y1ValueRange,
+              xSectionLength: canvasSize.width * 0.2  / data.xGroups.length,
+              groupedBars: data.groupedBars,
+              style: style,
+            ),
+          );
           break;
         case BarChartType.Grouped3D:
         // TODO: Handle this case.
@@ -141,7 +158,7 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
               xGroups: data.xGroups,
               subGroups: data.xSubGroups,
               subGroupColors: data.subGroupColors,
-              valueRange: data.yValueRange,
+              valueRange: data.y1ValueRange,
               xSectionLength: canvasSize.width * 0.2  / data.xGroups.length,
               groupedBars: data.groupedBars,
               style: style,
@@ -304,7 +321,7 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
   }
 
   double getXSectionLengthFromBarWidth(ModularBarChartData data, double barWidth) {
-    int numBarsInGroup = (data.type == BarChartType.Ungrouped || data.type == BarChartType.GroupedStacked)
+    int numBarsInGroup = (data.type == BarChartType.Ungrouped || data.type == BarChartType.GroupedStacked || data.type == BarChartType.GroupedSeparated)
         ? 1
         : data.xSubGroups.length;
     double totalBarWidth = numBarsInGroup * barWidth;

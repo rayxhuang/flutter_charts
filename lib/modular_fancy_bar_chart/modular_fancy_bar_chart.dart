@@ -51,40 +51,57 @@ class ModularBarChart extends StatelessWidget {
     style: style,
   );
 
+  factory ModularBarChart.groupedSeparated({
+    @required Map<String, Map<String,double>> data,
+    BarChartStyle style,
+  }) => ModularBarChart._(
+    data: data,
+    type: BarChartType.GroupedSeparated,
+    style: style,
+  );
+
+  ModularBarChartData createDataModel() {
+    switch (type) {
+      case BarChartType.Ungrouped:
+        return ModularBarChartData.ungrouped(rawData: data, sortXAxis: style.sortXAxis, xGroupComparator: style.groupComparator);
+        break;
+      case BarChartType.Grouped:
+        return ModularBarChartData.grouped(
+          rawData: data,
+          sortXAxis: style.sortXAxis,
+          xGroupComparator: style.groupComparator,
+          subGroupColors: style.subGroupColors ?? {},
+        );
+        break;
+      case BarChartType.GroupedStacked:
+        return ModularBarChartData.groupedStacked(
+          rawData: data,
+          sortXAxis: style.sortXAxis,
+          xGroupComparator: style.groupComparator,
+          subGroupColors: style.subGroupColors ?? {},
+        );
+        break;
+      case BarChartType.GroupedSeparated:
+        return ModularBarChartData.groupedSeparated(
+          rawData: data,
+          sortXAxis: style.sortXAxis,
+          xGroupComparator: style.groupComparator,
+          subGroupColors: style.subGroupColors ?? {},
+        );
+        break;
+      case BarChartType.Grouped3D:
+      // TODO: Handle this case.
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         Provider<BarChartStyle>(create: (_) => style),
         Provider<ModularBarChartData>(create: (_) {
-          ModularBarChartData dataModel;
-           switch (type) {
-            case BarChartType.Ungrouped:
-              dataModel = ModularBarChartData.ungrouped(rawData: data, sortXAxis: style.sortXAxis, xGroupComparator: style.groupComparator);
-              break;
-            case BarChartType.Grouped:
-              dataModel = ModularBarChartData.grouped(
-                rawData: data,
-                sortXAxis: style.sortXAxis,
-                xGroupComparator: style.groupComparator,
-                subGroupColors: style.subGroupColors ?? {},
-              );
-              break;
-            case BarChartType.GroupedStacked:
-              dataModel = ModularBarChartData.groupedStacked(
-                rawData: data,
-                sortXAxis: style.sortXAxis,
-                xGroupComparator: style.groupComparator,
-                subGroupColors: style.subGroupColors ?? {},
-              );
-              break;
-            case BarChartType.GroupedSeparated:
-              // TODO: Handle this case.
-              break;
-            case BarChartType.Grouped3D:
-              // TODO: Handle this case.
-              break;
-          }
+          ModularBarChartData dataModel = createDataModel();
           dataModel.analyseData();
           return dataModel;
         }),
@@ -94,13 +111,21 @@ class ModularBarChart extends StatelessWidget {
           ModularBarChartData data = context.read<ModularBarChartData>();
           BarChartStyle style = context.read<BarChartStyle>();
           // Size data
-          Size leftAxisSize = Size.zero, titleSize = Size.zero, canvasSize = Size.zero, bottomLabelSize = Size.zero;
+          Size leftAxisSize = Size.zero, titleSize = Size.zero, canvasSize = Size.zero, bottomLabelSize = Size.zero, rightAxisSize = Size.zero;
           final double parentHeight = constraint.maxHeight < double.infinity ? constraint.maxHeight : MediaQuery.of(context).size.height;
           final double parentWidth = constraint.maxWidth < double.infinity ? constraint.maxWidth : MediaQuery.of(context).size.width;
           final Size parentSize = Size(parentWidth, parentHeight);
 
+          final bool hasYAxisOnTheRight = type == BarChartType.GroupedSeparated ? true : false;
           // Get static sizes of components
-          final double leftAxisStaticWidth = ChartAxisVerticalWithLabel.getWidth(style.yAxisStyle.label.text, data.yValueRange[1], style.yAxisStyle);
+          double leftAxisStaticWidth, rightAxisStaticWidth;
+          if (hasYAxisOnTheRight) {
+            leftAxisStaticWidth = ChartAxisVerticalWithLabel.getWidth(style.yAxisStyle.label.text, data.y1ValueRange[1], style.yAxisStyle);
+            rightAxisStaticWidth = ChartAxisVerticalWithLabel.getWidth(style.yAxisStyle.label.text, data.y2ValueRange[1], style.yAxisStyle);
+          } else {
+            leftAxisStaticWidth = ChartAxisVerticalWithLabel.getWidth(style.yAxisStyle.label.text, data.y1ValueRange[1], style.yAxisStyle);
+            rightAxisStaticWidth = 0;
+          }
           final double titleStaticHeight = ChartTitle.getHeight(style.title);
           final double bottomAxisStaticHeight = ChartAxisHorizontal.getHeight(style.xAxisStyle);
           final double bottomLabelStaticHeight = ChartTitle.getHeight(style.xAxisStyle.label);
@@ -108,7 +133,7 @@ class ModularBarChart extends StatelessWidget {
           style.legendStyle.visible
               ? ChartLegendHorizontal.getHeight(BarChartLabel(text: 'Title', textStyle: style.legendStyle.legendTextStyle))
               : 0;
-          double canvasWidth = parentWidth - leftAxisStaticWidth;
+          double canvasWidth = parentWidth - leftAxisStaticWidth - rightAxisStaticWidth;
           if (canvasWidth < 0) { canvasWidth = 0; }
           double canvasHeight = parentHeight - titleStaticHeight - bottomAxisStaticHeight - bottomLabelStaticHeight - bottomLegendStaticHeight;
           if (canvasHeight < 0) { canvasHeight = 0; }
@@ -121,8 +146,22 @@ class ModularBarChart extends StatelessWidget {
           // This means a new bar width is calculated
           if (xSectionLength.length == 2) { overrideInputBarWidth = true; overrideBarWidth = xSectionLength[1];}
 
+          // TODO y2
           // Adjust y Max to fit number on bar and populate data
-          data.adjustAxisValueRange(canvasHeight, start: style.yAxisStyle.preferredStartValue, end: style.yAxisStyle.preferredEndValue);
+          data.adjustAxisValueRange(
+            canvasHeight,
+            valueRangeToBeAdjusted: data.y1ValueRange,
+            start: style.yAxisStyle.preferredStartValue,
+            end: style.yAxisStyle.preferredEndValue,
+          );
+          if (hasYAxisOnTheRight) {
+            data.adjustAxisValueRange(
+              canvasHeight,
+              valueRangeToBeAdjusted: data.y2ValueRange,
+              start: style.yAxisStyle.preferredStartValue,
+              end: style.yAxisStyle.preferredEndValue,
+            );
+          }
           data.populateDataWithMinimumValue();
 
           // Canvas and bottom axis
@@ -138,7 +177,7 @@ class ModularBarChart extends StatelessWidget {
 
           // Left Axis
           final ChartAxisVerticalWithLabel leftAxis = ChartAxisVerticalWithLabel(axisHeight: canvasHeight,);
-          leftAxisSize = leftAxis.size(data.yValueRange[2], style.yAxisStyle);
+          leftAxisSize = leftAxis.size(data.y1ValueRange[2], style.yAxisStyle);
 
           // Title
           final ChartTitle chartTitle = ChartTitle(width: parentSize.width,);
@@ -151,6 +190,10 @@ class ModularBarChart extends StatelessWidget {
           // Bottom Legend
           ChartLegendHorizontal bottomLegend;
           if (style.legendStyle.visible) { bottomLegend = ChartLegendHorizontal(width: canvasWidth); }
+
+          // Right Axis
+          final ChartAxisVerticalWithLabel rightAxis = ChartAxisVerticalWithLabel(axisHeight: canvasHeight, isRightAxis: true,);
+          rightAxisSize = rightAxis.size(data.y2ValueRange[2], style.yAxisStyle);
 
           // TODO Too small to have a canvas?
           return SizedBox(
@@ -196,6 +239,15 @@ class ModularBarChart extends StatelessWidget {
                         child: bottomLegend,
                       )
                       : SizedBox(),
+
+                  // Right Axis
+                  hasYAxisOnTheRight
+                      ? Positioned(
+                        top: titleSize.height,
+                        left: leftAxisSize.width + canvasWidth,
+                        child: rightAxis,
+                      )
+                      : SizedBox(),
                 ]
               ),
             ),
@@ -206,7 +258,7 @@ class ModularBarChart extends StatelessWidget {
   }
 
   List<double> calculateXSectionLength(ModularBarChartData data, BarChartStyle style, double canvasWidth) {
-    int numBarsInGroup = (data.type == BarChartType.Ungrouped || data.type == BarChartType.GroupedStacked)
+    int numBarsInGroup = (data.type == BarChartType.Ungrouped || data.type == BarChartType.GroupedStacked || data.type == BarChartType.GroupedSeparated)
         ? 1
         : data.xSubGroups.length;
     double totalBarWidth = numBarsInGroup * style.barStyle.barWidth;

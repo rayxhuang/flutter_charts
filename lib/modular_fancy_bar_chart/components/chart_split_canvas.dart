@@ -157,28 +157,42 @@ class SingleGroupDataPainter extends CustomPainter {
   @override
   void paint(Canvas originCanvas, Size size) {
     var canvas = TouchyCanvas(context, originCanvas);
-    final double yUnitPerPixel = (dataModel.yValueRange[2] - dataModel.yValueRange[0]) / size.height;
+    final double y1UnitPerPixel = (dataModel.y1ValueRange[2] - dataModel.y1ValueRange[0]) / size.height;
     final BarChartType type = dataModel.type;
+    double y2UnitPerPixel = double.negativeInfinity;
+    if (type == BarChartType.GroupedSeparated) {
+      y2UnitPerPixel = (dataModel.y2ValueRange[2] - dataModel.y2ValueRange[0]) / size.height;
+    }
+
     if (type == BarChartType.Ungrouped) {
       drawUngroupedData(
         originCanvas: originCanvas,
         canvas: canvas,
-        yUnitPerPixel: yUnitPerPixel,
+        y1UnitPerPixel: y1UnitPerPixel,
         bottomLeft: Offset(0, size.height)
       );
     } else if (type == BarChartType.Grouped) {
       drawGroupedData(
         originCanvas: originCanvas,
         canvas: canvas,
-        yUnitPerPixel: yUnitPerPixel,
+        y1UnitPerPixel: y1UnitPerPixel,
         bottomLeft: Offset(0, size.height)
       );
     } else if (type == BarChartType.GroupedStacked) {
       drawGroupedStackedData(
         originCanvas: originCanvas,
         canvas: canvas,
-        yUnitPerPixel: yUnitPerPixel,
+        y1UnitPerPixel: y1UnitPerPixel,
         bottomLeft: Offset(0, size.height)
+      );
+    } else if (type == BarChartType.GroupedSeparated) {
+      drawGroupedSeparatedData(
+        originCanvas: originCanvas,
+        canvas: canvas,
+        y1UnitPerPixel: y1UnitPerPixel,
+        y2UnitPerPixel: y2UnitPerPixel,
+        bottomLeft: Offset(0, size.height),
+        xSectionLength: size.width,
       );
     }
   }
@@ -193,7 +207,7 @@ class SingleGroupDataPainter extends CustomPainter {
   void drawUngroupedData({
     @required Canvas originCanvas,
     @required TouchyCanvas canvas,
-    @required double yUnitPerPixel,
+    @required double y1UnitPerPixel,
     @required Offset bottomLeft
   }) {
     //This is the bar paint
@@ -203,8 +217,7 @@ class SingleGroupDataPainter extends CustomPainter {
     paint..color = style.barStyle.color;
     double x1FromBottomLeft = style.groupMargin;
     double x2FromBottomLeft = x1FromBottomLeft + barWidth;
-    double y1FromBottomLeft = (bar.data - dataModel.yValueRange[0]) / yUnitPerPixel;
-
+    double y1FromBottomLeft = (bar.data - dataModel.y1ValueRange[0]) / y1UnitPerPixel;
     if (bar == barSelected) {
       double x1 = x1FromBottomLeft - 2;
       double x2 = x2FromBottomLeft + 2;
@@ -217,7 +230,6 @@ class SingleGroupDataPainter extends CustomPainter {
         y1: y,
       );
     }
-
     drawBar(
       canvas: canvas,
       data: bar,
@@ -243,7 +255,7 @@ class SingleGroupDataPainter extends CustomPainter {
   void drawGroupedData({
     @required Canvas originCanvas,
     @required TouchyCanvas canvas,
-    @required double yUnitPerPixel,
+    @required double y1UnitPerPixel,
     @required Offset bottomLeft
   }) {
     //This is the bar paint
@@ -259,7 +271,7 @@ class SingleGroupDataPainter extends CustomPainter {
           : style.barStyle.barInGroupMargin;
       double x1FromBottomLeft = i * barWidth + style.groupMargin + inGroupMargin * i;
       double x2FromBottomLeft = x1FromBottomLeft + barWidth;
-      double y1FromBottomLeft = (data[i].data - dataModel.yValueRange[0]) / yUnitPerPixel;
+      double y1FromBottomLeft = (data[i].data - dataModel.y1ValueRange[0]) / y1UnitPerPixel;
 
       if (groupSelected && data[i] == barSelected) {
         print('I am selected ${data[i]}');
@@ -318,7 +330,7 @@ class SingleGroupDataPainter extends CustomPainter {
   void drawGroupedStackedData({
     @required Canvas originCanvas,
     @required TouchyCanvas canvas,
-    @required double yUnitPerPixel,
+    @required double y1UnitPerPixel,
     @required Offset bottomLeft
   }) {
     //This is the bar paint
@@ -334,7 +346,7 @@ class SingleGroupDataPainter extends CustomPainter {
       paint..color = dataModel.subGroupColors[data[i].group];
       double x1FromBottomLeft = style.groupMargin;
       double x2FromBottomLeft = x1FromBottomLeft + barWidth;
-      double y1FromBottomLeft = (totalHeight - dataModel.yValueRange[0] - previousYValue) / yUnitPerPixel;
+      double y1FromBottomLeft = (totalHeight - dataModel.y1ValueRange[0] - previousYValue) / y1UnitPerPixel;
       if (i == data.length - 1) {
         lastBarX1 = x1FromBottomLeft;
         lastBarY1 = y1FromBottomLeft;
@@ -342,7 +354,7 @@ class SingleGroupDataPainter extends CustomPainter {
 
       if (groupSelected && data[i] == barSelected) {
         print('I am selected ${data[i]}');
-        double y2FromBottomLeft = (y1FromBottomLeft - data[i].data / yUnitPerPixel);
+        double y2FromBottomLeft = (y1FromBottomLeft - data[i].data / y1UnitPerPixel);
         savedBar = DataForBarToBeDrawnLast(
           data: data[i],
           x1: x1FromBottomLeft,
@@ -399,6 +411,75 @@ class SingleGroupDataPainter extends CustomPainter {
         bottomLeft: bottomLeft,
         x1: lastBarX1,
         y1: lastBarY1,
+      );
+    }
+  }
+
+  void drawGroupedSeparatedData({
+    @required Canvas originCanvas,
+    @required TouchyCanvas canvas,
+    @required double y1UnitPerPixel,
+    @required double y2UnitPerPixel,
+    @required Offset bottomLeft,
+    @required double xSectionLength,
+  }) {
+    drawUngroupedData(
+      originCanvas: originCanvas,
+      canvas: canvas,
+      y1UnitPerPixel: y1UnitPerPixel,
+      bottomLeft: bottomLeft,
+    );
+
+    //This is the bar paint
+    Paint paint = Paint();
+    final BarChartDataDouble current = dataModel.points[dataIndex];
+    //Draw data as bars on grid
+    //paint..color = style.barStyle.color;
+    paint..color = Colors.blue;
+    paint..strokeWidth = 2;
+    double x1FromBottomLeft = style.groupMargin + barWidth / 2;
+    double y1FromBottomLeft = (current.data - dataModel.y2ValueRange[0]) / y2UnitPerPixel;
+    Offset currentPosition = bottomLeft.translate(x1FromBottomLeft, -y1FromBottomLeft);
+    drawPoint(
+      canvas: canvas,
+      data: current,
+      center: currentPosition,
+      radius: 4,
+      paint: paint,
+    );
+
+    BarChartDataDouble previous, next;
+    double differenceOfPrevious, differenceOfNext;
+    Offset previousPosition, nextPosition;
+    if (dataIndex != 0) {
+      previous = dataModel.points[dataIndex - 1];
+      differenceOfPrevious = ((current.data - previous.data) / 2).abs();
+      double value = current.data < previous.data
+          ? current.data + differenceOfPrevious
+          : current.data - differenceOfPrevious;
+      double y = (value - dataModel.y2ValueRange[0]) / y2UnitPerPixel;
+      previousPosition = bottomLeft.translate(0, -y);
+      originCanvas.drawLine(currentPosition, previousPosition, paint);
+    }
+    if (dataIndex != dataModel.points.length - 1) {
+      next = dataModel.points[dataIndex + 1];
+      differenceOfNext = ((current.data - next.data) / 2).abs();
+      double value = current.data < next.data
+          ? current.data + differenceOfNext
+          : current.data - differenceOfNext;
+      double y = (value - dataModel.y2ValueRange[0]) / y2UnitPerPixel;
+      nextPosition = bottomLeft.translate(xSectionLength, -y);
+      originCanvas.drawLine(currentPosition, nextPosition, paint);
+    }
+
+    // Highlight the selected point
+    if (current == barSelected && groupSelected) {
+      drawPoint(
+        canvas: canvas,
+        data: current,
+        center: currentPosition,
+        radius: 6,
+        paint: paint,
       );
     }
   }
@@ -461,6 +542,21 @@ class SingleGroupDataPainter extends CustomPainter {
     );
     valuePainter.layout(maxWidth: barWidth);
     valuePainter.paint(canvas, bottomLeft.translate(x1 + barWidth / 2 - valuePainter.width / 2, -y1 - valuePainter.height));
+  }
+
+  void drawPoint({
+    @required TouchyCanvas canvas,
+    @required BarChartDataDouble data,
+    @required Offset center,
+    @required double radius,
+    @required Paint paint,
+  }) {
+    canvas.drawCircle(
+      center,
+      radius,
+      paint,
+      onTapDown: (details) { onBarSelected(data, details); }
+    );
   }
 
   void drawHighlight({

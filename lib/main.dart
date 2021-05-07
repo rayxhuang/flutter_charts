@@ -536,6 +536,41 @@ Map<String, Map<String, double>> sampleData5 = {
   },
 };
 
+Map<String, Map<String, double>> sampleData6 = {
+  '10': {
+    'weight': 40,
+    'height': 80,
+  },
+  '13': {
+    'weight': 48,
+    'height': 150,
+  },
+  '16': {
+    'weight': 55,
+    'height': 170,
+  },
+  '20': {
+    'weight': 60,
+    'height': 180,
+  },
+  '25': {
+    'weight': 40,
+    'height': 150,
+  },
+  '30': {
+    'weight': 60,
+    'height': 180,
+  },
+  '35': {
+    'weight': 55,
+    'height': 170,
+  },
+  '40': {
+    'weight': 80,
+    'height': 200,
+  },
+};
+
 void main() { runApp(MyApp()); }
 
 class MyApp extends StatelessWidget {
@@ -569,8 +604,8 @@ class MyHomePage extends StatelessWidget {
                   padding: EdgeInsets.all(20),
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height / 3,
-                  child: ModularBarChart.ungrouped(
-                    data: sampleData2,
+                  child: ModularBarChart.groupedSeparated(
+                    data: sampleData6,
                     style: BarChartStyle(
                       title: BarChartLabel(
                         text: 'Boring Title',
@@ -614,119 +649,171 @@ class MyHomePage extends StatelessWidget {
                   ),
                 ),
               ),
+              // Card(
+              //   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
+              //   margin: const EdgeInsets.all(5),
+              //   child: Container(
+              //     padding: EdgeInsets.all(20),
+              //     width: MediaQuery.of(context).size.width,
+              //     height: MediaQuery.of(context).size.height / 3,
+              //     child: ModularBarChart.ungrouped(
+              //       data: sampleData2,
+              //       style: BarChartStyle(
+              //         title: BarChartLabel(
+              //           text: 'Boring Title',
+              //           textStyle: TextStyle(color: Colors.white),
+              //         ),
+              //         sortXAxis: true,
+              //         groupMargin: 20,
+              //         xAxisStyle: AxisStyle(
+              //           label: BarChartLabel(
+              //             text: 'x Axis',
+              //             textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              //           ),
+              //           axisColor: Colors.teal,
+              //           tickStyle: TickStyle(
+              //             tickLength: 5,
+              //             tickColor: Colors.teal,
+              //           ),
+              //         ),
+              //         yAxisStyle: AxisStyle(
+              //           numTicks: 5,
+              //           label: BarChartLabel(
+              //             text: 'Y Axis',
+              //             textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
+              //           ),
+              //           //preferredEndValue: 20,
+              //           axisColor: Colors.teal,
+              //           tickStyle: TickStyle(
+              //             tickLength: 5,
+              //             tickColor: Colors.teal,
+              //           ),
+              //         ),
+              //         barStyle: BarChartBarStyle(
+              //           barWidth: 35,
+              //           barInGroupMargin: 5,
+              //         ),
+              //         legendStyle: BarChartLegendStyle(visible: false),
+              //         animation: BarChartAnimation(
+              //           animateData: true,
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
               SizedBox(height: 20,),
-              Card(
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-                margin: const EdgeInsets.all(5),
-                child: Container(
-                  padding: EdgeInsets.all(20),
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height / 3,
-                  child: ModularBarChart.grouped(
-                    data: sampleData5,
-                    style: BarChartStyle(
-                      title: BarChartLabel(
-                        text: 'Boring Title',
-                        textStyle: TextStyle(color: Colors.white),
-                      ),
-                      sortXAxis: true,
-                      groupMargin: 10,
-                      // TODO Fix mini canvas bar width < 1 pixel
-                      // TODO Allow subgroup comparator
-                      subGroupColors: {
-                        'Male': Colors.blue,
-                        'Female': Colors.red,
-                      },
-                      xAxisStyle: AxisStyle(
-                        label: BarChartLabel(
-                          text: 'Age',
-                          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                        axisColor: Colors.teal,
-                        tickStyle: TickStyle(
-                          tickLength: 5,
-                          tickColor: Colors.teal,
-                        ),
-                      ),
-                      yAxisStyle: AxisStyle(
-                        numTicks: 5,
-                        label: BarChartLabel(
-                          text: 'Height in cm',
-                          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
-                        ),
-                        //preferredEndValue: 20,
-                        axisColor: Colors.teal,
-                        tickStyle: TickStyle(
-                          tickLength: 5,
-                          tickColor: Colors.teal,
-                        ),
-                      ),
-                      barStyle: BarChartBarStyle(
-                        barWidth: 10,
-                        barInGroupMargin: 4,
-                      ),
-                      animation: BarChartAnimation(
-                        animateData: true,
-                        dataAnimationDuration: const Duration(milliseconds: 300),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              // Card(
+              //   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
+              //   margin: const EdgeInsets.all(5),
+              //   child: Container(
+              //     padding: EdgeInsets.all(20),
+              //     width: MediaQuery.of(context).size.width,
+              //     height: MediaQuery.of(context).size.height / 3,
+              //     child: ModularBarChart.grouped(
+              //       data: sampleData5,
+              //       style: BarChartStyle(
+              //         title: BarChartLabel(
+              //           text: 'Boring Title',
+              //           textStyle: TextStyle(color: Colors.white),
+              //         ),
+              //         sortXAxis: true,
+              //         groupMargin: 10,
+              //         // TODO Fix mini canvas bar width < 1 pixel
+              //         // TODO Allow subgroup comparator
+              //         subGroupColors: {
+              //           'Male': Colors.blue,
+              //           'Female': Colors.red,
+              //         },
+              //         xAxisStyle: AxisStyle(
+              //           label: BarChartLabel(
+              //             text: 'Age',
+              //             textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              //           ),
+              //           axisColor: Colors.teal,
+              //           tickStyle: TickStyle(
+              //             tickLength: 5,
+              //             tickColor: Colors.teal,
+              //           ),
+              //         ),
+              //         yAxisStyle: AxisStyle(
+              //           numTicks: 5,
+              //           label: BarChartLabel(
+              //             text: 'Height in cm',
+              //             textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
+              //           ),
+              //           //preferredEndValue: 20,
+              //           axisColor: Colors.teal,
+              //           tickStyle: TickStyle(
+              //             tickLength: 5,
+              //             tickColor: Colors.teal,
+              //           ),
+              //         ),
+              //         barStyle: BarChartBarStyle(
+              //           barWidth: 10,
+              //           barInGroupMargin: 4,
+              //         ),
+              //         animation: BarChartAnimation(
+              //           animateData: true,
+              //           dataAnimationDuration: const Duration(milliseconds: 300),
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
               SizedBox(height: 20,),
-              Card(
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-                margin: const EdgeInsets.all(5),
-                child: Container(
-                  padding: EdgeInsets.all(20),
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height / 3,
-                  child: ModularBarChart.groupedStacked(
-                    data: sampleData5,
-                    style: BarChartStyle(
-                      title: BarChartLabel(
-                        text: 'Boring Title',
-                        textStyle: TextStyle(color: Colors.white),
-                      ),
-                      sortXAxis: true,
-                      groupMargin: 20,
-                      xAxisStyle: AxisStyle(
-                        label: BarChartLabel(
-                          text: 'Age',
-                          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                        axisColor: Colors.teal,
-                        tickStyle: TickStyle(
-                          tickLength: 5,
-                          tickColor: Colors.teal,
-                        ),
-                      ),
-                      yAxisStyle: AxisStyle(
-                        numTicks: 5,
-                        label: BarChartLabel(
-                          text: 'Height in cm',
-                          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
-                        ),
-                        //preferredEndValue: 20,
-                        axisColor: Colors.teal,
-                        tickStyle: TickStyle(
-                          tickLength: 5,
-                          tickColor: Colors.teal,
-                        ),
-                      ),
-                      barStyle: BarChartBarStyle(
-                        barWidth: 10,
-                        barInGroupMargin: 5,
-                        isStacked: true,
-                      ),
-                      animation: BarChartAnimation(
-                        animateData: true,
-                        //dataAnimationDuration: const Duration(seconds: 10),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              // Card(
+              //   shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
+              //   margin: const EdgeInsets.all(5),
+              //   child: Container(
+              //     padding: EdgeInsets.all(20),
+              //     width: MediaQuery.of(context).size.width,
+              //     height: MediaQuery.of(context).size.height / 3,
+              //     child: ModularBarChart.groupedStacked(
+              //       data: sampleData5,
+              //       style: BarChartStyle(
+              //         title: BarChartLabel(
+              //           text: 'Boring Title',
+              //           textStyle: TextStyle(color: Colors.white),
+              //         ),
+              //         sortXAxis: true,
+              //         groupMargin: 20,
+              //         xAxisStyle: AxisStyle(
+              //           label: BarChartLabel(
+              //             text: 'Age',
+              //             textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              //           ),
+              //           axisColor: Colors.teal,
+              //           tickStyle: TickStyle(
+              //             tickLength: 5,
+              //             tickColor: Colors.teal,
+              //           ),
+              //         ),
+              //         yAxisStyle: AxisStyle(
+              //           numTicks: 5,
+              //           label: BarChartLabel(
+              //             text: 'Height in cm',
+              //             textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
+              //           ),
+              //           //preferredEndValue: 20,
+              //           axisColor: Colors.teal,
+              //           tickStyle: TickStyle(
+              //             tickLength: 5,
+              //             tickColor: Colors.teal,
+              //           ),
+              //         ),
+              //         barStyle: BarChartBarStyle(
+              //           barWidth: 10,
+              //           barInGroupMargin: 5,
+              //           isStacked: true,
+              //         ),
+              //         animation: BarChartAnimation(
+              //           animateData: true,
+              //           //dataAnimationDuration: const Duration(seconds: 10),
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         ),
