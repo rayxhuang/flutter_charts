@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_charts/modular_bar_chart/mixin/stringSizeMixin.dart';
 import 'package:provider/provider.dart';
 
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
-import 'package:flutter_charts/modular_bar_chart/data/textSizeInfo.dart';
 
 @immutable
-class ChartTitle extends StatelessWidget {
+class ChartTitle extends StatelessWidget with StringSize{
   final double width;
   final bool isXAxisLabel;
 
@@ -22,7 +22,7 @@ class ChartTitle extends StatelessWidget {
         : context.read<BarChartStyle>().title;
     return SizedBox(
       width: width,
-      height: size(label).height,
+      height: StringSize.getHeight(label),
       child: Center(
         child: Text(
           label.text,
@@ -32,7 +32,5 @@ class ChartTitle extends StatelessWidget {
     );
   }
 
-  Size size(BarChartLabel title) => Size(width, getHeight(title));
-
-  static double getHeight(BarChartLabel title) => getSizeOfString(title.text, title.textStyle, isHeight: true);
+  Size size(BarChartLabel title) => Size(width, StringSize.getHeight(title));
 }

@@ -5,15 +5,15 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
+import 'package:flutter_charts/modular_bar_chart/mixin/stringSizeMixin.dart';
 import 'package:provider/provider.dart';
 import 'components/chart_axis.dart';
 import 'components/chart_legend.dart';
 import 'components/chart_title.dart';
-import 'components/stateful/chart_axis.dart';
 import 'components/stateful/chart_canvas_wrapper.dart';
 
 @immutable
-class ModularBarChart extends StatelessWidget {
+class ModularBarChart extends StatelessWidget with StringSize {
   final Map<String, dynamic> data;
   final ModularBarChartData dataModel;
   final BarChartStyle style;
@@ -32,8 +32,6 @@ class ModularBarChart extends StatelessWidget {
   }) {
     final ModularBarChartData dataModel = this.dataModel;
     dataModel.subGroupColors = colorMap ?? dataModel.subGroupColors;
-    // print('called copy with');
-    // print(dataModel.subGroupColors);
     return ModularBarChart._(
       data: this.data,
       dataModel: dataModel,
@@ -51,7 +49,6 @@ class ModularBarChart extends StatelessWidget {
       sortXAxis: style.sortXAxis,
       xGroupComparator: style.groupComparator
     );
-    dataModel.analyseData();
     return ModularBarChart._(
       data: data,
       dataModel: dataModel,
@@ -69,7 +66,6 @@ class ModularBarChart extends StatelessWidget {
       sortXAxis: style.sortXAxis,
       xGroupComparator: style.groupComparator
     );
-    dataModel.analyseData();
     return ModularBarChart._(
       data: data,
       dataModel: dataModel,
@@ -87,7 +83,6 @@ class ModularBarChart extends StatelessWidget {
       sortXAxis: style.sortXAxis,
       xGroupComparator: style.groupComparator
     );
-    dataModel.analyseData();
     return ModularBarChart._(
       data: data,
       dataModel: dataModel,
@@ -105,7 +100,6 @@ class ModularBarChart extends StatelessWidget {
       sortXAxis: style.sortXAxis,
       xGroupComparator: style.groupComparator
     );
-    dataModel.analyseData();
     return ModularBarChart._(
       data: data,
       dataModel: dataModel,
@@ -160,14 +154,12 @@ class ModularBarChart extends StatelessWidget {
               style.y1AxisStyle);
           rightAxisStaticWidth = 0;
         }
-        final double titleStaticHeight = ChartTitle.getHeight(style.title);
+        final double titleStaticHeight = StringSize.getHeight(style.title);
         final double bottomAxisStaticHeight =
             ChartAxisHorizontal.getHeight(style.xAxisStyle);
-        final double bottomLabelStaticHeight =
-            ChartTitle.getHeight(style.xAxisStyle.label);
+        final double bottomLabelStaticHeight = StringSize.getHeight(style.xAxisStyle.label);
         final double bottomLegendStaticHeight = style.legendStyle.visible
-            ? ChartLegendHorizontal.getHeight(BarChartLabel(
-                text: 'Title', textStyle: style.legendStyle.legendTextStyle))
+            ? StringSize.getHeightOfString('Title', style.legendStyle.legendTextStyle)
             : 0;
         double canvasWidth =
             parentWidth - leftAxisStaticWidth - rightAxisStaticWidth;
@@ -216,12 +208,11 @@ class ModularBarChart extends StatelessWidget {
         final ChartCanvasWrapper chartCanvasWithAxis = ChartCanvasWrapper(
           size: Size(canvasWidth, canvasHeight + bottomAxisStaticHeight),
           canvasSize: canvasSize,
-          data: data,
-          style: style,
           barWidth: overrideInputBarWidth
               ? overrideBarWidth
               : style.barStyle.barWidth,
           displayMiniCanvas: overrideInputBarWidth ? false : true,
+          animation: style.animation,
         );
         final Size chartCanvasWithAxisSize = chartCanvasWithAxis.size;
 
@@ -246,9 +237,7 @@ class ModularBarChart extends StatelessWidget {
 
         // Bottom Legend
         ChartLegendHorizontal bottomLegend;
-        if (style.legendStyle.visible) {
-          bottomLegend = ChartLegendHorizontal(width: canvasWidth);
-        }
+        if (style.legendStyle.visible) { bottomLegend = ChartLegendHorizontal(width: canvasWidth); }
 
         // Right Axis
         final ChartAxisVerticalWithLabel rightAxis = ChartAxisVerticalWithLabel(
@@ -320,15 +309,10 @@ class ModularBarChart extends StatelessWidget {
 
   List<double> calculateXSectionLength(
       ModularBarChartData data, BarChartStyle style, double canvasWidth) {
-    int numBarsInGroup = (data.type == BarChartType.Ungrouped ||
-            data.type == BarChartType.GroupedStacked ||
-            data.type == BarChartType.GroupedSeparated)
-        ? 1
-        : data.xSubGroups.length;
-    double totalBarWidth = numBarsInGroup * style.barStyle.barWidth;
+    double totalBarWidth = data.numBarsInGroups * style.barStyle.barWidth;
     double totalGroupMargin = style.groupMargin * 2;
     double totalInGroupMargin =
-        style.barStyle.barInGroupMargin * (numBarsInGroup - 1);
+        style.barStyle.barInGroupMargin * (data.numBarsInGroups - 1);
     double xSectionLengthCalculatedFromData =
         totalBarWidth + totalGroupMargin + totalInGroupMargin;
     double xSectionLengthAvailable = canvasWidth / data.xGroups.length;
@@ -337,7 +321,7 @@ class ModularBarChart extends StatelessWidget {
     } else {
       double newBarWidth =
           (xSectionLengthAvailable - totalGroupMargin - totalInGroupMargin) /
-              numBarsInGroup;
+              data.numBarsInGroups;
       return [xSectionLengthAvailable, newBarWidth];
     }
   }

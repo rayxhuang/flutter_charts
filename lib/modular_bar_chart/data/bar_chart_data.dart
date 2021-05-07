@@ -3,12 +3,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:equatable/equatable.dart';
 
-import 'textSizeInfo.dart';
+import 'package:flutter_charts/modular_bar_chart/mixin/stringSizeMixin.dart';
 import 'bar_chart_style.dart';
 
 enum BarChartType {Ungrouped, Grouped, GroupedStacked, GroupedSeparated, Grouped3D}
 
-class ModularBarChartData{
+class ModularBarChartData with StringSize{
   final Map<String, dynamic> rawData;
   final BarChartType type;
   final bool sortXAxis;
@@ -27,62 +27,78 @@ class ModularBarChartData{
     @required Map<String, double> rawData,
     bool sortXAxis = false,
     Comparator<String> xGroupComparator,
-  }) => ModularBarChartData._(
-    rawData: rawData,
-    type: BarChartType.Ungrouped,
-    sortXAxis: sortXAxis,
-    xGroupComparator: xGroupComparator,
-    subGroupColors: const {},
-  );
+  }) {
+    final ModularBarChartData dataModel = ModularBarChartData._(
+      rawData: rawData,
+      type: BarChartType.Ungrouped,
+      sortXAxis: sortXAxis,
+      xGroupComparator: xGroupComparator,
+      subGroupColors: const {},
+    );
+    dataModel._analyseData();
+    return dataModel;
+  }
 
   factory ModularBarChartData.grouped({
     @required Map<String, Map<String, double>> rawData,
     bool sortXAxis = false,
     Comparator<String> xGroupComparator,
     Map<String, Color> subGroupColors,
-  }) => ModularBarChartData._(
-    rawData: rawData,
-    type: BarChartType.Grouped,
-    sortXAxis: sortXAxis,
-    xGroupComparator: xGroupComparator,
-    subGroupColors: subGroupColors ?? {},
-  );
+  }) {
+    final ModularBarChartData dataModel = ModularBarChartData._(
+      rawData: rawData,
+      type: BarChartType.Grouped,
+      sortXAxis: sortXAxis,
+      xGroupComparator: xGroupComparator,
+      subGroupColors: subGroupColors ?? {},
+    );
+    dataModel._analyseData();
+    return dataModel;
+  }
 
   factory ModularBarChartData.groupedStacked({
     @required Map<String, Map<String, double>> rawData,
     bool sortXAxis = false,
     Comparator<String> xGroupComparator,
     Map<String, Color> subGroupColors,
-  }) => ModularBarChartData._(
-    rawData: rawData,
-    type: BarChartType.GroupedStacked,
-    sortXAxis: sortXAxis,
-    xGroupComparator: xGroupComparator,
-    subGroupColors: subGroupColors ?? {},
-  );
+  }) {
+    final ModularBarChartData dataModel = ModularBarChartData._(
+      rawData: rawData,
+      type: BarChartType.GroupedStacked,
+      sortXAxis: sortXAxis,
+      xGroupComparator: xGroupComparator,
+      subGroupColors: subGroupColors ?? {},
+    );
+    dataModel._analyseData();
+    return dataModel;
+  }
 
   factory ModularBarChartData.groupedSeparated({
     @required Map<String, Map<String, double>> rawData,
     bool sortXAxis = false,
     Comparator<String> xGroupComparator,
     Map<String, Color> subGroupColors,
-  }) => ModularBarChartData._(
-    rawData: rawData,
-    type: BarChartType.GroupedSeparated,
-    sortXAxis: sortXAxis,
-    xGroupComparator: xGroupComparator,
-    subGroupColors: subGroupColors ?? {},
-  );
+  }) {
+    final ModularBarChartData dataModel = ModularBarChartData._(
+      rawData: rawData,
+      type: BarChartType.GroupedSeparated,
+      sortXAxis: sortXAxis,
+      xGroupComparator: xGroupComparator,
+      subGroupColors: subGroupColors ?? {},
+    );
+    dataModel._analyseData();
+    return dataModel;
+  }
 
   // Data processing variables
   List<String> xGroups = [], xSubGroups = [];
   List<double> _y1Values = [], _y2Values = [], y1ValueRange = [0, 0, 0], y2ValueRange = [0, 0, 0];
   List<BarChartDataDouble> bars = [], points = [];
   List<BarChartDataDoubleGrouped> groupedBars = [];
-  int numInGroups = 1;
+  int numBarsInGroups = 1;
   double valueOnBarHeight;
 
-  void analyseData() {
+  void _analyseData() {
     // Sort X Axis
     xGroups = rawData.keys.toList();
     if (sortXAxis) {
@@ -150,8 +166,6 @@ class ModularBarChartData{
     // Generate color for subgroups
     if (type != BarChartType.Ungrouped && type != BarChartType.GroupedSeparated) {
       final List<String> inputColorList = subGroupColors.keys.toList();
-      // print('in data model');
-      // print(subGroupColors);
       xSubGroups.forEach((group) {
         if (!inputColorList.contains(group)) {
           subGroupColors[group] = Colors.primaries[Random().nextInt(Colors.primaries.length)];
@@ -159,11 +173,13 @@ class ModularBarChartData{
       });
     }
 
-    numInGroups = xSubGroups.length;
-    if (numInGroups <= 1) { numInGroups = 1; }
-    if (type == BarChartType.GroupedStacked || type == BarChartType.GroupedSeparated) { numInGroups = 1; }
+    // Set the number of bars in one group
+    numBarsInGroups = xSubGroups.length;
+    if (numBarsInGroups <= 1) { numBarsInGroups = 1; }
+    if (type == BarChartType.GroupedStacked || type == BarChartType.GroupedSeparated) { numBarsInGroups = 1; }
 
-    valueOnBarHeight = getSizeOfString('1', const TextStyle());
+    // Set the height on value string on bar
+    valueOnBarHeight = StringSize.getWidthOfString('1', const TextStyle());
   }
 
   void adjustAxisValueRange(double yAxisHeight, {@required List<double> valueRangeToBeAdjusted, double start = 0, double end = 0,}) {

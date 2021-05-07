@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:touchable/touchable.dart';
 
-import 'package:flutter_charts/modular_bar_chart/mixin/drawingMixin.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 
@@ -34,29 +33,9 @@ class SingleGroupedCanvas extends StatelessWidget {
     final ModularBarChartData dataModel = context.read<ModularBarChartData>();
     final BarChartStyle style = context.read<BarChartStyle>();
     final bool clickable = style.clickable;
-    if (clickable) {
-      return CanvasTouchDetector(
-        builder: (BuildContext context) {
-          return CustomPaint(
-            painter: SingleGroupDataPainter(
-              context: context,
-              dataModel: dataModel,
-              dataIndex: groupIndex,
-              style: style,
-              xSectionLength: size.width,
-              barWidth: barWidth,
-              barAnimationFraction: barAnimationFraction,
-              onBarSelected: (data, details) { onBarSelected(groupIndex, data, details); },
-              groupSelected: isSelected ? true : false,
-              barSelected: barSelected,
-              clickable: clickable,
-            ),
-            size: size,
-          );
-        },
-      );
-    } else {
-      return CustomPaint(
+
+    return CanvasTouchDetector(
+      builder: (BuildContext context) => CustomPaint(
         painter: SingleGroupDataPainter(
           context: context,
           dataModel: dataModel,
@@ -71,7 +50,7 @@ class SingleGroupedCanvas extends StatelessWidget {
           clickable: clickable,
         ),
         size: size,
-      );
-    }
+      )
+    );
   }
 }

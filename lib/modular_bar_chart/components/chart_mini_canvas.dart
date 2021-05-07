@@ -20,9 +20,8 @@ class ChartCanvasMini extends StatelessWidget {
   Widget build(BuildContext context) {
     final ModularBarChartData dataModel = context.read<ModularBarChartData>();
     final BarChartStyle style = context.read<BarChartStyle>();
-    return SizedBox(
-      width: containerSize.width,
-      height: containerSize.height,
+    return SizedBox.fromSize(
+      size: containerSize,
       child: FittedBox(
         fit: BoxFit.fill,
         child: RepaintBoundary(
