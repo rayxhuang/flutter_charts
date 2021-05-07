@@ -95,7 +95,6 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
     //This is the bar paint
     Paint paint = Paint();
     for (int j = 0; j < dataModel.groupedBars.length; j++) {
-      int i = dataModel.xGroups.indexOf(dataModel.groupedBars[j].mainGroup);
       List<BarChartDataDouble> barList = dataModel.groupedBars[j].dataList;
       for (int i = 0; i < barList.length; i++) {
         // Grouped Data must use grouped Color
@@ -130,7 +129,6 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
     Paint paint = Paint();
     // TODO Values cannot be negative
     for (int j = 0; j < dataModel.groupedBars.length; j++) {
-      int i = dataModel.xGroups.indexOf(dataModel.groupedBars[j].mainGroup);
       List<BarChartDataDouble> barList = dataModel.groupedBars[j].dataList;
       double totalHeight = 0;
       barList.forEach((data) { totalHeight += data.data; });

@@ -143,9 +143,9 @@ class ModularBarChart extends StatelessWidget with StringSize {
               data.y1ValueRange[1],
               style.y1AxisStyle);
           rightAxisStaticWidth = ChartAxisVerticalWithLabel.getWidth(
-              style.y1AxisStyle.label.text,
+              style.y2AxisStyle.label.text,
               data.y2ValueRange[1],
-              style.y1AxisStyle);
+              style.y2AxisStyle);
         } else {
           leftAxisStaticWidth = ChartAxisVerticalWithLabel.getWidth(
               style.y1AxisStyle.label.text,
