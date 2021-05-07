@@ -88,7 +88,9 @@ class ChartAxisVerticalWithLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AxisStyle axisStyle = context.read<BarChartStyle>().yAxisStyle;
+    final AxisStyle axisStyle = isRightAxis
+        ? context.read<BarChartStyle>().y2AxisStyle
+        : context.read<BarChartStyle>().y1AxisStyle;
     final List<double> yValueRange = isRightAxis
         ? context.read<ModularBarChartData>().y2ValueRange
         : context.read<ModularBarChartData>().y1ValueRange;

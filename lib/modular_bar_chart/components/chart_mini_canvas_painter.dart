@@ -73,7 +73,7 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
       double x1FromBottomLeft = i * xSectionLength + style.groupMargin;
       double x2FromBottomLeft = x1FromBottomLeft + style.barStyle.barWidth;
       double y1FromBottomLeft = (bar.data - dataModel.y1ValueRange[0]) / y1UnitPerPixel;
-      drawSimpleBar(
+      drawBar(
         canvas: canvas,
         data: bar,
         bottomLeft: bottomLeft,
@@ -106,7 +106,7 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
         double x1FromBottomLeft = j * xSectionLength + i * style.barStyle.barWidth + style.groupMargin + inGroupMargin * i;
         double x2FromBottomLeft = x1FromBottomLeft + style.barStyle.barWidth;
         double y1FromBottomLeft = (barList[i].data - dataModel.y1ValueRange[0]) / y1UnitPerPixel;
-        drawSimpleBar(
+        drawBar(
           canvas: canvas,
           data: barList[i],
           bottomLeft: bottomLeft,
@@ -141,7 +141,7 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
         double x1FromBottomLeft = j * xSectionLength + style.groupMargin;
         double x2FromBottomLeft = x1FromBottomLeft + style.barStyle.barWidth;
         double y1FromBottomLeft = (totalHeight - dataModel.y1ValueRange[0] - previousYValue) / y1UnitPerPixel;
-        drawSimpleBar(
+        drawBar(
           canvas: canvas,
           data: barList[i],
           bottomLeft: bottomLeft,
@@ -182,7 +182,7 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
       double x1FromBottomLeft = i * xSectionLength + style.groupMargin + style.barStyle.barWidth / 2;
       double y1FromBottomLeft = (current.data - dataModel.y2ValueRange[0]) / y2UnitPerPixel;
       Offset currentPosition = bottomLeft.translate(x1FromBottomLeft, -y1FromBottomLeft);
-      drawSimplePoint(
+      drawPoint(
         canvas: canvas,
         data: current,
         center: currentPosition,

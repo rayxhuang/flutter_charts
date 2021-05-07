@@ -148,18 +148,18 @@ class ModularBarChart extends StatelessWidget {
         double leftAxisStaticWidth, rightAxisStaticWidth;
         if (hasYAxisOnTheRight) {
           leftAxisStaticWidth = ChartAxisVerticalWithLabel.getWidth(
-              style.yAxisStyle.label.text,
+              style.y1AxisStyle.label.text,
               data.y1ValueRange[1],
-              style.yAxisStyle);
+              style.y1AxisStyle);
           rightAxisStaticWidth = ChartAxisVerticalWithLabel.getWidth(
-              style.yAxisStyle.label.text,
+              style.y1AxisStyle.label.text,
               data.y2ValueRange[1],
-              style.yAxisStyle);
+              style.y1AxisStyle);
         } else {
           leftAxisStaticWidth = ChartAxisVerticalWithLabel.getWidth(
-              style.yAxisStyle.label.text,
+              style.y1AxisStyle.label.text,
               data.y1ValueRange[1],
-              style.yAxisStyle);
+              style.y1AxisStyle);
           rightAxisStaticWidth = 0;
         }
         final double titleStaticHeight = ChartTitle.getHeight(style.title);
@@ -201,15 +201,15 @@ class ModularBarChart extends StatelessWidget {
         data.adjustAxisValueRange(
           canvasHeight,
           valueRangeToBeAdjusted: data.y1ValueRange,
-          start: style.yAxisStyle.preferredStartValue,
-          end: style.yAxisStyle.preferredEndValue,
+          start: style.y1AxisStyle.preferredStartValue,
+          end: style.y1AxisStyle.preferredEndValue,
         );
         if (hasYAxisOnTheRight) {
           data.adjustAxisValueRange(
             canvasHeight,
             valueRangeToBeAdjusted: data.y2ValueRange,
-            start: style.yAxisStyle.preferredStartValue,
-            end: style.yAxisStyle.preferredEndValue,
+            start: style.y1AxisStyle.preferredStartValue,
+            end: style.y1AxisStyle.preferredEndValue,
           );
         }
         data.populateDataWithMinimumValue();
@@ -231,7 +231,7 @@ class ModularBarChart extends StatelessWidget {
         final ChartAxisVerticalWithLabel leftAxis = ChartAxisVerticalWithLabel(
           axisHeight: canvasHeight,
         );
-        leftAxisSize = leftAxis.size(data.y1ValueRange[2], style.yAxisStyle);
+        leftAxisSize = leftAxis.size(data.y1ValueRange[2], style.y1AxisStyle);
 
         // Title
         final ChartTitle chartTitle = ChartTitle(
@@ -257,7 +257,7 @@ class ModularBarChart extends StatelessWidget {
           axisHeight: canvasHeight,
           isRightAxis: true,
         );
-        rightAxisSize = rightAxis.size(data.y2ValueRange[2], style.yAxisStyle);
+        rightAxisSize = rightAxis.size(data.y2ValueRange[2], style.y2AxisStyle);
 
         // TODO Too small to have a canvas?
         return SizedBox(

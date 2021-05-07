@@ -13,6 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData.dark(),
       home: MyHomePage(),
@@ -41,7 +42,7 @@ class MyHomePage extends StatelessWidget {
           tickColor: Colors.teal,
         ),
       ),
-      yAxisStyle: AxisStyle(
+      y1AxisStyle: AxisStyle(
         numTicks: 5,
         label: BarChartLabel(
           text: 'Y Axis',
@@ -59,6 +60,7 @@ class MyHomePage extends StatelessWidget {
         barInGroupMargin: 1,
       ),
       legendStyle: BarChartLegendStyle(visible: false),
+      clickable: false,
     ),
   );
   final ModularBarChart chartGroupedSeparated = ModularBarChart.groupedSeparated(
@@ -81,7 +83,20 @@ class MyHomePage extends StatelessWidget {
           tickColor: Colors.teal,
         ),
       ),
-      yAxisStyle: AxisStyle(
+      y1AxisStyle: AxisStyle(
+        numTicks: 5,
+        label: BarChartLabel(
+          text: 'Y Axis',
+          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
+        ),
+        //preferredEndValue: 20,
+        axisColor: Colors.teal,
+        tickStyle: TickStyle(
+          tickLength: 5,
+          tickColor: Colors.teal,
+        ),
+      ),
+      y2AxisStyle: AxisStyle(
         numTicks: 5,
         label: BarChartLabel(
           text: 'Y Axis',
@@ -99,6 +114,7 @@ class MyHomePage extends StatelessWidget {
         barInGroupMargin: 1,
       ),
       legendStyle: BarChartLegendStyle(visible: false),
+      clickable: false,
     ),
   );
   final ModularBarChart chartGrouped = ModularBarChart.grouped(
@@ -122,7 +138,7 @@ class MyHomePage extends StatelessWidget {
           tickColor: Colors.teal,
         ),
       ),
-      yAxisStyle: AxisStyle(
+      y1AxisStyle: AxisStyle(
         numTicks: 5,
         label: BarChartLabel(
           text: 'Y Axis',
@@ -139,6 +155,7 @@ class MyHomePage extends StatelessWidget {
         barWidth: 10,
         barInGroupMargin: 0,
       ),
+      clickable: false,
     ),
   );
   final ModularBarChart chartGroupedStacked = ModularBarChart.groupedStacked(
@@ -161,7 +178,7 @@ class MyHomePage extends StatelessWidget {
           tickColor: Colors.teal,
         ),
       ),
-      yAxisStyle: AxisStyle(
+      y1AxisStyle: AxisStyle(
         numTicks: 5,
         label: BarChartLabel(
           text: 'Height in cm',
@@ -179,6 +196,7 @@ class MyHomePage extends StatelessWidget {
         barInGroupMargin: 0,
         isStacked: true,
       ),
+      clickable: false,
     ),
   );
   
@@ -200,6 +218,7 @@ class MyHomePage extends StatelessWidget {
                   MaterialPageRoute(builder: (context) =>
                     HorizontalChartViewPage(chart: chartUngrouped.copyWith(
                       style: chartUngrouped.style.copyWith(
+                        clickable: true,
                         animation: BarChartAnimation(
                           animateData: true,
                         )
@@ -224,6 +243,7 @@ class MyHomePage extends StatelessWidget {
                   MaterialPageRoute(builder: (context) =>
                     HorizontalChartViewPage(chart: chartGroupedSeparated.copyWith(
                       style: chartGroupedSeparated.style.copyWith(
+                        clickable: true,
                         animation: BarChartAnimation(
                           animateData: true,
                         )
@@ -248,6 +268,7 @@ class MyHomePage extends StatelessWidget {
                   MaterialPageRoute(builder: (context) =>
                     HorizontalChartViewPage(chart: chartGrouped.copyWith(
                       style: chartGrouped.style.copyWith(
+                        clickable: true,
                         animation: BarChartAnimation(
                           animateData: true,
                         )
@@ -272,6 +293,7 @@ class MyHomePage extends StatelessWidget {
                   MaterialPageRoute(builder: (context) =>
                     HorizontalChartViewPage(chart: chartGroupedStacked.copyWith(
                       style: chartGroupedStacked.style.copyWith(
+                        clickable: true,
                         animation: BarChartAnimation(
                           animateData: true,
                         )
@@ -289,37 +311,9 @@ class MyHomePage extends StatelessWidget {
                 ),
               ),
             ),
-            // TODO fix bug in not touchable when not in scroll view
-            // Container(
-            //   child: CanvasTouchDetector(
-            //     builder: (BuildContext context) {
-            //       return CustomPaint(
-            //         painter: c(context),
-            //       );
-            //     },
-            //   ),
-            // )
           ],
         ),
       ),
     );
   }
-}
-
-// TODO fix bug in not touchable when not in scroll view
-class c extends CustomPainter {
-  final BuildContext context;
-
-  c(this.context);
-  @override
-  void paint(Canvas canvas, Size size) {
-    Rect r = Rect.fromPoints(Offset(0,0), Offset(size.width, size.height));
-    var ca = TouchyCanvas(context, canvas);
-    ca.drawRect(r, Paint()..color = Colors.blue,
-    onTapDown: (details){ print(details.globalPosition); });
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-  
 }

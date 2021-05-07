@@ -18,6 +18,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
   final Function(BarChartDataDouble, TapDownDetails) onBarSelected;
   final bool groupSelected;
   final BarChartDataDouble barSelected;
+  final bool clickable;
 
   SingleGroupDataPainter({
     @required this.context,
@@ -30,6 +31,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
     this.onBarSelected,
     this.groupSelected,
     this.barSelected,
+    this.clickable = true,
   });
 
   @override
@@ -44,24 +46,24 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
 
     if (type == BarChartType.Ungrouped) {
       drawUngroupedData(
-          originCanvas: originCanvas,
-          canvas: canvas,
-          y1UnitPerPixel: y1UnitPerPixel,
-          bottomLeft: Offset(0, size.height)
+        originCanvas: originCanvas,
+        canvas: canvas,
+        y1UnitPerPixel: y1UnitPerPixel,
+        bottomLeft: Offset(0, size.height)
       );
     } else if (type == BarChartType.Grouped) {
       drawGroupedData(
-          originCanvas: originCanvas,
-          canvas: canvas,
-          y1UnitPerPixel: y1UnitPerPixel,
-          bottomLeft: Offset(0, size.height)
+        originCanvas: originCanvas,
+        canvas: canvas,
+        y1UnitPerPixel: y1UnitPerPixel,
+        bottomLeft: Offset(0, size.height)
       );
     } else if (type == BarChartType.GroupedStacked) {
       drawGroupedStackedData(
-          originCanvas: originCanvas,
-          canvas: canvas,
-          y1UnitPerPixel: y1UnitPerPixel,
-          bottomLeft: Offset(0, size.height)
+        originCanvas: originCanvas,
+        canvas: canvas,
+        y1UnitPerPixel: y1UnitPerPixel,
+        bottomLeft: Offset(0, size.height)
       );
     } else if (type == BarChartType.GroupedSeparated) {
       drawGroupedSeparatedData(
@@ -102,8 +104,8 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
         barAnimationFraction: barAnimationFraction,
       );
     }
-    drawTouchableBar(
-      canvas: canvas,
+    drawBar(
+      canvas: clickable ? canvas : originCanvas,
       data: bar,
       bottomLeft: bottomLeft,
       x1: x1FromBottomLeft,
@@ -160,8 +162,8 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
         );
       }
 
-      drawTouchableBar(
-        canvas: canvas,
+      drawBar(
+        canvas: clickable ? canvas : originCanvas,
         data: data[i],
         bottomLeft: bottomLeft,
         x1: x1FromBottomLeft,
@@ -170,9 +172,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
         style: style.barStyle,
         paint: paint,
         barAnimationFraction: barAnimationFraction,
-        onBarSelected: (data, details) {
-          onBarSelected(data, details);
-        },
+        onBarSelected: (data, details) { onBarSelected(data, details); },
       );
 
       if (barAnimationFraction == 1) {
@@ -196,8 +196,8 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
         y1: savedBar.y1 + 2,
         barAnimationFraction: barAnimationFraction,
       );
-      drawTouchableBar(
-        canvas: canvas,
+      drawBar(
+        canvas: clickable ? canvas : originCanvas,
         data: savedBar.data,
         bottomLeft: bottomLeft,
         x1: savedBar.x1,
@@ -206,9 +206,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
         style: style.barStyle,
         paint: savedBar.paint,
         barAnimationFraction: barAnimationFraction,
-        onBarSelected: (data, details) {
-          onBarSelected(data, details);
-        },
+        onBarSelected: (data, details) { onBarSelected(data, details); },
       );
     }
   }
@@ -250,8 +248,8 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
         );
       }
 
-      drawTouchableBar(
-        canvas: canvas,
+      drawBar(
+        canvas: clickable ? canvas : originCanvas,
         data: data[i],
         bottomLeft: bottomLeft,
         x1: x1FromBottomLeft,
@@ -261,9 +259,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
         paint: paint,
         last: false,
         barAnimationFraction: barAnimationFraction,
-        onBarSelected: (data, details) {
-          onBarSelected(data, details);
-        },
+        onBarSelected: (data, details) { onBarSelected(data, details); },
       );
 
       previousYValue += data[i].data;
@@ -279,8 +275,8 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
           isStacked: true,
           barAnimationFraction: barAnimationFraction,
         );
-        drawTouchableBar(
-          canvas: canvas,
+        drawBar(
+          canvas: clickable ? canvas : originCanvas,
           data: savedBar.data,
           bottomLeft: bottomLeft,
           x1: savedBar.x1,
@@ -290,9 +286,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
           style: style.barStyle,
           paint: savedBar.paint,
           barAnimationFraction: barAnimationFraction,
-          onBarSelected: (data, details) {
-            onBarSelected(data, details);
-          },
+          onBarSelected: (data, details) { onBarSelected(data, details); },
         );
       }
     }
@@ -334,7 +328,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
     double y1FromBottomLeft = (current.data - dataModel.y2ValueRange[0]) / y2UnitPerPixel;
     Offset currentPosition = bottomLeft.translate(x1FromBottomLeft, -y1FromBottomLeft);
     drawPoint(
-      canvas: canvas,
+      canvas: clickable ? canvas : originCanvas,
       data: current,
       center: currentPosition,
       radius: 4,
@@ -369,7 +363,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
     // Highlight the selected point
     if (current == barSelected && groupSelected) {
       drawPoint(
-        canvas: canvas,
+        canvas: clickable ? canvas : originCanvas,
         data: current,
         center: currentPosition,
         radius: 6,

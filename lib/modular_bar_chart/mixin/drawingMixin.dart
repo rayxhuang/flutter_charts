@@ -7,37 +7,31 @@ import 'package:touchable/touchable.dart';
 
 mixin Drawing {
   void drawPoint({
-    @required TouchyCanvas canvas,
+    @required canvas,
     @required BarChartDataDouble data,
     @required Offset center,
     @required double radius,
     @required Paint paint,
     Function(BarChartDataDouble, TapDownDetails) onBarSelected,
   }) {
-    canvas.drawCircle(
-      center,
-      radius,
-      paint,
-      onTapDown: (details) { onBarSelected(data, details); }
-    );
+    if (canvas is TouchyCanvas) {
+      canvas.drawCircle(
+        center,
+        radius,
+        paint,
+        onTapDown: (details) { onBarSelected(data, details); }
+      );
+    } else {
+      canvas.drawCircle(
+        center,
+        radius,
+        paint,
+      );
+    }
   }
 
-  void drawSimplePoint({
-    @required Canvas canvas,
-    @required BarChartDataDouble data,
-    @required Offset center,
-    @required double radius,
-    @required Paint paint,
-  }) {
-    canvas.drawCircle(
-      center,
-      radius,
-      paint,
-    );
-  }
-
-  void drawTouchableBar({
-    @required TouchyCanvas canvas,
+  void drawBar({
+    @required canvas,
     @required BarChartDataDouble data,
     @required Offset bottomLeft,
     @required double x1,
@@ -55,56 +49,40 @@ mixin Drawing {
         bottomLeft.translate(x2, -y2)
     );
     if (style.shape == BarChartBarShape.RoundedRectangle && last) {
-      canvas.drawRRect(
-        RRect.fromRectAndCorners(
-          rect,
-          topLeft: style.topLeft,
-          topRight: style.topRight,
-          bottomLeft: style.bottomLeft,
-          bottomRight: style.bottomRight,
-        ),
-        paint,
-      );
+      if (canvas is TouchyCanvas) {
+        canvas.drawRRect(
+          RRect.fromRectAndCorners(
+            rect,
+            topLeft: style.topLeft,
+            topRight: style.topRight,
+            bottomLeft: style.bottomLeft,
+            bottomRight: style.bottomRight,
+          ),
+          paint,
+          onTapDown: (details) { onBarSelected(data, details); }
+        );
+      } else {
+        canvas.drawRRect(
+          RRect.fromRectAndCorners(
+            rect,
+            topLeft: style.topLeft,
+            topRight: style.topRight,
+            bottomLeft: style.bottomLeft,
+            bottomRight: style.bottomRight,
+          ),
+          paint,
+        );
+      }
     } else {
-      canvas.drawRect(
-        rect,
-        paint,
-        onTapDown: (details) {
-          onBarSelected(data, details);
-        }
-      );
-    }
-  }
-
-  void drawSimpleBar({
-    @required Canvas canvas,
-    @required BarChartDataDouble data,
-    @required Offset bottomLeft,
-    @required double x1,
-    @required double x2,
-    @required double y1,
-    double y2 = 0,
-    @required BarChartBarStyle style,
-    @required Paint paint,
-    bool last = true,
-  }) {
-    Rect rect = Rect.fromPoints(
-        bottomLeft.translate(x1, -y1),
-        bottomLeft.translate(x2, -y2)
-    );
-    if (style.shape == BarChartBarShape.RoundedRectangle && last) {
-      canvas.drawRRect(
-        RRect.fromRectAndCorners(
+      if (canvas is TouchyCanvas) {
+        canvas.drawRect(
           rect,
-          topLeft: style.topLeft,
-          topRight: style.topRight,
-          bottomLeft: style.bottomLeft,
-          bottomRight: style.bottomRight,
-        ),
-        paint,
-      );
-    } else {
-      canvas.drawRect(rect, paint,);
+          paint,
+          onTapDown: (details) { onBarSelected(data, details); }
+        );
+      } else {
+        canvas.drawRect(rect, paint,);
+      }
     }
   }
 

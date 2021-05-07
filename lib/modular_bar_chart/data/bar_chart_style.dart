@@ -11,10 +11,11 @@ class BarChartStyle {
   final bool sortXAxis;
   final Comparator<String> groupComparator;
   final EdgeInsetsGeometry contentPadding;
-  final AxisStyle xAxisStyle, yAxisStyle;
+  final AxisStyle xAxisStyle, y1AxisStyle, y2AxisStyle;
   final BarChartLegendStyle legendStyle;
   final BarChartBarStyle barStyle;
   final BarChartAnimation animation;
+  final bool clickable;
 
   const BarChartStyle({
     this.title = const BarChartLabel(),
@@ -24,10 +25,12 @@ class BarChartStyle {
     this.groupComparator,
     this.contentPadding = const EdgeInsets.all(10),
     this.xAxisStyle = const AxisStyle(),
-    this.yAxisStyle = const AxisStyle(),
+    this.y1AxisStyle = const AxisStyle(),
+    this.y2AxisStyle = const AxisStyle(),
     this.barStyle = const BarChartBarStyle(),
     this.legendStyle = const BarChartLegendStyle(),
     this.animation = const BarChartAnimation(),
+    this.clickable = true,
   });
 
   BarChartStyle copyWith({
@@ -38,10 +41,12 @@ class BarChartStyle {
     Comparator<String> groupComparator,
     EdgeInsetsGeometry contentPadding,
     AxisStyle xAxisStyle,
-    AxisStyle yAxisStyle,
+    AxisStyle y1AxisStyle,
+    AxisStyle y2AxisStyle,
     BarChartBarStyle barStyle,
     BarChartLegendStyle legendStyle,
     BarChartAnimation animation,
+    bool clickable,
   }) => BarChartStyle(
       title: title ?? this.title,
       groupMargin: groupMargin ?? this.groupMargin,
@@ -50,10 +55,12 @@ class BarChartStyle {
       groupComparator: groupComparator ?? this.groupComparator,
       contentPadding: contentPadding ?? this.contentPadding,
       xAxisStyle: xAxisStyle ?? this.xAxisStyle,
-      yAxisStyle: yAxisStyle ?? this.yAxisStyle,
+      y1AxisStyle: y1AxisStyle ?? this.y1AxisStyle,
+      y2AxisStyle: y2AxisStyle ?? this.y2AxisStyle,
       barStyle: barStyle ?? this.barStyle,
       legendStyle: legendStyle ?? this.legendStyle,
       animation: animation ?? this.animation,
+      clickable: clickable ?? this.clickable,
     );
 }
 

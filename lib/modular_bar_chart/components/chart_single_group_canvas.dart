@@ -10,7 +10,7 @@ import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 import 'chart_single_group_canvas_painter.dart';
 
 @immutable
-class GroupedBars extends StatelessWidget {
+class SingleGroupedCanvas extends StatelessWidget {
   final Size size;
   final double barWidth;
   final int groupIndex;
@@ -19,7 +19,7 @@ class GroupedBars extends StatelessWidget {
   final double barAnimationFraction;
   final Function(int, BarChartDataDouble, TapDownDetails) onBarSelected;
 
-  const GroupedBars({
+  const SingleGroupedCanvas({
     this.size,
     this.barWidth,
     this.groupIndex,
@@ -33,26 +33,45 @@ class GroupedBars extends StatelessWidget {
   Widget build(BuildContext context) {
     final ModularBarChartData dataModel = context.read<ModularBarChartData>();
     final BarChartStyle style = context.read<BarChartStyle>();
-    return CanvasTouchDetector(
-      builder: (BuildContext context) {
-        return CustomPaint(
-          painter: SingleGroupDataPainter(
-            context: context,
-            dataModel: dataModel,
-            dataIndex: groupIndex,
-            style: style,
-            xSectionLength: size.width,
-            barWidth: barWidth,
-            barAnimationFraction: barAnimationFraction,
-            onBarSelected: (data, details) {
-              onBarSelected(groupIndex, data, details);
-            },
-            groupSelected: isSelected ? true : false,
-            barSelected: barSelected,
-          ),
-          size: size,
-        );
-      },
-    );
+    final bool clickable = style.clickable;
+    if (clickable) {
+      return CanvasTouchDetector(
+        builder: (BuildContext context) {
+          return CustomPaint(
+            painter: SingleGroupDataPainter(
+              context: context,
+              dataModel: dataModel,
+              dataIndex: groupIndex,
+              style: style,
+              xSectionLength: size.width,
+              barWidth: barWidth,
+              barAnimationFraction: barAnimationFraction,
+              onBarSelected: (data, details) { onBarSelected(groupIndex, data, details); },
+              groupSelected: isSelected ? true : false,
+              barSelected: barSelected,
+              clickable: clickable,
+            ),
+            size: size,
+          );
+        },
+      );
+    } else {
+      return CustomPaint(
+        painter: SingleGroupDataPainter(
+          context: context,
+          dataModel: dataModel,
+          dataIndex: groupIndex,
+          style: style,
+          xSectionLength: size.width,
+          barWidth: barWidth,
+          barAnimationFraction: barAnimationFraction,
+          onBarSelected: (data, details) { onBarSelected(groupIndex, data, details); },
+          groupSelected: isSelected ? true : false,
+          barSelected: barSelected,
+          clickable: clickable,
+        ),
+        size: size,
+      );
+    }
   }
 }

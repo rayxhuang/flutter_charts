@@ -133,7 +133,7 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
         physics: ClampingScrollPhysics(),
         itemCount: data.xGroups.length,
         itemBuilder: (context, index) {
-          return GroupedBars(
+          return SingleGroupedCanvas(
             groupIndex: index,
             isSelected: index == indexSelected ? true : false,
             barSelected: barSelected,
