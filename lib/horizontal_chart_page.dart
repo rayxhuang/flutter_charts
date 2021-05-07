@@ -7,7 +7,7 @@ class HorizontalChartViewPage extends StatelessWidget {
   final ModularBarChart chart;
 
   const HorizontalChartViewPage({
-    @required this.chart
+    @required this.chart,
   });
 
   @override
@@ -24,8 +24,6 @@ class HorizontalChartViewPage extends StatelessWidget {
         child: SizedBox(
           width: MediaQuery.of(context).size.height,
           height: MediaQuery.of(context).size.width,
-          // width: MediaQuery.of(context).size.width,
-          // height: MediaQuery.of(context).size.height,
           child: Padding(
             padding: EdgeInsets.all(10),
             child: chart,

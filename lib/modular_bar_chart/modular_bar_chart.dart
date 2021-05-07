@@ -12,118 +12,116 @@ import 'components/chart_title.dart';
 import 'components/stateful/chart_axis.dart';
 import 'components/stateful/chart_canvas_wrapper.dart';
 
+@immutable
 class ModularBarChart extends StatelessWidget {
   final Map<String, dynamic> data;
+  final ModularBarChartData dataModel;
   final BarChartStyle style;
   final BarChartType type;
 
-  ModularBarChart._({
+  const ModularBarChart._({
     @required this.data,
+    @required this.dataModel,
     @required this.type,
     this.style = const BarChartStyle(),
   }) : assert(data != null);
 
   ModularBarChart copyWith({
     BarChartStyle style,
-  }) => ModularBarChart._(
-    data: this.data,
-    style: style ?? this.style,
-    type: this.type
-  );
+    Map<String, Color> colorMap,
+  }) {
+    final ModularBarChartData dataModel = this.dataModel;
+    dataModel.subGroupColors = colorMap ?? dataModel.subGroupColors;
+    // print('called copy with');
+    // print(dataModel.subGroupColors);
+    return ModularBarChart._(
+      data: this.data,
+      dataModel: dataModel,
+      style: style ?? this.style,
+      type: this.type
+    );
+  }
 
   factory ModularBarChart.ungrouped({
     @required Map<String, double> data,
     BarChartStyle style,
-  }) =>
-      ModularBarChart._(
-        data: data,
-        type: BarChartType.Ungrouped,
-        style: style,
-      );
+  }) {
+    final ModularBarChartData dataModel = ModularBarChartData.ungrouped(
+      rawData: data,
+      sortXAxis: style.sortXAxis,
+      xGroupComparator: style.groupComparator
+    );
+    dataModel.analyseData();
+    return ModularBarChart._(
+      data: data,
+      dataModel: dataModel,
+      type: BarChartType.Ungrouped,
+      style: style,
+    );
+  }
 
   factory ModularBarChart.grouped({
     @required Map<String, Map<String, double>> data,
     BarChartStyle style,
-  }) =>
-      ModularBarChart._(
-        data: data,
-        type: BarChartType.Grouped,
-        style: style,
-      );
+  }) {
+    final ModularBarChartData dataModel = ModularBarChartData.grouped(
+      rawData: data,
+      sortXAxis: style.sortXAxis,
+      xGroupComparator: style.groupComparator
+    );
+    dataModel.analyseData();
+    return ModularBarChart._(
+      data: data,
+      dataModel: dataModel,
+      type: BarChartType.Grouped,
+      style: style,
+    );
+  }
 
   factory ModularBarChart.groupedStacked({
     @required Map<String, Map<String, double>> data,
     BarChartStyle style,
-  }) =>
-      ModularBarChart._(
-        data: data,
-        type: BarChartType.GroupedStacked,
-        style: style,
-      );
+  }) {
+    final ModularBarChartData dataModel = ModularBarChartData.groupedStacked(
+      rawData: data,
+      sortXAxis: style.sortXAxis,
+      xGroupComparator: style.groupComparator
+    );
+    dataModel.analyseData();
+    return ModularBarChart._(
+      data: data,
+      dataModel: dataModel,
+      type: BarChartType.GroupedStacked,
+      style: style,
+    );
+  }
 
   factory ModularBarChart.groupedSeparated({
     @required Map<String, Map<String, double>> data,
     BarChartStyle style,
-  }) =>
-      ModularBarChart._(
-        data: data,
-        type: BarChartType.GroupedSeparated,
-        style: style,
-      );
+  }) {
+    final ModularBarChartData dataModel = ModularBarChartData.groupedSeparated(
+      rawData: data,
+      sortXAxis: style.sortXAxis,
+      xGroupComparator: style.groupComparator
+    );
+    dataModel.analyseData();
+    return ModularBarChart._(
+      data: data,
+      dataModel: dataModel,
+      type: BarChartType.GroupedSeparated,
+      style: style,
+    );
+  }
 
   String get title => this.style.title.text;
-
-  ModularBarChartData createDataModel() {
-    switch (type) {
-      case BarChartType.Ungrouped:
-        return ModularBarChartData.ungrouped(
-            rawData: data,
-            sortXAxis: style.sortXAxis,
-            xGroupComparator: style.groupComparator);
-        break;
-      case BarChartType.Grouped:
-        return ModularBarChartData.grouped(
-          rawData: data,
-          sortXAxis: style.sortXAxis,
-          xGroupComparator: style.groupComparator,
-          subGroupColors: style.subGroupColors ?? {},
-        );
-        break;
-      case BarChartType.GroupedStacked:
-        return ModularBarChartData.groupedStacked(
-          rawData: data,
-          sortXAxis: style.sortXAxis,
-          xGroupComparator: style.groupComparator,
-          subGroupColors: style.subGroupColors ?? {},
-        );
-        break;
-      case BarChartType.GroupedSeparated:
-        return ModularBarChartData.groupedSeparated(
-          rawData: data,
-          sortXAxis: style.sortXAxis,
-          xGroupComparator: style.groupComparator,
-          subGroupColors: style.subGroupColors ?? {},
-        );
-        break;
-      case BarChartType.Grouped3D:
-        throw UnimplementedError();
-        break;
-
-      default:
-        throw UnimplementedError();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         Provider<BarChartStyle>(create: (_) => style),
-        Provider<ModularBarChartData>(create: (_) {
-          ModularBarChartData dataModel = createDataModel();
-          dataModel.analyseData();
-          return dataModel;
-        }),
+        Provider<ModularBarChartData>(create: (_) => dataModel),
       ],
       child: LayoutBuilder(builder: (context, constraint) {
         ModularBarChartData data = context.read<ModularBarChartData>();

@@ -241,14 +241,16 @@ class MyHomePage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) =>
-                    HorizontalChartViewPage(chart: chartGroupedSeparated.copyWith(
-                      style: chartGroupedSeparated.style.copyWith(
-                        clickable: true,
-                        animation: BarChartAnimation(
-                          animateData: true,
+                    HorizontalChartViewPage(
+                      chart: chartGroupedSeparated.copyWith(
+                        style: chartGroupedSeparated.style.copyWith(
+                          clickable: true,
+                          animation: BarChartAnimation(
+                            animateData: true,
+                          )
                         )
                       )
-                    ))
+                    )
                   ),
                 );
               },
@@ -266,14 +268,15 @@ class MyHomePage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) =>
-                    HorizontalChartViewPage(chart: chartGrouped.copyWith(
-                      style: chartGrouped.style.copyWith(
-                        clickable: true,
-                        animation: BarChartAnimation(
-                          animateData: true,
+                    HorizontalChartViewPage(
+                      chart: chartGrouped.copyWith(
+                        colorMap: chartGrouped.dataModel.subGroupColors,
+                        style: chartGrouped.style.copyWith(
+                          clickable: true,
+                          animation: BarChartAnimation(animateData: true,)
                         )
                       )
-                    ))
+                    )
                   ),
                 );
               },
@@ -291,14 +294,15 @@ class MyHomePage extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) =>
-                    HorizontalChartViewPage(chart: chartGroupedStacked.copyWith(
-                      style: chartGroupedStacked.style.copyWith(
-                        clickable: true,
-                        animation: BarChartAnimation(
-                          animateData: true,
+                    HorizontalChartViewPage(
+                      chart: chartGroupedStacked.copyWith(
+                        colorMap: chartGroupedStacked.dataModel.subGroupColors,
+                        style: chartGroupedStacked.style.copyWith(
+                          clickable: true,
+                          animation: BarChartAnimation(animateData: true,)
                         )
                       )
-                    ))
+                    )
                   ),
                 );
               },

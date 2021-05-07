@@ -45,7 +45,7 @@ class ModularBarChartData{
     type: BarChartType.Grouped,
     sortXAxis: sortXAxis,
     xGroupComparator: xGroupComparator,
-    subGroupColors: subGroupColors,
+    subGroupColors: subGroupColors ?? {},
   );
 
   factory ModularBarChartData.groupedStacked({
@@ -58,7 +58,7 @@ class ModularBarChartData{
     type: BarChartType.GroupedStacked,
     sortXAxis: sortXAxis,
     xGroupComparator: xGroupComparator,
-    subGroupColors: subGroupColors,
+    subGroupColors: subGroupColors ?? {},
   );
 
   factory ModularBarChartData.groupedSeparated({
@@ -71,7 +71,7 @@ class ModularBarChartData{
     type: BarChartType.GroupedSeparated,
     sortXAxis: sortXAxis,
     xGroupComparator: xGroupComparator,
-    subGroupColors: subGroupColors,
+    subGroupColors: subGroupColors ?? {},
   );
 
   // Data processing variables
@@ -150,6 +150,8 @@ class ModularBarChartData{
     // Generate color for subgroups
     if (type != BarChartType.Ungrouped && type != BarChartType.GroupedSeparated) {
       final List<String> inputColorList = subGroupColors.keys.toList();
+      // print('in data model');
+      // print(subGroupColors);
       xSubGroups.forEach((group) {
         if (!inputColorList.contains(group)) {
           subGroupColors[group] = Colors.primaries[Random().nextInt(Colors.primaries.length)];
