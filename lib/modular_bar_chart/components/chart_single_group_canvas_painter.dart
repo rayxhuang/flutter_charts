@@ -20,7 +20,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
   final BarChartDataDouble barSelected;
   final bool clickable;
 
-  SingleGroupDataPainter({
+  const SingleGroupDataPainter({
     @required this.context,
     @required this.dataIndex,
     @required this.dataModel,

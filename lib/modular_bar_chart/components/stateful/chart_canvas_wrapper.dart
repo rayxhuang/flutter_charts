@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -90,29 +92,29 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
     final ModularBarChartData dataModel = context.read<ModularBarChartData>();
     final BarChartStyle style = context.read<BarChartStyle>();
     final double xSectionLength = getXSectionLengthFromBarWidth(data: dataModel, style: style, barWidth: widget.barWidth);
+    final double xLength = getXLength(dataModel: dataModel, canvasWidth: canvasSize.width, xSectionLength: xSectionLength);
+    final double xHeight = getXHeight(style.xAxisStyle);
     final double miniCanvasWidth = canvasSize.width * 0.2;
     final double miniCanvasHeight = canvasSize.height * 0.2 + 3;
     final Size miniCanvasContainerSize = Size(miniCanvasWidth, miniCanvasHeight - 3);
 
     // Bottom Axis
-    final ChartAxisHorizontal bottomAxis = ChartAxisHorizontal(
-      dataModel: dataModel,
-      style: style,
-      axisLength: canvasSize.width,
-      barWidth: style.barStyle.barWidth,
+    final Widget bottomAxis = ChartAxisHorizontalWrapper(
+      containerSize: Size(canvasSize.width, xHeight),
+      singleCanvasSize: Size(xSectionLength, xHeight),
       scrollController: _scrollController1,
     );
 
     // Mini Canvas
     Widget inViewContainerOnMiniCanvas, miniCanvasDataBars;
-    final double inViewContainerOffset = (1 - scrollOffset / (bottomAxis.length - widget.canvasSize.width));
+    final double inViewContainerOffset = (1 - scrollOffset / (xLength - canvasSize.width));
     final double inViewContainerMovingDistance = widget.displayMiniCanvas
-        ? (1 - canvasSize.width / bottomAxis.length) * miniCanvasWidth
+        ? (1 - canvasSize.width / xLength) * miniCanvasWidth
         : 0;
     if (widget.displayMiniCanvas) {
       // Mini Canvas background
       inViewContainerOnMiniCanvas = Container(
-        width: (canvasSize.width / bottomAxis.length) * miniCanvasWidth,
+        width: (canvasSize.width / xLength) * miniCanvasWidth,
         height: miniCanvasHeight,
         color: Colors.white12,
       );
@@ -121,7 +123,7 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
         padding: const EdgeInsets.only(top: 3),
         child: ChartCanvasMini(
           containerSize: miniCanvasContainerSize,
-          canvasSize: Size(bottomAxis.length, widget.canvasSize.height),
+          canvasSize: Size(xLength, widget.canvasSize.height),
         ),
       );
     }
@@ -197,6 +199,12 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
                 )
                 : SizedBox(),
 
+            // // Bottom Axis
+            // Positioned(
+            //   top: canvasSize.height - style.xAxisStyle.strokeWidth / 2,
+            //   left: 0,
+            //   child: bottomAxis,
+            // )
             // Bottom Axis
             Positioned(
               top: canvasSize.height - style.xAxisStyle.strokeWidth / 2,
@@ -222,6 +230,15 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
     double totalInGroupMargin = style.barStyle.barInGroupMargin * (numBarsInGroup - 1);
     return totalBarWidth + totalGroupMargin + totalInGroupMargin;
   }
+
+  double getXLength({
+    @required ModularBarChartData dataModel,
+    @required double canvasWidth,
+    @required double xSectionLength,
+  }) => [xSectionLength * dataModel.xGroups.length, canvasWidth].reduce(max);
+
+  double getXHeight(AxisStyle xAxisStyle) =>
+      StringSize.getHeightOfString('I', xAxisStyle.tickStyle.labelTextStyle) + xAxisStyle.tickStyle.tickLength + xAxisStyle.tickStyle.tickMargin;
 
   void _createOverlay({
     @required BuildContext context,

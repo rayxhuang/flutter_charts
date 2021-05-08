@@ -10,52 +10,149 @@ import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 
 @immutable
-class ChartAxisHorizontal extends StatelessWidget with StringSize{
-  final ModularBarChartData dataModel;
-  final double barWidth;
-  final BarChartStyle style;
-  final double axisLength;
+class ChartAxisHorizontalWrapper extends StatelessWidget {
+  final Size containerSize;
+  final Size singleCanvasSize;
   final ScrollController scrollController;
 
-  const ChartAxisHorizontal({
-    @required this.dataModel,
-    @required this.barWidth,
-    @required this.axisLength,
+  const ChartAxisHorizontalWrapper({
+    @required this.containerSize,
+    @required this.singleCanvasSize,
     @required this.scrollController,
-    this.style = const BarChartStyle(),
   });
-
-  Size get size => Size(axisLength, getHeight(style.xAxisStyle));
-  double get xSectionLength {
-    return dataModel.numBarsInGroups * barWidth + style.groupMargin * 2
-        + style.barStyle.barInGroupMargin * (dataModel.numBarsInGroups - 1);
-  }
-  double get length => [xSectionLength * dataModel.xGroups.length, axisLength].reduce(max);
-  double get height => getHeight(style.xAxisStyle);
-
-  static double getHeight(AxisStyle xAxisStyle) =>
-      StringSize.getHeightOfString('I', xAxisStyle.tickStyle.labelTextStyle) + xAxisStyle.tickStyle.tickLength + xAxisStyle.tickStyle.tickMargin;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: axisLength,
-      height: height,
-      child: SingleChildScrollView(
-        physics: ClampingScrollPhysics(),
-        scrollDirection: Axis.horizontal,
+    final ModularBarChartData dataModel = context.read<ModularBarChartData>();
+    final BarChartStyle style = context.read<BarChartStyle>();
+    return SizedBox.fromSize(
+      size: containerSize,
+      child: ListView.builder(
         controller: scrollController,
-        child: CustomPaint(
-          painter: HorizontalAxisPainter(
-            xGroups: dataModel.xGroups,
-            axisStyle: style.xAxisStyle,
-          ),
-          size: Size(length, height),
-        ),
+        scrollDirection: Axis.horizontal,
+        physics: ClampingScrollPhysics(),
+        itemCount: dataModel.xGroups.length,
+        itemBuilder: (context, index) {
+          return CustomPaint(
+            painter: HorizontalAxisSingleGroupPainter(
+              groupName: dataModel.xGroups[index],
+              axisStyle: style.xAxisStyle,
+            ),
+            size: singleCanvasSize,
+          );
+        },
       ),
     );
   }
 }
+
+@immutable
+class HorizontalAxisSingleGroupPainter extends CustomPainter {
+  final String groupName;
+  final AxisStyle axisStyle;
+
+  const HorizontalAxisSingleGroupPainter({
+    @required this.groupName,
+    this.axisStyle = const AxisStyle(),
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final axisPaint = Paint();
+    axisPaint..color = axisStyle.axisColor;
+    axisPaint..strokeWidth = axisStyle.strokeWidth;
+    axisPaint..strokeCap = axisStyle.strokeCap;
+
+    // Draw axis line
+    final Offset start = Offset(0, axisStyle.strokeWidth / 2);
+    final Offset end = Offset(size.width, axisStyle.strokeWidth / 2);
+    canvas.drawLine(start, end, axisPaint);
+
+    final TickStyle tick = axisStyle.tickStyle;
+    final Paint tickPaint = Paint()
+      ..strokeWidth = axisStyle.strokeWidth
+      ..strokeCap = axisStyle.strokeCap
+      ..color = tick.tickColor;
+    final TextStyle tickTextStyle = tick.labelTextStyle;
+    final TextPainter _textPainter = TextPainter(
+      text: TextSpan(),
+      textDirection: TextDirection.ltr,
+    );
+    _textPainter.layout();
+
+    Offset p1, p2;
+
+    p1 = start;
+    p2 = p1.translate(0, tick.tickLength);
+    //Draw the tick line
+    canvas.drawLine(p1, p2, tickPaint);
+
+    p1 = end;
+    p2 = p1.translate(0, tick.tickLength);
+    //Draw the tick line
+    canvas.drawLine(p1, p2, tickPaint);
+
+    // Draw group name
+    _textPainter.text = TextSpan(text: '$groupName', style: tickTextStyle);
+    _textPainter.layout(maxWidth: size.width);
+    //Draw the tick value text
+    _textPainter.paint(canvas, Offset(
+        (size.width - _textPainter.width) / 2,
+        tick.tickLength + tick.tickMargin
+    ));
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// @immutable
+// class ChartAxisHorizontal extends StatelessWidget with StringSize{
+//   final ModularBarChartData dataModel;
+//   final double barWidth;
+//   final BarChartStyle style;
+//   final double axisLength;
+//   final ScrollController scrollController;
+//
+//   const ChartAxisHorizontal({
+//     @required this.dataModel,
+//     @required this.barWidth,
+//     @required this.axisLength,
+//     @required this.scrollController,
+//     this.style = const BarChartStyle(),
+//   });
+//
+//   Size get size => Size(axisLength, getHeight(style.xAxisStyle));
+//   double get xSectionLength {
+//     return dataModel.numBarsInGroups * barWidth + style.groupMargin * 2
+//         + style.barStyle.barInGroupMargin * (dataModel.numBarsInGroups - 1);
+//   }
+//   double get length => [xSectionLength * dataModel.xGroups.length, axisLength].reduce(max);
+//   double get height => getHeight(style.xAxisStyle);
+//
+//   static double getHeight(AxisStyle xAxisStyle) =>
+//       StringSize.getHeightOfString('I', xAxisStyle.tickStyle.labelTextStyle) + xAxisStyle.tickStyle.tickLength + xAxisStyle.tickStyle.tickMargin;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return SizedBox(
+//       width: axisLength,
+//       height: height,
+//       child: SingleChildScrollView(
+//         physics: ClampingScrollPhysics(),
+//         scrollDirection: Axis.horizontal,
+//         controller: scrollController,
+//         child: CustomPaint(
+//           painter: HorizontalAxisPainter(
+//             xGroups: dataModel.xGroups,
+//             axisStyle: style.xAxisStyle,
+//           ),
+//           size: Size(length, height),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 @immutable
 class HorizontalAxisPainter extends CustomPainter {

@@ -154,8 +154,7 @@ class ModularBarChart extends StatelessWidget with StringSize {
           rightAxisStaticWidth = 0;
         }
         final double titleStaticHeight = StringSize.getHeight(style.title);
-        final double bottomAxisStaticHeight =
-            ChartAxisHorizontal.getHeight(style.xAxisStyle);
+        final double bottomAxisStaticHeight = getXHeight(style.xAxisStyle);
         final double bottomLabelStaticHeight = StringSize.getHeight(style.xAxisStyle.label);
         final double bottomLegendStaticHeight = style.legendStyle.visible
             ? StringSize.getHeightOfString('Title', style.legendStyle.legendTextStyle)
@@ -323,4 +322,7 @@ class ModularBarChart extends StatelessWidget with StringSize {
       return [xSectionLengthAvailable, newBarWidth];
     }
   }
+
+  double getXHeight(AxisStyle xAxisStyle) =>
+      StringSize.getHeightOfString('I', xAxisStyle.tickStyle.labelTextStyle) + xAxisStyle.tickStyle.tickLength + xAxisStyle.tickStyle.tickMargin;
 }
