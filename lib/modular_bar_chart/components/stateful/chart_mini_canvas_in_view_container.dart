@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
-class InViewContainer extends StatefulWidget {
+class MiniCanvasInViewContainer extends StatefulWidget {
   final LinkedScrollControllerGroup controllerGroup;
   final Size containerSize;
   final Size inViewContainerSize;
@@ -10,7 +10,7 @@ class InViewContainer extends StatefulWidget {
   final double xLength;
   final double inViewContainerMovingDistance;
 
-  const InViewContainer({
+  const MiniCanvasInViewContainer({
     @required this.controllerGroup,
     @required this.containerSize,
     @required this.inViewContainerSize,
@@ -20,10 +20,10 @@ class InViewContainer extends StatefulWidget {
   });
 
   @override
-  _InViewContainerState createState() => _InViewContainerState();
+  _MiniCanvasInViewContainerState createState() => _MiniCanvasInViewContainerState();
 }
 
-class _InViewContainerState extends State<InViewContainer> {
+class _MiniCanvasInViewContainerState extends State<MiniCanvasInViewContainer> {
   double scrollOffset;
 
   @override
@@ -46,6 +46,7 @@ class _InViewContainerState extends State<InViewContainer> {
     );
     return SizedBox.fromSize(
       size: widget.containerSize,
+      // TODO replace stack with align tmrw
       child: Stack(
         children: [
           Positioned(

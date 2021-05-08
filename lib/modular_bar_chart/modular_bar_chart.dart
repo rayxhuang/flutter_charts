@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'components/chart_axis.dart';
 import 'components/chart_legend.dart';
 import 'components/chart_title.dart';
-import 'components/stateful/chart_canvas_wrapper.dart';
+import 'components/stateful/chart_main_canvas_wrapper.dart';
 
 @immutable
 class ModularBarChart extends StatelessWidget with StringSize {
