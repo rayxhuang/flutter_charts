@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_charts/modular_bar_chart/components/stateful/chart_mini_canvas_in_view_container.dart';
 import 'package:provider/provider.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
@@ -58,9 +59,6 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
     _linkedScrollControllerGroup = LinkedScrollControllerGroup();
     _scrollController1 = _linkedScrollControllerGroup.addAndGet();
     _scrollController2 = _linkedScrollControllerGroup.addAndGet();
-    _linkedScrollControllerGroup.addOffsetChangedListener(() {
-      setState(() { scrollOffset = _linkedScrollControllerGroup.offset; });
-    });
 
     // Animation
     final Tween<double> _tween = Tween(begin: 0, end: 1);
@@ -107,17 +105,20 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
 
     // Mini Canvas
     Widget inViewContainerOnMiniCanvas, miniCanvasDataBars;
-    final double inViewContainerOffset = (1 - scrollOffset / (xLength - canvasSize.width));
-    final double inViewContainerMovingDistance = widget.displayMiniCanvas
-        ? (1 - canvasSize.width / xLength) * miniCanvasWidth
-        : 0;
     if (widget.displayMiniCanvas) {
-      // Mini Canvas background
-      inViewContainerOnMiniCanvas = Container(
-        width: (canvasSize.width / xLength) * miniCanvasWidth,
-        height: miniCanvasHeight,
-        color: Colors.white12,
+      // Mini Canvas in-view Container
+      inViewContainerOnMiniCanvas = InViewContainer(
+        controllerGroup: _linkedScrollControllerGroup,
+        containerSize: widget.size,
+        canvasWidth: canvasSize.width,
+        inViewContainerMovingDistance: (1 - canvasSize.width / xLength) * miniCanvasWidth,
+        inViewContainerSize: Size(
+          (canvasSize.width / xLength) * miniCanvasWidth,
+          miniCanvasHeight
+        ),
+        xLength: xLength,
       );
+
       // Mini Canvas Data Bars
       miniCanvasDataBars = Padding(
         padding: const EdgeInsets.only(top: 3),
@@ -194,17 +195,11 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
             widget.displayMiniCanvas
                 ? Positioned(
                   top: 0,
-                  right: inViewContainerOffset * inViewContainerMovingDistance,
+                  left: 0,
                   child:  inViewContainerOnMiniCanvas,
                 )
                 : SizedBox(),
 
-            // // Bottom Axis
-            // Positioned(
-            //   top: canvasSize.height - style.xAxisStyle.strokeWidth / 2,
-            //   left: 0,
-            //   child: bottomAxis,
-            // )
             // Bottom Axis
             Positioned(
               top: canvasSize.height - style.xAxisStyle.strokeWidth / 2,
