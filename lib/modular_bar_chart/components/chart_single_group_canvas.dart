@@ -15,7 +15,7 @@ class SingleGroupedCanvas extends StatelessWidget {
   final int groupIndex;
   final bool isSelected;
   final BarChartDataDouble barSelected;
-  final double barAnimationFraction;
+  final Animation<double> dataAnimation;
   final Function(int, BarChartDataDouble, TapDownDetails) onBarSelected;
 
   const SingleGroupedCanvas({
@@ -24,7 +24,7 @@ class SingleGroupedCanvas extends StatelessWidget {
     this.groupIndex,
     this.isSelected,
     this.barSelected,
-    this.barAnimationFraction,
+    this.dataAnimation,
     this.onBarSelected,
   });
 
@@ -43,13 +43,14 @@ class SingleGroupedCanvas extends StatelessWidget {
           style: style,
           xSectionLength: size.width,
           barWidth: barWidth,
-          barAnimationFraction: barAnimationFraction,
+          dataAnimation: dataAnimation,
           onBarSelected: (data, details) { onBarSelected(groupIndex, data, details); },
           groupSelected: isSelected ? true : false,
           barSelected: barSelected,
           clickable: clickable,
         ),
         size: size,
+        willChange: true,
       )
     );
   }

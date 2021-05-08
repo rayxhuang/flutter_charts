@@ -11,7 +11,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
   final BuildContext context;
   final double xSectionLength;
   final double barWidth;
-  final double barAnimationFraction;
+  final Animation<double> dataAnimation;
   final int dataIndex;
   final ModularBarChartData dataModel;
   final BarChartStyle style;
@@ -27,12 +27,12 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
     @required this.xSectionLength,
     @required this.barWidth,
     this.style = const BarChartStyle(),
-    this.barAnimationFraction = 1,
+    this.dataAnimation,
     this.onBarSelected,
     this.groupSelected,
     this.barSelected,
     this.clickable = true,
-  });
+  }) : super(repaint: dataAnimation);
 
   @override
   void paint(Canvas originCanvas, Size size) {
@@ -101,7 +101,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
         x1: x1,
         x2: x2,
         y1: y,
-        barAnimationFraction: barAnimationFraction,
+        barAnimationFraction: dataAnimation.value,
       );
     }
     drawBar(
@@ -113,13 +113,13 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
       y1: y1FromBottomLeft,
       style: style.barStyle,
       paint: paint,
-      barAnimationFraction: barAnimationFraction,
+      barAnimationFraction: dataAnimation.value,
       onBarSelected: (data, details) {
         onBarSelected(data, details);
       },
     );
 
-    if (barAnimationFraction == 1) {
+    if (dataAnimation.value == 1) {
       drawValueOnBar(
         canvas: originCanvas,
         value: bar.data.toStringAsFixed(0),
@@ -171,11 +171,11 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
         y1: y1FromBottomLeft,
         style: style.barStyle,
         paint: paint,
-        barAnimationFraction: barAnimationFraction,
+        barAnimationFraction: dataAnimation.value,
         onBarSelected: (data, details) { onBarSelected(data, details); },
       );
 
-      if (barAnimationFraction == 1) {
+      if (dataAnimation.value == 1) {
         drawValueOnBar(
           canvas: originCanvas,
           value: data[i].data.toStringAsFixed(0),
@@ -194,7 +194,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
         x1: savedBar.x1 - 2,
         x2: savedBar.x2 + 2,
         y1: savedBar.y1 + 2,
-        barAnimationFraction: barAnimationFraction,
+        barAnimationFraction: dataAnimation.value,
       );
       drawBar(
         canvas: clickable ? canvas : originCanvas,
@@ -205,7 +205,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
         y1: savedBar.y1,
         style: style.barStyle,
         paint: savedBar.paint,
-        barAnimationFraction: barAnimationFraction,
+        barAnimationFraction: dataAnimation.value,
         onBarSelected: (data, details) { onBarSelected(data, details); },
       );
     }
@@ -258,7 +258,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
         style: style.barStyle,
         paint: paint,
         last: false,
-        barAnimationFraction: barAnimationFraction,
+        barAnimationFraction: dataAnimation.value,
         onBarSelected: (data, details) { onBarSelected(data, details); },
       );
 
@@ -273,7 +273,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
           y1: savedBar.y1 + 2,
           y2: savedBar.y2 - (savedBar.isLastInStack ? 0 : 2),
           isStacked: true,
-          barAnimationFraction: barAnimationFraction,
+          barAnimationFraction: dataAnimation.value,
         );
         drawBar(
           canvas: clickable ? canvas : originCanvas,
@@ -285,13 +285,13 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
           y2: savedBar.y2,
           style: style.barStyle,
           paint: savedBar.paint,
-          barAnimationFraction: barAnimationFraction,
+          barAnimationFraction: dataAnimation.value,
           onBarSelected: (data, details) { onBarSelected(data, details); },
         );
       }
     }
 
-    if (barAnimationFraction == 1) {
+    if (dataAnimation.value == 1) {
       drawValueOnBar(
         canvas: originCanvas,
         value: totalHeight.toStringAsFixed(0),
@@ -375,8 +375,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
 
   @override
   bool shouldRepaint(covariant SingleGroupDataPainter oldDelegate) {
-    return oldDelegate.barAnimationFraction != barAnimationFraction
-        || oldDelegate.groupSelected != groupSelected
+    return oldDelegate.groupSelected != groupSelected
         || oldDelegate.barSelected != barSelected;
   }
 }
