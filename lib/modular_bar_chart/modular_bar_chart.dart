@@ -224,9 +224,22 @@ class ModularBarChart extends StatelessWidget with StringSize {
           final double xSectionLength = getXSectionLengthFromBarWidth(data: dataModel, style: style, barWidth: barWidth);
           final double xLength = getXLength(dataModel: dataModel, canvasWidth: canvasSize.width, xSectionLength: xSectionLength);
           //chartCanvasWithAxis = Container();
-          chartCanvasWithAxis = ChartCanvasMini(
-            containerSize: Size(canvasWidth, canvasHeight),
-            canvasSize: Size(xLength, canvasHeight)
+          chartCanvasWithAxis = Column(
+            children: [
+              ChartCanvasMini(
+                containerSize: Size(canvasWidth, canvasHeight),
+                canvasSize: Size(xLength, canvasHeight)
+              ),
+              HorizontalAxisSimpleWrapper(
+                size: Size(canvasWidth, style.xAxisStyle.strokeWidth),
+              ),
+              Center(
+                child: Text(
+                  style.xAxisStyle.label.text,
+                  style: style.xAxisStyle.label.textStyle,
+                ),
+              )
+            ],
           );
           chartCanvasWithAxisSize = Size(canvasWidth, canvasHeight);
         } else {

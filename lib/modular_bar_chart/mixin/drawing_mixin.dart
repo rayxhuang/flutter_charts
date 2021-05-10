@@ -101,7 +101,7 @@ mixin Drawing {
         // TODO style
         style: textStyle,
       ),
-      ellipsis: '..',
+      ellipsis: ' ',
       textDirection: TextDirection.ltr,
     );
     valuePainter.layout(maxWidth: barWidth);

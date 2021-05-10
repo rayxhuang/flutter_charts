@@ -16,6 +16,7 @@ class ChartAxisHorizontalWrapper extends StatelessWidget {
   final ScrollController scrollController;
   final ScrollController labelController;
   final List<double> labelInfo;
+  final bool isMini;
 
   const ChartAxisHorizontalWrapper({
     @required this.containerSize,
@@ -23,6 +24,7 @@ class ChartAxisHorizontalWrapper extends StatelessWidget {
     @required this.scrollController,
     @required this.labelController,
     @required this.labelInfo,
+    this.isMini = false,
   });
 
   @override
@@ -35,7 +37,6 @@ class ChartAxisHorizontalWrapper extends StatelessWidget {
     final bool widthIsGreaterThanHeight = rotatedBoxWidth >= labelInfo[0] ? true : false;
     final double startingValue = widthIsGreaterThanHeight ? 0 : 0.5 * pi;
     final int quarterTurn = widthIsGreaterThanHeight ? 0 : -1;
-    //final double diaLen = sqrt(pow(singleCanvasSize.width * groupsToCombine, 2) + pow(labelInfo[0], 2));
     return SizedBox.fromSize(
       size: containerSize,
       child: Column(
@@ -92,6 +93,28 @@ class ChartAxisHorizontalWrapper extends StatelessWidget {
 }
 
 @immutable
+class HorizontalAxisSimpleWrapper extends StatelessWidget {
+  final Size size;
+
+  const HorizontalAxisSimpleWrapper({
+    @required this.size,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final BarChartStyle style = context.read<BarChartStyle>();
+    return SizedBox.fromSize(
+      size: size,
+      child: CustomPaint(
+        painter: HorizontalAxisSimplePainter(axisStyle: style.xAxisStyle,),
+        size: Size(size.width, style.xAxisStyle.strokeWidth),
+      ),
+    );
+  }
+}
+
+
+@immutable
 class HorizontalAxisSingleGroupPainter extends CustomPainter {
   final String groupName;
   final AxisStyle axisStyle;
@@ -145,6 +168,28 @@ class HorizontalAxisSingleGroupPainter extends CustomPainter {
     //     (size.width - _textPainter.width) / 2,
     //     tick.tickLength + tick.tickMargin
     // ));
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+@immutable
+class HorizontalAxisSimplePainter extends CustomPainter {
+  final AxisStyle axisStyle;
+
+  const HorizontalAxisSimplePainter({
+    @required this.axisStyle
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint axisPainter = Paint();
+    axisPainter..color = axisStyle.axisColor;
+    axisPainter..strokeWidth = axisStyle.strokeWidth;
+    axisPainter..strokeCap = axisStyle.strokeCap;
+
+    canvas.drawLine(Offset(0, 0), Offset(size.width, 0), axisPainter);
   }
 
   @override
