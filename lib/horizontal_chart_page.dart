@@ -20,10 +20,10 @@ class HorizontalChartViewPage extends StatelessWidget {
         title: Text('${chart.title}'),
       ),
       body: RotatedBox(
-        quarterTurns: 1,
+        quarterTurns: 0,
         child: SizedBox(
-          width: MediaQuery.of(context).size.height,
-          height: MediaQuery.of(context).size.width,
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height / 2,
           child: Padding(
             padding: EdgeInsets.all(10),
             child: chart,

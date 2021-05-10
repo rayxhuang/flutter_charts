@@ -16,6 +16,7 @@ class BarChartStyle {
   final BarChartBarStyle barStyle;
   final BarChartAnimation animation;
   final bool clickable;
+  final bool isMini;
 
   const BarChartStyle({
     this.title = const BarChartLabel(),
@@ -31,6 +32,7 @@ class BarChartStyle {
     this.legendStyle = const BarChartLegendStyle(),
     this.animation = const BarChartAnimation(),
     this.clickable = true,
+    this.isMini = false,
   });
 
   BarChartStyle copyWith({
@@ -230,7 +232,7 @@ class BarChartAnimation {
 
   const BarChartAnimation({
     this.animateData = false,
-    this.dataAnimationDuration = const Duration(milliseconds: 1000),
+    this.dataAnimationDuration = const Duration(milliseconds: 300),
   });
 
   BarChartAnimation copyWith({

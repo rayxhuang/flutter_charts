@@ -19,6 +19,7 @@ class ChartCanvasWrapper extends StatefulWidget {
   final double barWidth;
   final bool displayMiniCanvas;
   final BarChartAnimation animation;
+  final List<double> labelInfo;
 
   ChartCanvasWrapper({
     @required this.size,
@@ -26,6 +27,7 @@ class ChartCanvasWrapper extends StatefulWidget {
     @required this.barWidth,
     @required this.displayMiniCanvas,
     @required this.animation,
+    @required this.labelInfo,
   });
 
   @override
@@ -35,7 +37,7 @@ class ChartCanvasWrapper extends StatefulWidget {
 class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTickerProviderStateMixin, StringSize {
   // Scroll Controllers
   LinkedScrollControllerGroup _linkedScrollControllerGroup;
-  ScrollController _scrollController1, _scrollController2;
+  ScrollController _scrollController1, _scrollController2, _scrollController3;
 
   @override
   void initState() {
@@ -45,12 +47,14 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
     _linkedScrollControllerGroup = LinkedScrollControllerGroup();
     _scrollController1 = _linkedScrollControllerGroup.addAndGet();
     _scrollController2 = _linkedScrollControllerGroup.addAndGet();
+    _scrollController3 = _linkedScrollControllerGroup.addAndGet();
   }
 
   @override
   void dispose() {
     _scrollController1.dispose();
     _scrollController2.dispose();
+    _scrollController3.dispose();
     super.dispose();
   }
 
@@ -61,21 +65,24 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
     final BarChartStyle style = context.read<BarChartStyle>();
     final double xSectionLength = getXSectionLengthFromBarWidth(data: dataModel, style: style, barWidth: widget.barWidth);
     final double xLength = getXLength(dataModel: dataModel, canvasWidth: canvasSize.width, xSectionLength: xSectionLength);
-    final double xHeight = getXHeight(style.xAxisStyle);
+    //final double xHeight = getXHeight(style.xAxisStyle);
+    // TODO
     final double miniCanvasWidth = canvasSize.width * 0.2;
     final double miniCanvasHeight = canvasSize.height * 0.2 + 3;
     final Size miniCanvasContainerSize = Size(miniCanvasWidth, miniCanvasHeight - 3);
 
     // Bottom Axis
     final Widget bottomAxis = ChartAxisHorizontalWrapper(
-      containerSize: Size(canvasSize.width, xHeight),
-      singleCanvasSize: Size(xSectionLength, xHeight),
+      containerSize: Size(canvasSize.width, widget.labelInfo[0] + style.xAxisStyle.tickStyle.tickLength),
+      singleCanvasSize: Size(xSectionLength, style.xAxisStyle.tickStyle.tickLength),
       scrollController: _scrollController1,
+      labelController: _scrollController3,
+      labelInfo: widget.labelInfo,
     );
 
     // Mini Canvas
     Widget inViewContainerOnMiniCanvas, miniCanvasDataBars;
-    if (widget.displayMiniCanvas) {
+    if (widget.displayMiniCanvas && !style.isMini) {
       // Mini Canvas in-view Container
       inViewContainerOnMiniCanvas = MiniCanvasInViewContainer(
         controllerGroup: _linkedScrollControllerGroup,
@@ -122,7 +129,7 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
             ),
 
             // Mini Canvas background
-            widget.displayMiniCanvas
+            widget.displayMiniCanvas && !style.isMini
                 ? Positioned(
                   top: 0,
                   right: 0,
@@ -135,7 +142,7 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
                 : SizedBox(),
 
             // Mini Canvas Data Bars
-            widget.displayMiniCanvas
+            widget.displayMiniCanvas && !style.isMini
                 ? Positioned(
                   top: 0,
                   right: 0,
@@ -144,7 +151,7 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
                 : SizedBox(),
 
             // Mini Canvas in View Container
-            widget.displayMiniCanvas
+            widget.displayMiniCanvas && !style.isMini
                 ? Positioned(
                   top: 0,
                   left: 0,

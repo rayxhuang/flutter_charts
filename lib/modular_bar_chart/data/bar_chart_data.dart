@@ -96,7 +96,7 @@ class ModularBarChartData with StringSize{
   List<BarChartDataDouble> bars = [], points = [];
   List<BarChartDataDoubleGrouped> groupedBars = [];
   int numBarsInGroups = 1;
-  double valueOnBarHeight;
+  double valueOnBarHeight, maxGroupNameWidth, maxGroupNameWidthWithSpace;
 
   void _analyseData() {
     // Sort X Axis
@@ -180,6 +180,18 @@ class ModularBarChartData with StringSize{
 
     // Set the height on value string on bar
     valueOnBarHeight = StringSize.getWidthOfString('1', const TextStyle());
+  }
+
+  void setMaxGroupNameWidth(TextStyle textStyle) {
+    // Calculate max width for group names
+    maxGroupNameWidth = double.negativeInfinity;
+    xGroups.forEach((name) {
+      double singleNameWidth = StringSize.getWidthOfString(name, textStyle);
+      if ( singleNameWidth >= maxGroupNameWidth) {
+        maxGroupNameWidth = singleNameWidth;
+        maxGroupNameWidthWithSpace = StringSize.getWidthOfString(name + "  ", textStyle);
+      }
+    });
   }
 
   void adjustAxisValueRange(double yAxisHeight, {@required List<double> valueRangeToBeAdjusted, double start = 0, double end = 0,}) {

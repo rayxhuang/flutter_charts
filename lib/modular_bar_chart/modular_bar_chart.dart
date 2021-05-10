@@ -1,7 +1,10 @@
+import 'dart:math';
 import 'dart:ui';
 import 'dart:core';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_charts/modular_bar_chart/components/chart_mini_canvas.dart';
+import 'package:flutter_charts/modular_bar_chart/components/chart_mini_version.dart';
 
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
@@ -120,6 +123,10 @@ class ModularBarChart extends StatelessWidget with StringSize {
       child: LayoutBuilder(builder: (context, constraint) {
         ModularBarChartData data = context.read<ModularBarChartData>();
         BarChartStyle style = context.read<BarChartStyle>();
+
+        // Set max group name width
+        data.setMaxGroupNameWidth(style.xAxisStyle.tickStyle.labelTextStyle);
+
         // Size data
         Size leftAxisSize = Size.zero,
             titleSize = Size.zero,
@@ -133,50 +140,31 @@ class ModularBarChart extends StatelessWidget with StringSize {
             : MediaQuery.of(context).size.width;
         final Size parentSize = Size(parentWidth, parentHeight);
 
+        // Width
         final bool hasYAxisOnTheRight =
             type == BarChartType.GroupedSeparated ? true : false;
+
         // Get static sizes of components
         double leftAxisStaticWidth, rightAxisStaticWidth;
-        if (hasYAxisOnTheRight) {
-          leftAxisStaticWidth = ChartAxisVerticalWithLabel.getWidth(
-              style.y1AxisStyle.label.text,
-              data.y1ValueRange[1],
-              style.y1AxisStyle);
-          rightAxisStaticWidth = ChartAxisVerticalWithLabel.getWidth(
+        leftAxisStaticWidth = ChartAxisVerticalWithLabel.getWidth(
+          style.y1AxisStyle.label.text,
+          data.y1ValueRange[1],
+          style.y1AxisStyle,
+          isMini: style.isMini,
+        );
+        rightAxisStaticWidth = hasYAxisOnTheRight
+            ? ChartAxisVerticalWithLabel.getWidth(
               style.y2AxisStyle.label.text,
               data.y2ValueRange[1],
-              style.y2AxisStyle);
-        } else {
-          leftAxisStaticWidth = ChartAxisVerticalWithLabel.getWidth(
-              style.y1AxisStyle.label.text,
-              data.y1ValueRange[1],
-              style.y1AxisStyle);
-          rightAxisStaticWidth = 0;
-        }
-        final double titleStaticHeight = StringSize.getHeight(style.title);
-        final double bottomAxisStaticHeight = getXHeight(style.xAxisStyle);
-        final double bottomLabelStaticHeight = StringSize.getHeight(style.xAxisStyle.label);
-        final double bottomLegendStaticHeight = style.legendStyle.visible
-            ? StringSize.getHeightOfString('Title', style.legendStyle.legendTextStyle)
+              style.y2AxisStyle,
+              isMini: style.isMini,
+            )
             : 0;
-        double canvasWidth =
-            parentWidth - leftAxisStaticWidth - rightAxisStaticWidth;
-        if (canvasWidth < 0) {
-          canvasWidth = 0;
-        }
-        double canvasHeight = parentHeight -
-            titleStaticHeight -
-            bottomAxisStaticHeight -
-            bottomLabelStaticHeight -
-            bottomLegendStaticHeight;
-        if (canvasHeight < 0) {
-          canvasHeight = 0;
-        }
-        canvasSize = Size(canvasWidth, canvasHeight);
+        double canvasWidth = parentWidth - leftAxisStaticWidth - rightAxisStaticWidth;
+        if (canvasWidth < 0) { canvasWidth = 0; }
 
         // Adjust xSectionLength in case of data is too small
-        final List<double> xSectionLength =
-            calculateXSectionLength(data, style, canvasWidth);
+        final List<double> xSectionLength = calculateXSectionLength(data, style, canvasWidth);
         bool overrideInputBarWidth = false;
         double overrideBarWidth;
         // This means a new bar width is calculated
@@ -184,6 +172,30 @@ class ModularBarChart extends StatelessWidget with StringSize {
           overrideInputBarWidth = true;
           overrideBarWidth = xSectionLength[1];
         }
+
+        // Height
+        final double titleStaticHeight = StringSize.getHeight(style.title);
+        double a = 2 * StringSize.getHeightOfString('I', style.xAxisStyle.tickStyle.labelTextStyle);
+        final List<double> bottomAxisHeightInformation = getXRotatedHeight(
+          axisStyle: style.xAxisStyle,
+          nameMaxWidth: data.maxGroupNameWidth + a - a,
+          nameMaxWidthWithSpace: data.maxGroupNameWidthWithSpace,
+          xSectionLength: xSectionLength[0],
+        );
+        final double bottomLabelStaticHeight = style.isMini ? 0 : StringSize.getHeight(style.xAxisStyle.label);
+        final double bottomLegendStaticHeight = style.legendStyle.visible && !style.isMini
+            ? StringSize.getHeightOfString('Title', style.legendStyle.legendTextStyle)
+            : 0;
+        double canvasHeight = parentHeight -
+            titleStaticHeight -
+            bottomAxisHeightInformation[0] -
+            style.xAxisStyle.tickStyle.tickLength -
+            bottomLabelStaticHeight -
+            bottomLegendStaticHeight;
+        if (canvasHeight < 0) {
+          canvasHeight = 0;
+        }
+        canvasSize = Size(canvasWidth, canvasHeight);
 
         // Adjust y Max to fit number on bar and populate data
         data.adjustAxisValueRange(
@@ -203,22 +215,39 @@ class ModularBarChart extends StatelessWidget with StringSize {
         data.populateDataWithMinimumValue();
 
         // Canvas and bottom axis
-        final ChartCanvasWrapper chartCanvasWithAxis = ChartCanvasWrapper(
-          size: Size(canvasWidth, canvasHeight + bottomAxisStaticHeight),
-          canvasSize: canvasSize,
-          barWidth: overrideInputBarWidth
+        var chartCanvasWithAxis, chartCanvasWithAxisSize;
+        if (style.isMini) {
+          // TODO Correct data is done, work on x Axis
+          final double barWidth = overrideInputBarWidth
               ? overrideBarWidth
-              : style.barStyle.barWidth,
-          displayMiniCanvas: overrideInputBarWidth ? false : true,
-          animation: style.animation,
-        );
-        final Size chartCanvasWithAxisSize = chartCanvasWithAxis.size;
+              : style.barStyle.barWidth;
+          final double xSectionLength = getXSectionLengthFromBarWidth(data: dataModel, style: style, barWidth: barWidth);
+          final double xLength = getXLength(dataModel: dataModel, canvasWidth: canvasSize.width, xSectionLength: xSectionLength);
+          //chartCanvasWithAxis = Container();
+          chartCanvasWithAxis = ChartCanvasMini(
+            containerSize: Size(canvasWidth, canvasHeight),
+            canvasSize: Size(xLength, canvasHeight)
+          );
+          chartCanvasWithAxisSize = Size(canvasWidth, canvasHeight);
+        } else {
+          chartCanvasWithAxis = ChartCanvasWrapper(
+            size: Size(canvasWidth, canvasHeight + bottomAxisHeightInformation[0] + style.xAxisStyle.tickStyle.tickLength),
+            labelInfo: bottomAxisHeightInformation,
+            canvasSize: canvasSize,
+            barWidth: overrideInputBarWidth
+                ? overrideBarWidth
+                : style.barStyle.barWidth,
+            displayMiniCanvas: overrideInputBarWidth ? false : true,
+            animation: style.animation,
+          );
+          chartCanvasWithAxisSize = chartCanvasWithAxis.size;
+        }
 
         // Left Axis
         final ChartAxisVerticalWithLabel leftAxis = ChartAxisVerticalWithLabel(
           axisHeight: canvasHeight,
         );
-        leftAxisSize = leftAxis.size(data.y1ValueRange[2], style.y1AxisStyle);
+        leftAxisSize = leftAxis.size(data.y1ValueRange[2], style.y1AxisStyle, isMini: style.isMini);
 
         // Title
         final ChartTitle chartTitle = ChartTitle(
@@ -235,7 +264,7 @@ class ModularBarChart extends StatelessWidget with StringSize {
 
         // Bottom Legend
         ChartLegendHorizontal bottomLegend;
-        if (style.legendStyle.visible) { bottomLegend = ChartLegendHorizontal(width: canvasWidth); }
+        if (style.legendStyle.visible && !style.isMini) { bottomLegend = ChartLegendHorizontal(width: canvasWidth); }
 
         // Right Axis
         final ChartAxisVerticalWithLabel rightAxis = ChartAxisVerticalWithLabel(
@@ -272,14 +301,16 @@ class ModularBarChart extends StatelessWidget with StringSize {
               ),
 
               // Bottom Label
-              Positioned(
-                top: titleSize.height + chartCanvasWithAxisSize.height,
-                left: leftAxisSize.width,
-                child: bottomLabel,
-              ),
+              !style.isMini
+                  ? Positioned(
+                    top: titleSize.height + chartCanvasWithAxisSize.height,
+                    left: leftAxisSize.width,
+                    child: bottomLabel,
+                  )
+                  : SizedBox(),
 
               // Bottom Legends
-              style.legendStyle.visible
+              style.legendStyle.visible && !style.isMini
                   ? Positioned(
                       top: titleSize.height +
                           chartCanvasWithAxisSize.height +
@@ -304,6 +335,43 @@ class ModularBarChart extends StatelessWidget with StringSize {
     );
   }
 
+  Widget _buildMiniChart({
+    @required Size size,
+    @required ModularBarChartData dataModel,
+    @required BarChartStyle style,
+  }) {
+    int numberOfYTicks = size.height ~/ 50;
+    if (numberOfYTicks == 0 ) { numberOfYTicks = 1; }
+    if (numberOfYTicks >= 4) { numberOfYTicks = 4; }
+    return SizedBox.fromSize(
+      size: size,
+      child: Column(
+        children: [
+          Container(
+            height: 20,
+            width: size.width,
+            decoration: BoxDecoration(border: Border.all(color: Colors.red)),
+          ),
+          SizedBox(
+            height: size.height - 20 - 20,
+            width: size.width,
+            child: FittedBox(
+              fit: BoxFit.fill,
+              child: MiniChart(
+                numberOfYTicks: numberOfYTicks,
+              ),
+            ),
+          ),
+          Container(
+            height: 20,
+            width: size.width,
+            decoration: BoxDecoration(border: Border.all(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
   List<double> calculateXSectionLength(
       ModularBarChartData data, BarChartStyle style, double canvasWidth) {
     double totalBarWidth = data.numBarsInGroups * style.barStyle.barWidth;
@@ -323,6 +391,85 @@ class ModularBarChart extends StatelessWidget with StringSize {
     }
   }
 
+  double getXSectionLengthFromBarWidth({
+    @required ModularBarChartData data,
+    @required BarChartStyle style,
+    @required double barWidth,
+  }) {
+    int numBarsInGroup = (data.type == BarChartType.Ungrouped || data.type == BarChartType.GroupedStacked || data.type == BarChartType.GroupedSeparated)
+        ? 1
+        : data.xSubGroups.length;
+    double totalBarWidth = numBarsInGroup * barWidth;
+    double totalGroupMargin = style.groupMargin * 2;
+    double totalInGroupMargin = style.barStyle.barInGroupMargin * (numBarsInGroup - 1);
+    return totalBarWidth + totalGroupMargin + totalInGroupMargin;
+  }
+
+  double getXLength({
+    @required ModularBarChartData dataModel,
+    @required double canvasWidth,
+    @required double xSectionLength,
+  }) => [xSectionLength * dataModel.xGroups.length, canvasWidth].reduce(max);
+
   double getXHeight(AxisStyle xAxisStyle) =>
       StringSize.getHeightOfString('I', xAxisStyle.tickStyle.labelTextStyle) + xAxisStyle.tickStyle.tickLength + xAxisStyle.tickStyle.tickMargin;
+
+  List<double> getXRotatedHeight({
+    @required AxisStyle axisStyle,
+    @required double nameMaxWidth,
+    @required double nameMaxWidthWithSpace,
+    @required double xSectionLength,
+  }) {
+    double rotatedAngle = 0;
+    if (nameMaxWidth > xSectionLength) {
+      final double ratio = 2;
+      //final double maxHeight = xSectionLength * ratio;
+      double maxHeight = 30, maxRotatedAngle = 0, spaceLeft = 0;
+      bool success = false;
+      // print('got it');
+      // print(xSectionLength);
+      // print(maxHeight);
+      double maxCombineGroup = 3, numGroupsToBeCombined = 1;
+      for (int i = 1; i < maxCombineGroup + 1; i++) {
+        double w = i * xSectionLength;
+        if (w >= nameMaxWidth) {
+          // print('success at $i, simple width: $w');
+          // print('text len: $nameMaxWidth');
+          success = true;
+          numGroupsToBeCombined = i.toDouble();
+          final double tickLength = axisStyle.tickStyle.tickLength + axisStyle.tickStyle.tickMargin;
+          maxHeight = StringSize.getHeightOfString('I', axisStyle.tickStyle.labelTextStyle) + tickLength;
+          break;
+        }
+        double diagonalLength = sqrt(pow(w, 2) + pow(maxHeight, 2));
+        if (diagonalLength >= nameMaxWidthWithSpace) {
+          // print('success at $i, dia len: $diagonalLength');
+          // print('text len: $nameMaxWidthWithSpace');
+          maxRotatedAngle = asin(maxHeight / diagonalLength);
+          success = true;
+          numGroupsToBeCombined = i.toDouble();
+          spaceLeft = diagonalLength - nameMaxWidthWithSpace;
+          //print('space left: $spaceLeft');
+          break;
+        }
+      }
+      if (!success) {
+        maxRotatedAngle = asin(maxHeight / sqrt(pow(maxCombineGroup * xSectionLength, 2) + pow(maxHeight, 2)));
+        numGroupsToBeCombined = maxCombineGroup;
+      }
+      // print('success? $success');
+      // print('max angle: $maxRotatedAngle');
+      // print('groups combined: $numGroupsToBeCombined');
+      final List<double> result = [maxHeight, maxRotatedAngle, numGroupsToBeCombined, spaceLeft];
+      print(result);
+      return result;
+    } else {
+      final double tickLength = axisStyle.tickStyle.tickLength + axisStyle.tickStyle.tickMargin;
+      return [
+        StringSize.getHeightOfString('I', axisStyle.tickStyle.labelTextStyle) + tickLength,
+        0,
+        1
+      ];
+    }
+  }
 }

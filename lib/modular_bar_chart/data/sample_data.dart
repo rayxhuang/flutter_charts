@@ -576,3 +576,103 @@ Map<String, Map<String, double>> sampleData6 = {
     'height': 200,
   },
 };
+
+Map<String, Map<String, double>> sampleData7 = {
+  'JANUARY': {
+    'weight': 40,
+    'height': 80,
+    'data': 60,
+  },
+  'FEBRUARY': {
+    'weight': 40,
+    'height': 80,
+    'data': 60,
+  },
+  'MARCH': {
+    'weight': 40,
+    'height': 80,
+    'data': 60,
+  },
+  'APRIL': {
+    'weight': 40,
+    'height': 80,
+    'data': 60,
+  },
+  'MAY': {
+    'weight': 40,
+    'height': 80,
+    'data': 60,
+  },
+  'JUNE': {
+    'weight': 40,
+    'height': 80,
+    'data': 60,
+  },
+  'JULY': {
+    'weight': 40,
+    'height': 80,
+    'data': 60,
+  },
+  'AUGUST': {
+    'weight': 40,
+    'height': 80,
+    'data': 60,
+  },
+  'SEPTEMBER': {
+    'weight': 40,
+    'height': 80,
+    'data': 60,
+  },
+  'OCTOBER': {
+    'weight': 40,
+    'height': 80,
+    'data': 60,
+  },
+  'NOVEMBER': {
+    'weight': 40,
+    'height': 80,
+    'data': 60,
+  },
+  'DECEMBER': {
+    'weight': 40,
+    'height': 80,
+    'data': 60,
+  },
+};
+
+Map<String, Map<String, double>> sampleData8 = {
+  '1': {
+    'weight': 40,
+    'height': 80,
+  },
+  '3': {
+    'weight': 48,
+    'height': 150,
+  },
+  '6': {
+    'weight': 55,
+    'height': 170,
+  },
+  '2': {
+    'weight': 60,
+    'height': 180,
+  },
+  '5': {
+    'weight': 40,
+    'height': 150,
+  },
+  '0': {
+    'weight': 60,
+    'height': 180,
+  },
+  '4': {
+    'weight': 55,
+    'height': 170,
+  },
+  '7': {
+    'weight': 80,
+    'height': 200,
+  },
+};
+
+List<String> monthNames = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];

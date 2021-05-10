@@ -14,33 +14,78 @@ class ChartAxisHorizontalWrapper extends StatelessWidget {
   final Size containerSize;
   final Size singleCanvasSize;
   final ScrollController scrollController;
+  final ScrollController labelController;
+  final List<double> labelInfo;
 
   const ChartAxisHorizontalWrapper({
     @required this.containerSize,
     @required this.singleCanvasSize,
     @required this.scrollController,
+    @required this.labelController,
+    @required this.labelInfo,
   });
 
   @override
   Widget build(BuildContext context) {
     final ModularBarChartData dataModel = context.read<ModularBarChartData>();
     final BarChartStyle style = context.read<BarChartStyle>();
+    final int groupsToCombine = labelInfo[2].toInt();
+    final int numGroupNames = (dataModel.xGroups.length / groupsToCombine).ceil();
+    final double rotatedBoxWidth = singleCanvasSize.width * groupsToCombine;
+    final bool widthIsGreaterThanHeight = rotatedBoxWidth >= labelInfo[0] ? true : false;
+    final double startingValue = widthIsGreaterThanHeight ? 0 : 0.5 * pi;
+    final int quarterTurn = widthIsGreaterThanHeight ? 0 : -1;
+    //final double diaLen = sqrt(pow(singleCanvasSize.width * groupsToCombine, 2) + pow(labelInfo[0], 2));
     return SizedBox.fromSize(
       size: containerSize,
-      child: ListView.builder(
-        controller: scrollController,
-        scrollDirection: Axis.horizontal,
-        physics: ClampingScrollPhysics(),
-        itemCount: dataModel.xGroups.length,
-        itemBuilder: (context, index) {
-          return CustomPaint(
-            painter: HorizontalAxisSingleGroupPainter(
-              groupName: dataModel.xGroups[index],
-              axisStyle: style.xAxisStyle,
+      child: Column(
+        children: [
+          SizedBox(
+            height: style.xAxisStyle.tickStyle.tickLength + style.xAxisStyle.strokeWidth,
+            child: ListView.builder(
+              controller: scrollController,
+              scrollDirection: Axis.horizontal,
+              physics: ClampingScrollPhysics(),
+              itemCount: dataModel.xGroups.length,
+              itemBuilder: (context, index) {
+                return CustomPaint(
+                  painter: HorizontalAxisSingleGroupPainter(
+                    groupName: dataModel.xGroups[index],
+                    axisStyle: style.xAxisStyle,
+                  ),
+                  size: Size(singleCanvasSize.width, style.xAxisStyle.tickStyle.tickLength),
+                );
+              },
             ),
-            size: singleCanvasSize,
-          );
-        },
+          ),
+          SizedBox(
+            height: labelInfo[0] - style.xAxisStyle.strokeWidth,
+            child: ListView.builder(
+              controller: labelController,
+              scrollDirection: Axis.horizontal,
+              physics: ClampingScrollPhysics(),
+              itemCount: numGroupNames,
+              itemBuilder: (context, index) {
+                return SizedBox(
+                  width: singleCanvasSize.width * groupsToCombine,
+                  height: labelInfo[0],
+                  child: Transform.rotate(
+                    angle: startingValue - labelInfo[1],
+                    child: Center(
+                      child: RotatedBox(
+                        quarterTurns: quarterTurn,
+                        child: Text(
+                          dataModel.xGroups[index * groupsToCombine],
+                          maxLines: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -92,14 +137,14 @@ class HorizontalAxisSingleGroupPainter extends CustomPainter {
     //Draw the tick line
     canvas.drawLine(p1, p2, tickPaint);
 
-    // Draw group name
-    _textPainter.text = TextSpan(text: '$groupName', style: tickTextStyle);
-    _textPainter.layout(maxWidth: size.width);
-    //Draw the tick value text
-    _textPainter.paint(canvas, Offset(
-        (size.width - _textPainter.width) / 2,
-        tick.tickLength + tick.tickMargin
-    ));
+    // // Draw group name
+    // _textPainter.text = TextSpan(text: '$groupName', style: tickTextStyle);
+    // _textPainter.layout(maxWidth: size.width);
+    // //Draw the tick value text
+    // _textPainter.paint(canvas, Offset(
+    //     (size.width - _textPainter.width) / 2,
+    //     tick.tickLength + tick.tickMargin
+    // ));
   }
 
   @override
@@ -229,9 +274,13 @@ class ChartAxisVerticalWithLabel extends StatelessWidget with StringSize {
 
   ChartAxisVerticalWithLabel({ @required this.axisHeight, this.isRightAxis = false });
 
-  Size size(double maxValue, AxisStyle axisStyle) => Size(getWidth(axisStyle.label.text, maxValue, axisStyle), axisHeight);
+  Size size(double maxValue, AxisStyle axisStyle, {bool isMini = false})
+  => Size(getWidth(axisStyle.label.text, maxValue, axisStyle, isMini: isMini), axisHeight);
 
-  static double getWidth(String axisLabel, double axisData, AxisStyle style) => labelWidth(style.label) + axisWidth(axisData, style);
+  static double getWidth(String axisLabel, double axisData, AxisStyle style, {bool isMini = false}) {
+    final double label = isMini ? 0 : labelWidth(style.label);
+    return label + axisWidth(axisData, style);
+  }
 
   static double labelWidth(BarChartLabel label) => label.text == '' ? 0 : 5 + StringSize.getHeight(label);
 
@@ -241,22 +290,25 @@ class ChartAxisVerticalWithLabel extends StatelessWidget with StringSize {
 
   @override
   Widget build(BuildContext context) {
+    final BarChartStyle style = context.read<BarChartStyle>();
     final AxisStyle axisStyle = isRightAxis
-        ? context.read<BarChartStyle>().y2AxisStyle
-        : context.read<BarChartStyle>().y1AxisStyle;
+        ? style.y2AxisStyle
+        : style.y1AxisStyle;
     final List<double> yValueRange = isRightAxis
         ? context.read<ModularBarChartData>().y2ValueRange
         : context.read<ModularBarChartData>().y1ValueRange;
-    final Widget axisLabel = SizedBox(
-      width: axisHeight,
-      height: labelWidth(axisStyle.label),
-      child: Center(
-        child: Text(
-          axisStyle.label.text,
-          style: axisStyle.label.textStyle,
-        ),
-      ),
-    );
+    final Widget axisLabel = style.isMini
+        ? SizedBox()
+        : SizedBox(
+          width: axisHeight,
+          height: labelWidth(axisStyle.label),
+          child: Center(
+            child: Text(
+              axisStyle.label.text,
+              style: axisStyle.label.textStyle,
+            ),
+          ),
+        );
 
     return SizedBox(
       height: axisHeight,
