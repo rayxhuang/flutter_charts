@@ -318,6 +318,7 @@ class MyHomePage extends StatelessWidget {
                     HorizontalChartViewPage(chart: chartUngrouped.copyWith(
                       style: chartUngrouped.style.copyWith(
                         clickable: true,
+                        isMini: false,
                         animation: BarChartAnimation(
                           animateData: true,
                         )
@@ -335,59 +336,61 @@ class MyHomePage extends StatelessWidget {
                 ),
               ),
             ),
-            // GestureDetector(
-            //   onTap: () {
-            //     Navigator.push(
-            //       context,
-            //       MaterialPageRoute(builder: (context) =>
-            //         HorizontalChartViewPage(
-            //           chart: chartGroupedSeparated.copyWith(
-            //             style: chartGroupedSeparated.style.copyWith(
-            //               clickable: true,
-            //               animation: BarChartAnimation(
-            //                 animateData: true,
-            //               )
-            //             )
-            //           )
-            //         )
-            //       ),
-            //     );
-            //   },
-            //   child: Card(
-            //     shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-            //     margin: const EdgeInsets.all(5),
-            //     child: Container(
-            //       padding: EdgeInsets.all(5),
-            //       child: chartGroupedSeparated,
-            //     ),
-            //   ),
-            // ),
-            // GestureDetector(
-            //   onTap: () {
-            //     Navigator.push(
-            //       context,
-            //       MaterialPageRoute(builder: (context) =>
-            //         HorizontalChartViewPage(
-            //           chart: chartGrouped.copyWith(
-            //             colorMap: chartGrouped.dataModel.subGroupColors,
-            //             style: chartGrouped.style.copyWith(
-            //               clickable: true,
-            //               animation: BarChartAnimation(animateData: true,)
-            //             )
-            //           )
-            //         )
-            //       ),
-            //     );
-            //   },
-            //   child: Card(
-            //     shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-            //     margin: const EdgeInsets.all(5),
-            //     child: Container(
-            //       padding: EdgeInsets.all(5),
-            //       child: chartGrouped,
-            //     ),
-            //   ),
-            // ),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) =>
+                    HorizontalChartViewPage(
+                      chart: chartGroupedSeparated.copyWith(
+                        style: chartGroupedSeparated.style.copyWith(
+                          clickable: true,
+                          isMini: false,
+                          animation: BarChartAnimation(
+                            animateData: true,
+                          )
+                        )
+                      )
+                    )
+                  ),
+                );
+              },
+              child: Card(
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
+                margin: const EdgeInsets.all(5),
+                child: Container(
+                  padding: EdgeInsets.all(5),
+                  child: chartGroupedSeparated,
+                ),
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) =>
+                    HorizontalChartViewPage(
+                      chart: chartGrouped.copyWith(
+                        colorMap: chartGrouped.dataModel.subGroupColors,
+                        style: chartGrouped.style.copyWith(
+                          clickable: true,
+                          isMini: false,
+                          animation: BarChartAnimation(animateData: true,)
+                        )
+                      )
+                    )
+                  ),
+                );
+              },
+              child: Card(
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
+                margin: const EdgeInsets.all(5),
+                child: Container(
+                  padding: EdgeInsets.all(5),
+                  child: chartGrouped,
+                ),
+              ),
+            ),
             GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -398,6 +401,7 @@ class MyHomePage extends StatelessWidget {
                         colorMap: chartGroupedStacked.dataModel.subGroupColors,
                         style: chartGroupedStacked.style.copyWith(
                           clickable: true,
+                          isMini: false,
                           animation: BarChartAnimation(animateData: true,)
                         )
                       )
@@ -424,6 +428,7 @@ class MyHomePage extends StatelessWidget {
                         colorMap: chartGroupedTest.dataModel.subGroupColors,
                         style: chartGroupedTest.style.copyWith(
                           clickable: true,
+                          isMini: false,
                           animation: BarChartAnimation(animateData: true,)
                         )
                       )

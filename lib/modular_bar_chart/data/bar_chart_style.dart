@@ -49,6 +49,7 @@ class BarChartStyle {
     BarChartLegendStyle legendStyle,
     BarChartAnimation animation,
     bool clickable,
+    bool isMini,
   }) => BarChartStyle(
       title: title ?? this.title,
       groupMargin: groupMargin ?? this.groupMargin,
@@ -63,6 +64,7 @@ class BarChartStyle {
       legendStyle: legendStyle ?? this.legendStyle,
       animation: animation ?? this.animation,
       clickable: clickable ?? this.clickable,
+      isMini: isMini ?? this.isMini,
     );
 }
 
