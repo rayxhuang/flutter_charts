@@ -93,6 +93,7 @@ class ModularBarChartData with StringSize{
   // Data processing variables
   List<String> xGroups = [], xSubGroups = [];
   List<double> _y1Values = [], _y2Values = [], y1ValueRange = [0, 0, 0], y2ValueRange = [0, 0, 0];
+  double y1Average, y2Average;
   List<BarChartDataDouble> bars = [], points = [];
   List<BarChartDataDoubleGrouped> groupedBars = [];
   int numBarsInGroups = 1;
@@ -180,6 +181,13 @@ class ModularBarChartData with StringSize{
 
     // Set the height on value string on bar
     valueOnBarHeight = StringSize.getWidthOfString('1', const TextStyle());
+
+    // Set average for y1 and y2
+    y1Average = _y1Values.reduce((a, b) => a + b) / _y1Values.length;
+    if (_y2Values.isNotEmpty) {
+      y2Average = _y1Values.reduce((a, b) => a + b) / _y2Values.length;
+    }
+    print(y1Average);
   }
 
   void setMaxGroupNameWidth(TextStyle textStyle) {

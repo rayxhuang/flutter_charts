@@ -401,13 +401,14 @@ class ChartAxisVerticalWithLabel extends StatelessWidget with StringSize, AxisIn
                 child: axisLabel
               ),
           SizedBox(
-            width: getVerticalAxisWidth(max: yValueRange[2], style: axisStyle),
+            width: getVerticalAxisWidth(max: yValueRange[2], style: axisStyle, isMini: style.isMini),
             height: axisHeight,
             child: CustomPaint(
               painter: VerticalAxisPainter(
                 valueRange: yValueRange,
                 axisStyle: axisStyle,
-                isRight: isRightAxis ? true : false,
+                isRight: isRightAxis,
+                isMini: style.isMini,
               ),
             ),
           ),
@@ -428,11 +429,13 @@ class VerticalAxisPainter extends CustomPainter {
   final List<double> valueRange;
   final AxisStyle axisStyle;
   final bool isRight;
+  final bool isMini;
 
   const VerticalAxisPainter({
     @required this.valueRange,
     @required this.axisStyle,
     @required this.isRight,
+    this.isMini = false,
   }) : assert(valueRange != null);
 
   @override
@@ -448,6 +451,7 @@ class VerticalAxisPainter extends CustomPainter {
     final Offset end = Offset(isRight ? 0 : size.width, size.height);
     canvas.drawLine(start, end, axisPaint);
 
+    // TODO Auto num ticks in mini mode
     final TickStyle tickStyle = axisStyle.tickStyle;
     final double lengthPerTick = length / (axisStyle.numTicks - 1);
     final double yMax = valueRange[2], yMin = valueRange[0];
@@ -457,12 +461,20 @@ class VerticalAxisPainter extends CustomPainter {
     //Draw start value tick
     p1 = end;
     final String startText = yMin.toStringAsFixed(tickStyle.tickDecimal);
-    _drawTickAndValue(canvas, p1, startText);
+    _drawTickAndValue(
+      canvas: canvas,
+      offset: p1,
+      value: startText,
+    );
 
     //Draw end value tick
     p1 = start;
     final String endText = yMax.toStringAsFixed(tickStyle.tickDecimal);
-    _drawTickAndValue(canvas, p1, endText);
+    _drawTickAndValue(
+      canvas: canvas,
+      offset: p1,
+      value: endText,
+    );
 
     // Draw ticks in between
     if (!tickStyle.onlyShowTicksAtTwoSides) {
@@ -471,12 +483,20 @@ class VerticalAxisPainter extends CustomPainter {
         // p1 is the point on axis
         p1 = end.translate(0, -1 * i * lengthPerTick);
         final String value = (yMin + i * valuePerTick).toStringAsFixed(tickStyle.tickDecimal);
-        _drawTickAndValue(canvas, p1, value);
+        _drawTickAndValue(
+          canvas: canvas,
+          offset: p1,
+          value: value,
+        );
       }
     }
   }
 
-  void _drawTickAndValue(Canvas canvas, Offset p1, String value) {
+  void _drawTickAndValue({
+    @required Canvas canvas,
+    @required Offset offset,
+    @required String value,
+  }) {
     final TickStyle tick = axisStyle.tickStyle;
     final Paint tickPaint = Paint()
       ..strokeWidth = axisStyle.strokeWidth
@@ -490,11 +510,16 @@ class VerticalAxisPainter extends CustomPainter {
     _textPainter.layout();
 
     Offset p2, p3;
-    p2 = p1.translate((isRight ? 1 : -1) * tick.tickLength, 0);         // p2 is the point at the end of each tick
-    p3 = p2.translate((isRight ? 1 : -1) * tick.tickMargin, 0);         // p3 is p2 + margin set by user
+    if (!isMini) {
+      p2 = offset.translate((isRight ? 1 : -1) * tick.tickLength, 0);     // p2 is the point at the end of each tick
+      p3 = p2.translate((isRight ? 1 : -1) * tick.tickMargin, 0);         // p3 is p2 + margin set by user
+    } else {
+      p2 = offset;
+      p3 = offset.translate((isRight ? 1 : -1) * tick.tickMargin, 0);
+    }
 
     //Draw the tick line
-    canvas.drawLine(p1, p2, tickPaint);
+    canvas.drawLine(offset, p2, tickPaint);
     _textPainter.text = TextSpan(text: '$value', style: tickTextStyle,);
     _textPainter.layout();
     //Draw the tick value text

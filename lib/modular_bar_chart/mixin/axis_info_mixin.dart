@@ -51,7 +51,7 @@ mixin AxisInfo {
     bool isMini = false,
   }) {
     final double label = isMini ? 0 : getVerticalAxisLabelWidth(label: style.label);
-    return label + getVerticalAxisWidth(max: axisMaxValue, style: style);
+    return label + getVerticalAxisWidth(max: axisMaxValue, style: style, isMini: isMini);
   }
 
   double getVerticalAxisLabelWidth({@required BarChartLabel label}) => label.text == '' ? 0 : 5 + StringSize.getHeight(label);
@@ -59,6 +59,7 @@ mixin AxisInfo {
   double getVerticalAxisWidth({
     @required double max,
     @required AxisStyle style,
+    bool isMini = false,
   }) => StringSize.getWidthOfString(max.toStringAsFixed(style.tickStyle.tickDecimal), style.tickStyle.labelTextStyle)
-          + style.tickStyle.tickMargin + style.tickStyle.tickLength;
+          + style.tickStyle.tickMargin + (isMini ? 0 : style.tickStyle.tickLength);
 }

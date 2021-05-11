@@ -101,10 +101,10 @@ mixin Drawing {
         // TODO style
         style: textStyle,
       ),
-      ellipsis: ' ',
+      ellipsis: '',
       textDirection: TextDirection.ltr,
     );
-    valuePainter.layout(maxWidth: barWidth);
+    valuePainter.layout();
     valuePainter.paint(canvas, bottomLeft.translate(x1 + barWidth / 2 - valuePainter.width / 2, -y1 - valuePainter.height));
   }
 

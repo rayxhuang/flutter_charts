@@ -123,9 +123,7 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
             Positioned(
               top: 0,
               left: 0,
-              child: SafeArea(
-                child: chartCanvas,
-              ),
+              child: chartCanvas,
             ),
 
             // Mini Canvas background

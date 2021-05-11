@@ -195,7 +195,7 @@ class MyHomePage extends StatelessWidget {
         ),
       ),
       barStyle: BarChartBarStyle(
-        barWidth: 15,
+        barWidth: 25,
         barInGroupMargin: 0,
         isStacked: true,
       ),

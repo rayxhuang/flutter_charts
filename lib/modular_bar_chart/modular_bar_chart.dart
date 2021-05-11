@@ -4,7 +4,6 @@ import 'dart:core';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_charts/modular_bar_chart/components/chart_mini_canvas.dart';
-import 'package:flutter_charts/modular_bar_chart/components/chart_mini_version.dart';
 
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
@@ -148,6 +147,8 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
         // Height information
         final double titleStaticHeight = StringSize.getHeight(style.title);
         // TODO
+        final double spacingStaticHeight = 0.5 * StringSize.getHeightOfString('I', style.y1AxisStyle.tickStyle.labelTextStyle);
+        // TODO
         double a = 2 * StringSize.getHeightOfString('I', style.xAxisStyle.tickStyle.labelTextStyle);
         final List<double> bottomAxisHeightInformation = getXRotatedHeight(
           axisStyle: style.xAxisStyle,
@@ -160,8 +161,10 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
         final double bottomLegendStaticHeight = style.legendStyle.visible && !style.isMini
             ? StringSize.getHeightOfString('Title', style.legendStyle.legendTextStyle)
             : 0;
+        //print(bottomLabelStaticHeight);
         double canvasHeight = parentSize.height -
             titleStaticHeight -
+            spacingStaticHeight -
             bottomAxisStaticHeight -
             bottomLabelStaticHeight -
             bottomLegendStaticHeight;
@@ -194,7 +197,7 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
         final ChartAxisVerticalWithLabel leftAxis = ChartAxisVerticalWithLabel(axisHeight: canvasHeight,);
 
         // Title
-        final ChartTitle chartTitle = ChartTitle(width: parentSize.width,);
+        final ChartTitle chartTitle = ChartTitle(width: parentSize.width - leftAxisStaticWidth - rightAxisStaticWidth,);
 
         // Bottom Label
         final Widget bottomLabel = !style.isMini
@@ -222,12 +225,14 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
           parentSize: parentSize,
           canvasSize: chartCanvasWithAxisSize,
           title: chartTitle,
+          spacing: SizedBox(height: spacingStaticHeight,),
           leftAxisWithLabel: leftAxis,
           mainCanvasWithBottomAxis: chartCanvasWithAxis,
           bottomLabel: bottomLabel,
           bottomLegend: bottomLegend,
           rightAxisWithLabel: rightAxis,
           titleHeight: titleStaticHeight,
+          spacingHeight: spacingStaticHeight,
           leftAxisWidth: leftAxisStaticWidth,
           bottomLabelHeight: bottomLabelStaticHeight,
         );
@@ -302,12 +307,14 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
     @required Size parentSize,
     @required Size canvasSize,
     @required Widget title,
+    @required Widget spacing,
     @required Widget leftAxisWithLabel,
     @required Widget mainCanvasWithBottomAxis,
     @required Widget bottomLabel,
     @required Widget bottomLegend,
     @required Widget rightAxisWithLabel,
     @required double titleHeight,
+    @required double spacingHeight,
     @required double leftAxisWidth,
     @required double bottomLabelHeight,
   }) {
@@ -317,43 +324,50 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
         // TODO padding
         padding: EdgeInsets.all(0),
         child: Stack(children: [
+          // Spacing between title and axis
+          Positioned(
+            left: 0,
+            top: titleHeight,
+            child: spacing,
+          ),
+
           // Canvas and bottom axis
           Positioned(
-            top: titleHeight,
+            top: titleHeight + spacingHeight,
             left: leftAxisWidth,
             child: mainCanvasWithBottomAxis,
           ),
 
           // Left Axis
           Positioned(
-            top: titleHeight,
+            top: titleHeight + spacingHeight,
             child: leftAxisWithLabel,
           ),
 
           // Title
           Positioned(
             top: 0,
-            left: 0,
+            left: leftAxisWidth,
             child: title,
           ),
 
           // Bottom Label
           Positioned(
-            top: titleHeight + canvasSize.height,
+            top: titleHeight + spacingHeight + canvasSize.height,
             left: leftAxisWidth,
             child: bottomLabel,
           ),
 
           // Bottom Legends
           Positioned(
-            top: titleHeight + canvasSize.height + bottomLabelHeight,
+            top: titleHeight + spacingHeight + canvasSize.height + bottomLabelHeight,
             left: leftAxisWidth,
             child: bottomLegend,
           ),
 
           // Right Axis
           Positioned(
-            top: titleHeight,
+            top: titleHeight + spacingHeight,
             left: leftAxisWidth + canvasSize.width,
             child: rightAxisWithLabel,
           ),
@@ -409,7 +423,7 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
       // print('max angle: $maxRotatedAngle');
       // print('groups combined: $numGroupsToBeCombined');
       final List<double> result = [maxHeight, maxRotatedAngle, numGroupsToBeCombined, spaceLeft];
-      print(result);
+      //print(result);
       return result;
     } else {
       final double tickLength = axisStyle.tickStyle.tickLength + axisStyle.tickStyle.tickMargin;

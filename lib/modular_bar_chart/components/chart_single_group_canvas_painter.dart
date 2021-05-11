@@ -9,16 +9,17 @@ import 'package:flutter_charts/modular_bar_chart/mixin/drawing_mixin.dart';
 @immutable
 class SingleGroupDataPainter extends CustomPainter with Drawing{
   final BuildContext context;
-  final double xSectionLength;
-  final double barWidth;
-  final Animation<double> dataAnimation;
   final int dataIndex;
   final ModularBarChartData dataModel;
   final BarChartStyle style;
-  final Function(BarChartDataDouble, TapDownDetails) onBarSelected;
+  final double xSectionLength;
+  final double barWidth;
+  final Animation<double> dataAnimation;
   final bool groupSelected;
   final BarChartDataDouble barSelected;
   final bool clickable;
+  final Function(BarChartDataDouble, TapDownDetails) onBarSelected;
+  final bool drawAverageLine;
 
   const SingleGroupDataPainter({
     @required this.context,
@@ -32,6 +33,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
     this.groupSelected,
     this.barSelected,
     this.clickable = true,
+    this.drawAverageLine = false,
   }) : super(repaint: dataAnimation);
 
   @override
@@ -83,6 +85,13 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
     @required double y1UnitPerPixel,
     @required Offset bottomLeft
   }) {
+    // Average line
+    if (drawAverageLine) {
+      final Paint avgLinePaint = Paint()..color = Colors.lightBlueAccent;
+      final double avgYValue = (dataModel.y1Average - dataModel.y1ValueRange[0]) / y1UnitPerPixel;
+      canvas.drawLine(Offset(0, avgYValue), Offset(xSectionLength, avgYValue), avgLinePaint);
+    }
+
     //This is the bar paint
     Paint paint = Paint();
     final BarChartDataDouble bar = dataModel.bars[dataIndex];
@@ -139,22 +148,26 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
   }) {
     //This is the bar paint
     Paint paint = Paint();
-    final List<BarChartDataDouble> data = dataModel.groupedBars[dataIndex].dataList;
+    final List<BarChartDataDouble> dataList = dataModel.groupedBars[dataIndex].dataList;
     DataForBarToBeDrawnLast savedBar;
+    final List<double> _x = [], _y = [];
     //Draw data as bars on grid
-    for (int i = 0; i < data.length; i++) {
+    for (int i = 0; i < dataList.length; i++) {
       // Grouped Data must use defined Color for its group
-      paint..color = dataModel.subGroupColors[data[i].group];
+      paint..color = dataModel.subGroupColors[dataList[i].group];
       double inGroupMargin = i == 0
           ? 0
           : style.barStyle.barInGroupMargin;
       double x1FromBottomLeft = i * barWidth + style.groupMargin + inGroupMargin * i;
       double x2FromBottomLeft = x1FromBottomLeft + barWidth;
-      double y1FromBottomLeft = (data[i].data - dataModel.y1ValueRange[0]) / y1UnitPerPixel;
+      double y1FromBottomLeft = (dataList[i].data - dataModel.y1ValueRange[0]) / y1UnitPerPixel;
 
-      if (groupSelected && data[i] == barSelected) {
+      _x.add(x1FromBottomLeft);
+      _y.add(y1FromBottomLeft);
+
+      if (groupSelected && dataList[i] == barSelected) {
         savedBar = DataForBarToBeDrawnLast(
-          data: data[i],
+          data: dataList[i],
           x1: x1FromBottomLeft,
           x2: x2FromBottomLeft,
           y1: y1FromBottomLeft,
@@ -164,7 +177,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
 
       drawBar(
         canvas: clickable ? canvas : originCanvas,
-        data: data[i],
+        data: dataList[i],
         bottomLeft: bottomLeft,
         x1: x1FromBottomLeft,
         x2: x2FromBottomLeft,
@@ -175,13 +188,26 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
         onBarSelected: (data, details) { onBarSelected(data, details); },
       );
 
-      if (dataAnimation.value == 1) {
+      // if (dataAnimation.value == 1) {
+      //   drawValueOnBar(
+      //     canvas: originCanvas,
+      //     value: dataList[i].data.toStringAsFixed(0),
+      //     bottomLeft: bottomLeft,
+      //     x1: x1FromBottomLeft,
+      //     y1: y1FromBottomLeft,
+      //     barWidth: barWidth,
+      //   );
+      // }
+    }
+
+    if (dataAnimation.value == 1) {
+      for (int i = 0; i < dataList.length; i++) {
         drawValueOnBar(
           canvas: originCanvas,
-          value: data[i].data.toStringAsFixed(0),
+          value: dataList[i].data.toStringAsFixed(0),
           bottomLeft: bottomLeft,
-          x1: x1FromBottomLeft,
-          y1: y1FromBottomLeft,
+          x1: _x[i],
+          y1: _y[i],
           barWidth: barWidth,
         );
       }
