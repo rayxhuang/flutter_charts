@@ -39,11 +39,11 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
   @override
   void paint(Canvas originCanvas, Size size) {
     var canvas = TouchyCanvas(context, originCanvas);
-    final double y1UnitPerPixel = (dataModel.y1ValueRange[2] - dataModel.y1ValueRange[0]) / size.height;
+    final double y1UnitPerPixel = dataModel.y1Difference / size.height;
     final BarChartType type = dataModel.type;
     double y2UnitPerPixel = double.negativeInfinity;
     if (type == BarChartType.GroupedSeparated) {
-      y2UnitPerPixel = (dataModel.y2ValueRange[2] - dataModel.y2ValueRange[0]) / size.height;
+      y2UnitPerPixel = dataModel.y2Difference / size.height;
     }
 
     if (type == BarChartType.Ungrouped) {

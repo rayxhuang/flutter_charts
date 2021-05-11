@@ -113,6 +113,18 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
   }
 
   String get title => this.style.title.text;
+  Size _getParentSize({
+    @required BoxConstraints constraint,
+    @required BuildContext context,
+  }) {
+    final double parentHeight = constraint.maxHeight < double.infinity
+        ? constraint.maxHeight
+        : MediaQuery.of(context).size.height;
+    final double parentWidth = constraint.maxWidth < double.infinity
+        ? constraint.maxWidth
+        : MediaQuery.of(context).size.width;
+    return Size(parentWidth, parentHeight);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,12 +135,13 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
         ChangeNotifierProvider<BarChartEvent>(create: (_) => BarChartEvent(dataModel: dataModel, style: style),),
       ],
       child: LayoutBuilder(builder: (context, constraint) {
-        ModularBarChartData dataModel = context.read<ModularBarChartData>();
-        BarChartStyle style = context.read<BarChartStyle>();
+        final ModularBarChartData dataModel = context.read<ModularBarChartData>();
+        final BarChartStyle style = context.read<BarChartStyle>();
         final Size parentSize = _getParentSize(constraint: constraint, context: context);
 
+        // TODO Separate one more class which combines style and data to do calculation
         // Set max group name width
-        dataModel.setMaxGroupNameWidth(style.xAxisStyle.tickStyle.labelTextStyle);
+        dataModel.setMaxGroupNameWidth(textStyle: style.xAxisStyle.tickStyle.labelTextStyle);
 
         // Width information
         final bool hasYAxisOnTheRight = type == BarChartType.GroupedSeparated;
@@ -196,7 +209,7 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
         }
 
         // Left Axis
-        final ChartAxisVerticalWithLabel leftAxis = ChartAxisVerticalWithLabel(axisHeight: canvasHeight,);
+        final VerticalAxisWithLabel leftAxis = VerticalAxisWithLabel(axisHeight: canvasHeight,);
 
         // TODO Change the height of title in full mode
         // Title
@@ -221,7 +234,7 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
 
         // Right Axis
         final Widget rightAxis = hasYAxisOnTheRight
-            ? ChartAxisVerticalWithLabel(
+            ? VerticalAxisWithLabel(
               axisHeight: canvasHeight,
               isRightAxis: true,
             )
@@ -245,19 +258,6 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
         );
       }),
     );
-  }
-
-  Size _getParentSize({
-    @required BoxConstraints constraint,
-    @required BuildContext context,
-  }) {
-    final double parentHeight = constraint.maxHeight < double.infinity
-        ? constraint.maxHeight
-        : MediaQuery.of(context).size.height;
-    final double parentWidth = constraint.maxWidth < double.infinity
-        ? constraint.maxWidth
-        : MediaQuery.of(context).size.width;
-    return Size(parentWidth, parentHeight);
   }
 
   void _adjustVerticalAxisValueRange({
@@ -297,7 +297,7 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
           containerSize: canvasSize,
           canvasSize: Size(xLength, canvasSize.height)
         ),
-        HorizontalAxisSimpleWrapper(
+        HorizontalAxisSimpleLine(
           size: Size(canvasSize.width, style.xAxisStyle.strokeWidth),
         ),
         Center(

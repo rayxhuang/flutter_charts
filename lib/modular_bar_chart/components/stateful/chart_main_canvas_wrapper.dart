@@ -72,7 +72,7 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
     final Size miniCanvasContainerSize = Size(miniCanvasWidth, miniCanvasHeight - 3);
 
     // Bottom Axis
-    final Widget bottomAxis = ChartAxisHorizontalWrapper(
+    final Widget bottomAxis = HorizontalAxisWrapper(
       containerSize: Size(canvasSize.width, widget.labelInfo[0] + style.xAxisStyle.tickStyle.tickLength),
       singleCanvasSize: Size(xSectionLength, style.xAxisStyle.tickStyle.tickLength),
       scrollController: _scrollController1,
