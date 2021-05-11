@@ -258,18 +258,6 @@ class ModularBarChartData with StringSize {
     _setYAverage();
   }
 
-  void setMaxGroupNameWidth({@required TextStyle textStyle}) {
-    // Calculate max width for group names
-    _maxGroupNameWidth = double.negativeInfinity;
-    _xGroups.forEach((name) {
-      double singleNameWidth = StringSize.getWidthOfString(name, textStyle);
-      if ( singleNameWidth >= _maxGroupNameWidth) {
-        _maxGroupNameWidth = singleNameWidth;
-        _maxGroupNameWidthWithSpace = StringSize.getWidthOfString(name + "  ", textStyle);
-      }
-    });
-  }
-
   void adjustAxisValueRange({@required double yAxisHeight, @required List<double> valueRangeToBeAdjusted, double start = 0, double end = 0,}) {
     start <= valueRangeToBeAdjusted[0]
         ? valueRangeToBeAdjusted[0] = start

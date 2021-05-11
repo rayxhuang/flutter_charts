@@ -38,7 +38,6 @@ class SingleGroupedCanvas extends StatelessWidget {
 
     return Consumer<BarChartEvent>(
       builder: (context, event, child) {
-        //print('in consumer: ${event.showAverageLine}');
         return CanvasTouchDetector(
           builder: (BuildContext context) => CustomPaint(
             painter: SingleGroupDataPainter(
