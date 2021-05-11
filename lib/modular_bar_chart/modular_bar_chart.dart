@@ -147,34 +147,25 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
               final double leftAxisWidth = sizeInfo.leftAxisWidth;
               final double rightAxisWidth = sizeInfo.rightAxisWidth;
               final double canvasWidth = sizeInfo.canvasWidth;
-              final double xSectionLength = sizeInfo.xSectionWidth;
+              final double xSectionWidth = sizeInfo.xSectionWidth;
               final double barWidth = sizeInfo.barWidth;
 
               // Height information
-              final double titleStaticHeight = StringSize.getHeight(style.title);
+              final double titleHeight = sizeInfo.titleHeight;
+              final double spacingHeight = sizeInfo.spacingHeight;
               // TODO
-              final double spacingStaticHeight = 0.5 * StringSize.getHeightOfString('I', style.y1AxisStyle.tickStyle.labelTextStyle);
-              // TODO
-              double a = 2 * StringSize.getHeightOfString('I', style.xAxisStyle.tickStyle.labelTextStyle);
-              final List<double> bottomAxisHeightInformation = getXRotatedHeight(
-                axisStyle: style.xAxisStyle,
-                nameMaxWidth: dataModel.maxGroupNameWidth + a - a,
-                nameMaxWidthWithSpace: dataModel.maxGroupNameWidthWithSpace,
-                xSectionLength: xSectionLength,
-              );
-              final double bottomAxisStaticHeight = bottomAxisHeightInformation[0] + style.xAxisStyle.tickStyle.tickLength + style.xAxisStyle.tickStyle.tickMargin;
-              final double bottomLabelStaticHeight = style.isMini ? 0 : StringSize.getHeight(style.xAxisStyle.label);
-              final double bottomLegendStaticHeight = style.legendStyle.visible && !style.isMini
-                  ? StringSize.getHeightOfString('Title', style.legendStyle.legendTextStyle)
-                  : 0;
-              //print(bottomLabelStaticHeight);
-              double canvasHeight = parentSize.height -
-                  titleStaticHeight -
-                  spacingStaticHeight -
-                  bottomAxisStaticHeight -
-                  bottomLabelStaticHeight -
-                  bottomLegendStaticHeight;
-              if (canvasHeight < 0) { canvasHeight = 0; }
+              // double a = 2 * StringSize.getHeightOfString('I', style.xAxisStyle.tickStyle.labelTextStyle);
+              // final List<double> bottomAxisHeightInformation = getXRotatedHeight(
+              //   axisStyle: style.xAxisStyle,
+              //   nameMaxWidth: dataModel.maxGroupNameWidth + a - a,
+              //   nameMaxWidthWithSpace: dataModel.maxGroupNameWidthWithSpace,
+              //   xSectionLength: xSectionWidth,
+              // );
+
+              final double bottomAxisHeight = sizeInfo.bottomAxisHeight;
+              final double bottomLabelHeight = sizeInfo.bottomLabelHeight;
+              final double bottomLegendHeight = sizeInfo.bottomLegendHeight;
+              final double canvasHeight = sizeInfo.canvasHeight;
               final Size canvasSize = Size(canvasWidth, canvasHeight);
               // Adjust y Max to fit number on bar and populate data
               _adjustVerticalAxisValueRange(canvasHeight: canvasHeight, hasYAxisOnTheRight: hasYAxisOnTheRight);
@@ -187,10 +178,9 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
                 chartCanvasWithAxis = _buildMiniChart(canvasSize: canvasSize, dataModel: dataModel, style: style, barWidth: barWidth);
                 chartCanvasWithAxisSize = canvasSize;
               } else {
-                final Size wrapperSize = Size(canvasWidth, canvasHeight + bottomAxisHeightInformation[0] + style.xAxisStyle.tickStyle.tickLength);
+                final Size wrapperSize = Size(canvasWidth, canvasHeight + bottomAxisHeight);
                 chartCanvasWithAxis = ChartCanvasWrapper(
                   size: wrapperSize,
-                  labelInfo: bottomAxisHeightInformation,
                   canvasSize: canvasSize,
                   barWidth: barWidth,
                   displayMiniCanvas: barWidth == style.barStyle.barWidth ? true : false,
@@ -236,16 +226,16 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
                 parentSize: parentSize,
                 canvasSize: chartCanvasWithAxisSize,
                 title: chartTitle,
-                spacing: SizedBox(height: spacingStaticHeight,),
+                spacing: SizedBox(height: spacingHeight,),
                 leftAxisWithLabel: leftAxis,
                 mainCanvasWithBottomAxis: chartCanvasWithAxis,
                 bottomLabel: bottomLabel,
                 bottomLegend: bottomLegend,
                 rightAxisWithLabel: rightAxis,
-                titleHeight: titleStaticHeight,
-                spacingHeight: spacingStaticHeight,
+                titleHeight: titleHeight,
+                spacingHeight: spacingHeight,
                 leftAxisWidth: leftAxisWidth,
-                bottomLabelHeight: bottomLabelStaticHeight,
+                bottomLabelHeight: bottomLabelHeight,
               );
             },
           ),

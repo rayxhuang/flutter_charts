@@ -15,7 +15,6 @@ class ChartAxisHorizontalWrapper extends StatelessWidget {
   final Size singleCanvasSize;
   final ScrollController scrollController;
   final ScrollController labelController;
-  final List<double> labelInfo;
   final bool isMini;
 
   const ChartAxisHorizontalWrapper({
@@ -23,7 +22,6 @@ class ChartAxisHorizontalWrapper extends StatelessWidget {
     @required this.singleCanvasSize,
     @required this.scrollController,
     @required this.labelController,
-    @required this.labelInfo,
     this.isMini = false,
   });
 
@@ -31,70 +29,7 @@ class ChartAxisHorizontalWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     final ModularBarChartData dataModel = context.read<ModularBarChartData>();
     final BarChartStyle style = context.read<BarChartStyle>();
-    final int numGroupsToCombine = labelInfo[2].toInt();
-    final int numGroupNames = (dataModel.xGroups.length / numGroupsToCombine).ceil();
-    final int difference = numGroupNames * numGroupsToCombine - dataModel.xGroups.length;
-    final double singleCombinedGroupNameWidth = singleCanvasSize.width * numGroupsToCombine;
-
-    final double rotatedBoxWidth = singleCanvasSize.width * numGroupsToCombine;
-    final bool widthIsGreaterThanHeight = rotatedBoxWidth >= labelInfo[0] ? true : false;
-    final double startingValue = widthIsGreaterThanHeight ? 0 : 0.5 * pi;
-    final int quarterTurn = widthIsGreaterThanHeight ? 0 : -1;
-    return SizedBox.fromSize(
-      size: containerSize,
-      child: Column(
-        children: [
-          SizedBox(
-            height: style.xAxisStyle.tickStyle.tickLength + style.xAxisStyle.strokeWidth,
-            child: ListView.builder(
-              padding: EdgeInsets.zero,
-              controller: scrollController,
-              scrollDirection: Axis.horizontal,
-              physics: ClampingScrollPhysics(),
-              itemCount: dataModel.xGroups.length,
-              itemBuilder: (context, index) =>
-                _buildSingleGroupXAxisCanvas(
-                  dataModel: dataModel,
-                  style: style,
-                  index: index,
-                  numGroupsToCombine: numGroupsToCombine,
-                )
-            ),
-          ),
-          SizedBox(
-            height: labelInfo[0] - style.xAxisStyle.strokeWidth,
-            child: ListView.builder(
-              padding: EdgeInsets.zero,
-              controller: labelController,
-              scrollDirection: Axis.horizontal,
-              physics: ClampingScrollPhysics(),
-              itemCount: numGroupNames,
-              itemBuilder: (context, index) {
-                final bool notEnoughGroupsAtTheEnd = index == numGroupNames - 1 && difference > 0 ? true : false;
-                return SizedBox(
-                  width: notEnoughGroupsAtTheEnd
-                      ? singleCombinedGroupNameWidth - difference * singleCanvasSize.width
-                      : singleCombinedGroupNameWidth,
-                  height: labelInfo[0],
-                  child: Transform.rotate(
-                    angle: startingValue - labelInfo[1],
-                    child: Center(
-                      child: RotatedBox(
-                        quarterTurns: quarterTurn,
-                        child: Text(
-                          dataModel.xGroups[index * numGroupsToCombine],
-                          maxLines: 1,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
+    return SizedBox.fromSize(size: containerSize,);
   }
 
   CustomPaint _buildSingleGroupXAxisCanvas({
@@ -120,6 +55,118 @@ class ChartAxisHorizontalWrapper extends StatelessWidget {
     );
   }
 }
+
+// @immutable
+// class ChartAxisHorizontalWrapper extends StatelessWidget {
+//   final Size containerSize;
+//   final Size singleCanvasSize;
+//   final ScrollController scrollController;
+//   final ScrollController labelController;
+//   final List<double> labelInfo;
+//   final bool isMini;
+//
+//   const ChartAxisHorizontalWrapper({
+//     @required this.containerSize,
+//     @required this.singleCanvasSize,
+//     @required this.scrollController,
+//     @required this.labelController,
+//     @required this.labelInfo,
+//     this.isMini = false,
+//   });
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final ModularBarChartData dataModel = context.read<ModularBarChartData>();
+//     final BarChartStyle style = context.read<BarChartStyle>();
+//     final int numGroupsToCombine = labelInfo[2].toInt();
+//     final int numGroupNames = (dataModel.xGroups.length / numGroupsToCombine).ceil();
+//     final int difference = numGroupNames * numGroupsToCombine - dataModel.xGroups.length;
+//     final double singleCombinedGroupNameWidth = singleCanvasSize.width * numGroupsToCombine;
+//
+//     final double rotatedBoxWidth = singleCanvasSize.width * numGroupsToCombine;
+//     final bool widthIsGreaterThanHeight = rotatedBoxWidth >= labelInfo[0] ? true : false;
+//     final double startingValue = widthIsGreaterThanHeight ? 0 : 0.5 * pi;
+//     final int quarterTurn = widthIsGreaterThanHeight ? 0 : -1;
+//     return SizedBox.fromSize(
+//       size: containerSize,
+//       child: Column(
+//         children: [
+//           SizedBox(
+//             height: style.xAxisStyle.tickStyle.tickLength + style.xAxisStyle.strokeWidth,
+//             child: ListView.builder(
+//                 padding: EdgeInsets.zero,
+//                 controller: scrollController,
+//                 scrollDirection: Axis.horizontal,
+//                 physics: ClampingScrollPhysics(),
+//                 itemCount: dataModel.xGroups.length,
+//                 itemBuilder: (context, index) =>
+//                     _buildSingleGroupXAxisCanvas(
+//                       dataModel: dataModel,
+//                       style: style,
+//                       index: index,
+//                       numGroupsToCombine: numGroupsToCombine,
+//                     )
+//             ),
+//           ),
+//           SizedBox(
+//             height: labelInfo[0] - style.xAxisStyle.strokeWidth,
+//             child: ListView.builder(
+//               padding: EdgeInsets.zero,
+//               controller: labelController,
+//               scrollDirection: Axis.horizontal,
+//               physics: ClampingScrollPhysics(),
+//               itemCount: numGroupNames,
+//               itemBuilder: (context, index) {
+//                 final bool notEnoughGroupsAtTheEnd = index == numGroupNames - 1 && difference > 0 ? true : false;
+//                 return SizedBox(
+//                   width: notEnoughGroupsAtTheEnd
+//                       ? singleCombinedGroupNameWidth - difference * singleCanvasSize.width
+//                       : singleCombinedGroupNameWidth,
+//                   height: labelInfo[0],
+//                   child: Transform.rotate(
+//                     angle: startingValue - labelInfo[1],
+//                     child: Center(
+//                       child: RotatedBox(
+//                         quarterTurns: quarterTurn,
+//                         child: Text(
+//                           dataModel.xGroups[index * numGroupsToCombine],
+//                           maxLines: 1,
+//                         ),
+//                       ),
+//                     ),
+//                   ),
+//                 );
+//               },
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+//
+//   CustomPaint _buildSingleGroupXAxisCanvas({
+//     @required ModularBarChartData dataModel,
+//     @required BarChartStyle style,
+//     @required int index,
+//     @required int numGroupsToCombine,
+//   }) {
+//     final bool isFirstOfAll = index == 0 ? true : false;
+//     final bool isLastOfAll = index == dataModel.xGroups.length - 1 ? true : false;
+//     final bool isFirstInGroup = index.remainder(numGroupsToCombine) == 0 ? true : false;
+//     final bool isLastInGroup = index.remainder(numGroupsToCombine) == numGroupsToCombine - 1 ? true : false;
+//     final bool paintTickOnLeft = !isFirstOfAll &&  isFirstInGroup;
+//     final bool paintTickOnRight = !isLastOfAll && isLastInGroup;
+//     return CustomPaint(
+//       painter: HorizontalAxisSingleGroupPainter(
+//         groupName: dataModel.xGroups[index],
+//         axisStyle: style.xAxisStyle,
+//         paintTickOnLeft: paintTickOnLeft,
+//         paintTickOnRight: paintTickOnRight,
+//       ),
+//       size: Size(singleCanvasSize.width, style.xAxisStyle.tickStyle.tickLength),
+//     );
+//   }
+// }
 
 @immutable
 class HorizontalAxisSimpleWrapper extends StatelessWidget {
