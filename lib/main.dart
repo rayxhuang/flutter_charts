@@ -360,7 +360,7 @@ class MyHomePage extends StatelessWidget {
                 margin: const EdgeInsets.all(5),
                 child: Container(
                   padding: EdgeInsets.all(5),
-                  child: chartGroupedSeparated,
+                  child: SafeArea(child: chartGroupedSeparated),
                 ),
               ),
             ),

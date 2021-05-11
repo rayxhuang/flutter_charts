@@ -92,7 +92,7 @@ class ModularBarChartData with StringSize{
 
   // Data processing variables
   List<String> xGroups = [], xSubGroups = [];
-  List<double> _y1Values = [], _y2Values = [], y1ValueRange = [0, 0, 0], y2ValueRange = [0, 0, 0];
+  List<double> _y1Values = [], _y2Values = [], _stackedValues = [], y1ValueRange = [0, 0, 0], y2ValueRange = [0, 0, 0];
   double y1Average, y2Average;
   List<BarChartDataDouble> bars = [], points = [];
   List<BarChartDataDoubleGrouped> groupedBars = [];
@@ -152,6 +152,7 @@ class ModularBarChartData with StringSize{
             _y1Values.add(value.toDouble());
             sum += value.toDouble();
           });
+          _stackedValues.add(sum);
           if (sum >= localMaximum) { localMaximum = sum; }
         });
         xSubGroups = xSubGroups.toSet().toList();
@@ -203,8 +204,11 @@ class ModularBarChartData with StringSize{
   }
 
   void _setYAverage() {
-    // TODO Stack average
-    y1Average = _y1Values.reduce((a, b) => a + b) / _y1Values.length;
+    if (type == BarChartType.GroupedStacked) {
+      y1Average = _stackedValues.reduce((a, b) => a + b) / xGroups.length;
+    } else {
+      y1Average = _y1Values.reduce((a, b) => a + b) / _y1Values.length;
+    }
     if (_y2Values.isNotEmpty) {
       y2Average = _y2Values.reduce((a, b) => a + b) / _y2Values.length;
     }

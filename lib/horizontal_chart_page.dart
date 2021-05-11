@@ -25,7 +25,7 @@ class HorizontalChartViewPage extends StatelessWidget {
           height: MediaQuery.of(context).size.height / 2,
           child: Padding(
             padding: EdgeInsets.all(10),
-            child: chart,
+            child: SafeArea(child: chart),
           ),
         ),
       ),
