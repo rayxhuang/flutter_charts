@@ -48,6 +48,7 @@ class ChartAxisHorizontalWrapper extends StatelessWidget {
           SizedBox(
             height: style.xAxisStyle.tickStyle.tickLength + style.xAxisStyle.strokeWidth,
             child: ListView.builder(
+              padding: EdgeInsets.zero,
               controller: scrollController,
               scrollDirection: Axis.horizontal,
               physics: ClampingScrollPhysics(),
@@ -64,6 +65,7 @@ class ChartAxisHorizontalWrapper extends StatelessWidget {
           SizedBox(
             height: labelInfo[0] - style.xAxisStyle.strokeWidth,
             child: ListView.builder(
+              padding: EdgeInsets.zero,
               controller: labelController,
               scrollDirection: Axis.horizontal,
               physics: ClampingScrollPhysics(),

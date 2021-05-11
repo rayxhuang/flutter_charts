@@ -136,50 +136,17 @@ class ChartToolBar extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Material(
-                    color: Colors.white10,
-                    clipBehavior: Clip.hardEdge,
-                    shape: CircleBorder(side: BorderSide(color: Colors.black12)),
-                    elevation: 16,
-                    child: IconButton(
-                      padding: EdgeInsets.symmetric(horizontal: 0),
-                      onPressed: () => toggleAverageLine(event),
-                      iconSize: 12,
-                      icon: const Icon(
-                        CupertinoIcons.minus,
-                        color: Colors.white70,
-                      ),
-                    ),
+                  ChartToolBarButton(
+                    icon: CupertinoIcons.minus,
+                    onPressed: () => toggleAverageLine(event),
                   ),
-                  Material(
-                    color: Colors.white10,
-                    clipBehavior: Clip.hardEdge,
-                    shape: CircleBorder(side: BorderSide(color: Colors.black12)),
-                    elevation: 16,
-                    child: IconButton(
-                      padding: EdgeInsets.symmetric(horizontal: 0),
-                      onPressed: onPressed,
-                      iconSize: 12,
-                      icon: const Icon(
-                        CupertinoIcons.chevron_down,
-                        color: Colors.white70,
-                      ),
-                    ),
+                  ChartToolBarButton(
+                    icon: CupertinoIcons.chevron_up,
+                    onPressed: onPressed,
                   ),
-                  Material(
-                    color: Colors.white10,
-                    clipBehavior: Clip.hardEdge,
-                    shape: CircleBorder(side: BorderSide(color: Colors.black12)),
-                    elevation: 16,
-                    child: IconButton(
-                      padding: EdgeInsets.symmetric(horizontal: 0),
-                      onPressed: onPressed,
-                      iconSize: 12,
-                      icon: const Icon(
-                        CupertinoIcons.chevron_up,
-                        color: Colors.white70,
-                      ),
-                    ),
+                  ChartToolBarButton(
+                    icon: CupertinoIcons.chevron_up,
+                    onPressed: onPressed,
                   ),
                 ],
               ),
@@ -193,6 +160,37 @@ class ChartToolBar extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+@immutable
+class ChartToolBarButton extends StatelessWidget {
+  const ChartToolBarButton({
+    Key key,
+    @required this.icon,
+    @required this.onPressed,
+  }) : super(key: key);
+
+  final IconData icon;
+  final Function onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white10,
+      clipBehavior: Clip.hardEdge,
+      shape: CircleBorder(side: BorderSide(color: Colors.black12)),
+      elevation: 16,
+      child: IconButton(
+        padding: EdgeInsets.symmetric(horizontal: 0),
+        onPressed: onPressed,
+        iconSize: 12,
+        icon: Icon(
+          icon,
+          color: Colors.white70,
+        ),
+      ),
     );
   }
 }

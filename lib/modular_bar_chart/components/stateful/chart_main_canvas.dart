@@ -61,6 +61,7 @@ class _MainCanvasState extends State<MainCanvas> with SingleTickerProviderStateM
     return SizedBox.fromSize(
       size: canvasSize,
       child: ListView.builder(
+        padding: EdgeInsets.zero,
         controller: widget.scrollController,
         scrollDirection: Axis.horizontal,
         physics: ClampingScrollPhysics(),
