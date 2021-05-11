@@ -12,14 +12,11 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
   final int dataIndex;
   final ModularBarChartData dataModel;
   final BarChartStyle style;
-  final double xSectionLength;
-  final double barWidth;
   final Animation<double> dataAnimation;
-  final bool groupSelected;
+  final double xSectionLength, barWidth;
   final BarChartDataDouble barSelected;
-  final bool clickable;
   final Function(BarChartDataDouble, TapDownDetails) onBarSelected;
-  final bool showAverageLine;
+  final bool groupSelected, clickable, showAverageLine, showValueOnBar, showGridLine;
 
   const SingleGroupDataPainter({
     @required this.context,
@@ -34,6 +31,8 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
     this.barSelected,
     this.clickable = true,
     this.showAverageLine = false,
+    this.showValueOnBar = false,
+    this.showGridLine = false,
   }) : super(repaint: dataAnimation);
 
   @override
@@ -51,21 +50,24 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
         originCanvas: originCanvas,
         canvas: canvas,
         y1UnitPerPixel: y1UnitPerPixel,
-        bottomLeft: Offset(0, size.height)
+        bottomLeft: Offset(0, size.height),
+        height: size.height,
       );
     } else if (type == BarChartType.Grouped) {
       drawGroupedData(
         originCanvas: originCanvas,
         canvas: canvas,
         y1UnitPerPixel: y1UnitPerPixel,
-        bottomLeft: Offset(0, size.height)
+        bottomLeft: Offset(0, size.height),
+        height: size.height,
       );
     } else if (type == BarChartType.GroupedStacked) {
       drawGroupedStackedData(
         originCanvas: originCanvas,
         canvas: canvas,
         y1UnitPerPixel: y1UnitPerPixel,
-        bottomLeft: Offset(0, size.height)
+        bottomLeft: Offset(0, size.height),
+        height: size.height,
       );
     } else if (type == BarChartType.GroupedSeparated) {
       drawGroupedSeparatedData(
@@ -75,6 +77,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
         y2UnitPerPixel: y2UnitPerPixel,
         bottomLeft: Offset(0, size.height),
         xSectionLength: size.width,
+        height: size.height,
       );
     }
   }
@@ -83,8 +86,12 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
     @required Canvas originCanvas,
     @required TouchyCanvas canvas,
     @required double y1UnitPerPixel,
-    @required Offset bottomLeft
+    @required Offset bottomLeft,
+    @required double height,
   }) {
+    // Grid line
+    if (showGridLine) { drawGrid(canvas: originCanvas, bottomLeft: bottomLeft, height: height); }
+
     // Average line
     if (showAverageLine) {
       final double avgYValue = (dataModel.y1Average - dataModel.y1ValueRange[0]) / y1UnitPerPixel;
@@ -131,7 +138,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
       },
     );
 
-    if (dataAnimation.value == 1) {
+    if (dataAnimation.value == 1 && showValueOnBar) {
       drawValueOnBar(
         canvas: originCanvas,
         value: bar.data.toStringAsFixed(0),
@@ -147,8 +154,12 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
     @required Canvas originCanvas,
     @required TouchyCanvas canvas,
     @required double y1UnitPerPixel,
-    @required Offset bottomLeft
+    @required Offset bottomLeft,
+    @required double height,
   }) {
+    // Grid line
+    if (showGridLine) { drawGrid(canvas: originCanvas, bottomLeft: bottomLeft, height: height); }
+
     // Average line
     if (showAverageLine) {
       final double avgYValue = (dataModel.y1Average - dataModel.y1ValueRange[0]) / y1UnitPerPixel;
@@ -202,7 +213,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
       );
     }
 
-    if (dataAnimation.value == 1) {
+    if (dataAnimation.value == 1 && showValueOnBar) {
       for (int i = 0; i < dataList.length; i++) {
         drawValueOnBar(
           canvas: originCanvas,
@@ -243,8 +254,12 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
     @required Canvas originCanvas,
     @required TouchyCanvas canvas,
     @required double y1UnitPerPixel,
-    @required Offset bottomLeft
+    @required Offset bottomLeft,
+    @required double height,
   }) {
+    // Grid line
+    if (showGridLine) { drawGrid(canvas: originCanvas, bottomLeft: bottomLeft, height: height); }
+
     // Average line
     if (showAverageLine) {
       final double avgYValue = (dataModel.y1Average - dataModel.y1ValueRange[0]) / y1UnitPerPixel;
@@ -329,7 +344,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
       }
     }
 
-    if (dataAnimation.value == 1) {
+    if (dataAnimation.value == 1 && showValueOnBar) {
       drawValueOnBar(
         canvas: originCanvas,
         value: totalHeight.toStringAsFixed(0),
@@ -348,20 +363,19 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
     @required double y2UnitPerPixel,
     @required Offset bottomLeft,
     @required double xSectionLength,
+    @required double height,
   }) {
+    // Grid line
+    if (showGridLine) { drawGrid(canvas: originCanvas, bottomLeft: bottomLeft, height: height); }
+
     // Average line
     if (showAverageLine) {
-      final double avgY1Value = (dataModel.y1Average - dataModel.y1ValueRange[0]) / y1UnitPerPixel;
       final double avgY2Value = (dataModel.y2Average - dataModel.y2ValueRange[0]) / y2UnitPerPixel;
       drawAverageLine(
         canvas: originCanvas,
         length: xSectionLength,
-        start: bottomLeft.translate(0, -avgY1Value),
-      );
-      drawAverageLine(
-        canvas: originCanvas,
-        length: xSectionLength,
         start: bottomLeft.translate(0, -avgY2Value),
+        color: Colors.white,
       );
       print(dataModel.y1Average.toStringAsFixed(2));
       print(dataModel.y2Average.toStringAsFixed(2));
@@ -372,6 +386,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
       canvas: canvas,
       y1UnitPerPixel: y1UnitPerPixel,
       bottomLeft: bottomLeft,
+      height: height,
     );
 
     //This is the bar paint
@@ -425,6 +440,23 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
         radius: 6,
         paint: paint,
         onBarSelected: (data, details) { onBarSelected(data, details); },
+      );
+    }
+  }
+
+  void drawGrid({
+    @required Canvas canvas,
+    @required Offset bottomLeft,
+    @required double height,
+  }) {
+    final int numberOfTicksInBetween = style.y1AxisStyle.numTicks - 2;
+    if (numberOfTicksInBetween > 0) {
+      drawGridLine(
+        canvas: canvas,
+        numberOfTicksInBetween: numberOfTicksInBetween,
+        start: bottomLeft,
+        length: xSectionLength,
+        height: height,
       );
     }
   }

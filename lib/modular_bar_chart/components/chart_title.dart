@@ -39,6 +39,10 @@ class _ChartTitleState extends State<ChartTitle> {
 
   void _toggleAverageLine(BarChartEvent event) => event.toggleAverageLine(hasRightAxis: widget.hasRightAxis);
 
+  void _toggleValueOnBar(BarChartEvent event) => event.toggleValueOnBar();
+
+  void _toggleGridLine(BarChartEvent event) => event.toggleGridLine();
+
   Size size(BarChartLabel title) =>
       Size(widget.width, StringSize.getHeight(title));
 
@@ -56,6 +60,8 @@ class _ChartTitleState extends State<ChartTitle> {
             ? ChartToolBar(
                 onPressed: _toggleToolBar,
                 toggleAverageLine: _toggleAverageLine,
+                toggleValueOnBar: _toggleValueOnBar,
+                toggleGridLine: _toggleGridLine,
               )
             : ChartTitleBar(label: label, onPressed: _toggleToolBar),
       ),
@@ -111,10 +117,14 @@ class ChartToolBar extends StatelessWidget {
     Key key,
     @required this.onPressed,
     @required this.toggleAverageLine,
+    @required this.toggleValueOnBar,
+    @required this.toggleGridLine,
   }) : super(key: key);
 
   final VoidCallback onPressed;
   final Function(BarChartEvent) toggleAverageLine;
+  final Function(BarChartEvent) toggleValueOnBar;
+  final Function(BarChartEvent) toggleGridLine;
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +139,10 @@ class ChartToolBar extends StatelessWidget {
             SizedBox(
               width: maxLengthOfDisplayText,
               child: Text(
-                event.leftDisplayText
+                event.leftDisplayText,
+                style: TextStyle(
+                  color: Colors.red,
+                ),
               ),
             ),
             Expanded(
@@ -141,11 +154,15 @@ class ChartToolBar extends StatelessWidget {
                     onPressed: () => toggleAverageLine(event),
                   ),
                   ChartToolBarButton(
-                    icon: CupertinoIcons.chevron_up,
-                    onPressed: onPressed,
+                    icon: CupertinoIcons.textformat_123,
+                    onPressed: () => toggleValueOnBar(event),
                   ),
                   ChartToolBarButton(
-                    icon: CupertinoIcons.chevron_up,
+                    icon: CupertinoIcons.line_horizontal_3,
+                    onPressed: () => toggleGridLine(event),
+                  ),
+                  ChartToolBarButton(
+                    icon: CupertinoIcons.chevron_compact_up,
                     onPressed: onPressed,
                   ),
                 ],

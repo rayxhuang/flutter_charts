@@ -128,7 +128,7 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
         final Size parentSize = _getParentSize(constraint: constraint, context: context);
 
         // Set max group name width
-        dataModel.setMaxGroupNameWidth(style.xAxisStyle.tickStyle.labelTextStyle);
+        dataModel.setMaxGroupNameWidth(textStyle: style.xAxisStyle.tickStyle.labelTextStyle);
 
         // Width information
         final bool hasYAxisOnTheRight = type == BarChartType.GroupedSeparated;
@@ -265,14 +265,14 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
     @required hasYAxisOnTheRight
   }) {
     dataModel.adjustAxisValueRange(
-      canvasHeight,
+      yAxisHeight: canvasHeight,
       valueRangeToBeAdjusted: dataModel.y1ValueRange,
       start: style.y1AxisStyle.preferredStartValue,
       end: style.y1AxisStyle.preferredEndValue,
     );
     if (hasYAxisOnTheRight) {
       dataModel.adjustAxisValueRange(
-        canvasHeight,
+        yAxisHeight: canvasHeight,
         valueRangeToBeAdjusted: dataModel.y2ValueRange,
         start: style.y2AxisStyle.preferredStartValue,
         end: style.y2AxisStyle.preferredEndValue,

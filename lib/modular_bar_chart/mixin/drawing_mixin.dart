@@ -6,13 +6,33 @@ import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 import 'package:touchable/touchable.dart';
 
 mixin Drawing {
+  void drawGridLine({
+    @required Canvas canvas,
+    //@required List<double> valueRange,
+    @required int numberOfTicksInBetween,
+    @required Offset start,
+    @required double length,
+    @required double height,
+    Color color,
+  }) {
+    final Paint gridLinePaint = Paint()
+      ..color = color ?? Colors.grey
+      ..strokeWidth = 1;
+    final double heightPerLine = height / (numberOfTicksInBetween + 1);
+    for (int i = 1; i  < numberOfTicksInBetween + 1; i++) {
+      final Offset p1 = start.translate(0, i * -heightPerLine);
+      canvas.drawLine(p1, p1.translate(length, 0), gridLinePaint);
+    }
+  }
+
   void drawAverageLine({
     @required Canvas canvas,
     @required Offset start,
     @required double length,
+    Color color,
   }) {
     final Paint avgLinePaint = Paint()
-      ..color = Colors.grey
+      ..color = color ?? Colors.red
       ..strokeWidth = 2;
     canvas.drawLine(start, start.translate(length, 0), avgLinePaint);
   }

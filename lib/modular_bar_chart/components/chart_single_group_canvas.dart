@@ -53,6 +53,8 @@ class SingleGroupedCanvas extends StatelessWidget {
               groupSelected: isSelected,
               barSelected: barSelected,
               showAverageLine: event.showAverageLine,
+              showValueOnBar: event.showValueOnBar,
+              showGridLine: event.showGridLine,
               clickable: clickable,
             ),
             size: size,

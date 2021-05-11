@@ -12,6 +12,8 @@ class BarChartEvent extends ChangeNotifier {
   });
 
   bool showAverageLine = false;
+  bool showValueOnBar = false;
+  bool showGridLine = false;
   String leftDisplayText = '';
   String rightDisplayText = '';
 
@@ -26,6 +28,16 @@ class BarChartEvent extends ChangeNotifier {
       leftDisplayText = '';
       rightDisplayText = '';
     }
+    notifyListeners();
+  }
+
+  void toggleValueOnBar() {
+    showValueOnBar = !showValueOnBar;
+    notifyListeners();
+  }
+
+  void toggleGridLine() {
+    showGridLine = !showGridLine;
     notifyListeners();
   }
 }
