@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_charts/modular_bar_chart/components/chart_mini_canvas.dart';
 
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_event.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
 import 'package:provider/provider.dart';
@@ -117,8 +118,9 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<BarChartStyle>(create: (_) => style),
         Provider<ModularBarChartData>(create: (_) => dataModel),
+        Provider<BarChartStyle>(create: (_) => style),
+        ChangeNotifierProvider<BarChartEvent>(create: (_) => BarChartEvent(dataModel: dataModel, style: style),),
       ],
       child: LayoutBuilder(builder: (context, constraint) {
         ModularBarChartData dataModel = context.read<ModularBarChartData>();
@@ -196,14 +198,19 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
         // Left Axis
         final ChartAxisVerticalWithLabel leftAxis = ChartAxisVerticalWithLabel(axisHeight: canvasHeight,);
 
+        // TODO Change the height of title in full mode
         // Title
-        final ChartTitle chartTitle = ChartTitle(width: parentSize.width - leftAxisStaticWidth - rightAxisStaticWidth,);
+        final ChartTitle chartTitle = ChartTitle(
+          width: parentSize.width,
+          hasRightAxis: hasYAxisOnTheRight,
+        );
 
         // Bottom Label
         final Widget bottomLabel = !style.isMini
             ? ChartTitle(
               width: canvasWidth,
               isXAxisLabel: true,
+              hasRightAxis: hasYAxisOnTheRight,
             )
             : SizedBox();
 
@@ -347,7 +354,7 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
           // Title
           Positioned(
             top: 0,
-            left: leftAxisWidth,
+            left: 0,
             child: title,
           ),
 

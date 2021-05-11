@@ -19,7 +19,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
   final BarChartDataDouble barSelected;
   final bool clickable;
   final Function(BarChartDataDouble, TapDownDetails) onBarSelected;
-  final bool drawAverageLine;
+  final bool showAverageLine;
 
   const SingleGroupDataPainter({
     @required this.context,
@@ -33,7 +33,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
     this.groupSelected,
     this.barSelected,
     this.clickable = true,
-    this.drawAverageLine = false,
+    this.showAverageLine = false,
   }) : super(repaint: dataAnimation);
 
   @override
@@ -86,10 +86,13 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
     @required Offset bottomLeft
   }) {
     // Average line
-    if (drawAverageLine) {
-      final Paint avgLinePaint = Paint()..color = Colors.lightBlueAccent;
+    if (showAverageLine) {
       final double avgYValue = (dataModel.y1Average - dataModel.y1ValueRange[0]) / y1UnitPerPixel;
-      canvas.drawLine(Offset(0, avgYValue), Offset(xSectionLength, avgYValue), avgLinePaint);
+      drawAverageLine(
+        canvas: originCanvas,
+        length: xSectionLength,
+        start: bottomLeft.translate(0, -avgYValue),
+      );
     }
 
     //This is the bar paint
@@ -146,6 +149,16 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
     @required double y1UnitPerPixel,
     @required Offset bottomLeft
   }) {
+    // Average line
+    if (showAverageLine) {
+      final double avgYValue = (dataModel.y1Average - dataModel.y1ValueRange[0]) / y1UnitPerPixel;
+      drawAverageLine(
+        canvas: originCanvas,
+        length: xSectionLength,
+        start: bottomLeft.translate(0, -avgYValue),
+      );
+    }
+
     //This is the bar paint
     Paint paint = Paint();
     final List<BarChartDataDouble> dataList = dataModel.groupedBars[dataIndex].dataList;
@@ -187,17 +200,6 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
         barAnimationFraction: dataAnimation.value,
         onBarSelected: (data, details) { onBarSelected(data, details); },
       );
-
-      // if (dataAnimation.value == 1) {
-      //   drawValueOnBar(
-      //     canvas: originCanvas,
-      //     value: dataList[i].data.toStringAsFixed(0),
-      //     bottomLeft: bottomLeft,
-      //     x1: x1FromBottomLeft,
-      //     y1: y1FromBottomLeft,
-      //     barWidth: barWidth,
-      //   );
-      // }
     }
 
     if (dataAnimation.value == 1) {
@@ -243,6 +245,16 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
     @required double y1UnitPerPixel,
     @required Offset bottomLeft
   }) {
+    // Average line
+    if (showAverageLine) {
+      final double avgYValue = (dataModel.y1Average - dataModel.y1ValueRange[0]) / y1UnitPerPixel;
+      drawAverageLine(
+        canvas: originCanvas,
+        length: xSectionLength,
+        start: bottomLeft.translate(0, -avgYValue),
+      );
+    }
+
     //This is the bar paint
     Paint paint = Paint();
     //Draw data as bars on grid
@@ -337,6 +349,24 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
     @required Offset bottomLeft,
     @required double xSectionLength,
   }) {
+    // Average line
+    if (showAverageLine) {
+      final double avgY1Value = (dataModel.y1Average - dataModel.y1ValueRange[0]) / y1UnitPerPixel;
+      final double avgY2Value = (dataModel.y2Average - dataModel.y2ValueRange[0]) / y2UnitPerPixel;
+      drawAverageLine(
+        canvas: originCanvas,
+        length: xSectionLength,
+        start: bottomLeft.translate(0, -avgY1Value),
+      );
+      drawAverageLine(
+        canvas: originCanvas,
+        length: xSectionLength,
+        start: bottomLeft.translate(0, -avgY2Value),
+      );
+      print(dataModel.y1Average.toStringAsFixed(2));
+      print(dataModel.y2Average.toStringAsFixed(2));
+    }
+
     drawUngroupedData(
       originCanvas: originCanvas,
       canvas: canvas,
@@ -402,6 +432,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
   @override
   bool shouldRepaint(covariant SingleGroupDataPainter oldDelegate) {
     return oldDelegate.groupSelected != groupSelected
-        || oldDelegate.barSelected != barSelected;
+        || oldDelegate.barSelected != barSelected
+        || oldDelegate.drawAverageLine != drawAverageLine;
   }
 }

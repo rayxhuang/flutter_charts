@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_event.dart';
 import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
 import 'package:provider/provider.dart';
 
@@ -10,10 +13,13 @@ import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 class ChartTitle extends StatefulWidget with StringSize {
   final double width;
   final bool isXAxisLabel;
+  final bool hasRightAxis;
 
+  // TODO Separate out x label
   const ChartTitle({
     @required this.width,
     this.isXAxisLabel = false,
+    this.hasRightAxis = false,
   });
 
   @override
@@ -29,13 +35,9 @@ class _ChartTitleState extends State<ChartTitle> {
     showToolbar = false;
   }
 
-  void _toggleToolBar() {
-    setState(() { showToolbar = !showToolbar; });
-  }
+  void _toggleToolBar() => setState(() { showToolbar = !showToolbar; });
 
-  void _toggleAverageLine() {
-
-  }
+  void _toggleAverageLine(BarChartEvent event) => event.toggleAverageLine(hasRightAxis: widget.hasRightAxis);
 
   Size size(BarChartLabel title) =>
       Size(widget.width, StringSize.getHeight(title));
@@ -61,55 +63,7 @@ class _ChartTitleState extends State<ChartTitle> {
   }
 }
 
-// @immutable
-// class ChartTitle extends StatelessWidget with StringSize{
-//   final double width;
-//   final bool isXAxisLabel;
-//
-//   const ChartTitle({
-//     @required this.width,
-//     this.isXAxisLabel = false,
-//   });
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final BarChartLabel label = isXAxisLabel
-//         ? context.read<BarChartStyle>().xAxisStyle.label
-//         : context.read<BarChartStyle>().title;
-//     return SizedBox(
-//       width: width,
-//       height: StringSize.getHeight(label),
-//       child: Center(
-//         child: Row(
-//           children: [
-//             Spacer(),
-//             Text(
-//               label.text,
-//               style: label.textStyle,
-//             ),
-//             SizedBox(
-//               width: 12,
-//               child: IconButton(
-//                 onPressed: () {
-//
-//                 },
-//                 padding: EdgeInsets.all(0),
-//                 icon: Icon(
-//                   Icons.arrow_drop_down_circle_outlined,
-//                   size: 12,
-//                 ),
-//               ),
-//             ),
-//             Spacer(),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-//
-//   Size size(BarChartLabel title) => Size(width, StringSize.getHeight(title));
-// }
-
+@immutable
 class ChartTitleBar extends StatelessWidget {
   const ChartTitleBar({
     @required this.label,
@@ -139,8 +93,7 @@ class ChartTitleBar extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 4),
             onPressed: onPressed,
             icon: const Icon(
-              //CupertinoIcons.chevron_down,
-              CupertinoIcons.slider_horizontal_3,
+              CupertinoIcons.chevron_down,
               size: 12,
               color: Colors.white70,
             ),
@@ -152,6 +105,7 @@ class ChartTitleBar extends StatelessWidget {
   }
 }
 
+@immutable
 class ChartToolBar extends StatelessWidget {
   const ChartToolBar({
     Key key,
@@ -160,59 +114,85 @@ class ChartToolBar extends StatelessWidget {
   }) : super(key: key);
 
   final VoidCallback onPressed;
-  final VoidCallback toggleAverageLine;
+  final Function(BarChartEvent) toggleAverageLine;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Material(
-          color: Colors.white10,
-          clipBehavior: Clip.hardEdge,
-          shape: CircleBorder(side: BorderSide(color: Colors.black12)),
-          elevation: 16,
-          child: IconButton(
-            padding: EdgeInsets.symmetric(horizontal: 0),
-            onPressed: toggleAverageLine,
-            iconSize: 12,
-            icon: const Icon(
-              CupertinoIcons.minus,
-              color: Colors.white70,
+    return Consumer<BarChartEvent>(
+      builder: (context, event, child) {
+        final double maxLengthOfDisplayText = [
+          StringSize.getWidthOfString(event.leftDisplayText, TextStyle()),
+          StringSize.getWidthOfString(event.rightDisplayText, TextStyle())
+        ].reduce(max);
+        return Row(
+          children: [
+            SizedBox(
+              width: maxLengthOfDisplayText,
+              child: Text(
+                event.leftDisplayText
+              ),
             ),
-          ),
-        ),
-        Material(
-          color: Colors.white10,
-          clipBehavior: Clip.hardEdge,
-          shape: CircleBorder(side: BorderSide(color: Colors.black12)),
-          elevation: 16,
-          child: IconButton(
-            padding: EdgeInsets.symmetric(horizontal: 0),
-            onPressed: onPressed,
-            iconSize: 12,
-            icon: const Icon(
-              CupertinoIcons.chevron_down,
-              color: Colors.white70,
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Material(
+                    color: Colors.white10,
+                    clipBehavior: Clip.hardEdge,
+                    shape: CircleBorder(side: BorderSide(color: Colors.black12)),
+                    elevation: 16,
+                    child: IconButton(
+                      padding: EdgeInsets.symmetric(horizontal: 0),
+                      onPressed: () => toggleAverageLine(event),
+                      iconSize: 12,
+                      icon: const Icon(
+                        CupertinoIcons.minus,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ),
+                  Material(
+                    color: Colors.white10,
+                    clipBehavior: Clip.hardEdge,
+                    shape: CircleBorder(side: BorderSide(color: Colors.black12)),
+                    elevation: 16,
+                    child: IconButton(
+                      padding: EdgeInsets.symmetric(horizontal: 0),
+                      onPressed: onPressed,
+                      iconSize: 12,
+                      icon: const Icon(
+                        CupertinoIcons.chevron_down,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ),
+                  Material(
+                    color: Colors.white10,
+                    clipBehavior: Clip.hardEdge,
+                    shape: CircleBorder(side: BorderSide(color: Colors.black12)),
+                    elevation: 16,
+                    child: IconButton(
+                      padding: EdgeInsets.symmetric(horizontal: 0),
+                      onPressed: onPressed,
+                      iconSize: 12,
+                      icon: const Icon(
+                        CupertinoIcons.chevron_up,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ),
-        Material(
-          color: Colors.white10,
-          clipBehavior: Clip.hardEdge,
-          shape: CircleBorder(side: BorderSide(color: Colors.black12)),
-          elevation: 16,
-          child: IconButton(
-            padding: EdgeInsets.symmetric(horizontal: 0),
-            onPressed: onPressed,
-            iconSize: 12,
-            icon: const Icon(
-              CupertinoIcons.chevron_down,
-              color: Colors.white70,
+            SizedBox(
+              width: maxLengthOfDisplayText,
+              child: Text(
+                event.rightDisplayText
+              ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 }

@@ -6,6 +6,17 @@ import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 import 'package:touchable/touchable.dart';
 
 mixin Drawing {
+  void drawAverageLine({
+    @required Canvas canvas,
+    @required Offset start,
+    @required double length,
+  }) {
+    final Paint avgLinePaint = Paint()
+      ..color = Colors.grey
+      ..strokeWidth = 2;
+    canvas.drawLine(start, start.translate(length, 0), avgLinePaint);
+  }
+
   void drawPoint({
     @required canvas,
     @required BarChartDataDouble data,

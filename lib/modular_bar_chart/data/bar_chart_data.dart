@@ -175,19 +175,13 @@ class ModularBarChartData with StringSize{
     }
 
     // Set the number of bars in one group
-    numBarsInGroups = xSubGroups.length;
-    if (numBarsInGroups <= 1) { numBarsInGroups = 1; }
-    if (type == BarChartType.GroupedStacked || type == BarChartType.GroupedSeparated) { numBarsInGroups = 1; }
+    _setNumberOfBarsInGroups();
 
     // Set the height on value string on bar
     valueOnBarHeight = StringSize.getWidthOfString('1', const TextStyle());
 
     // Set average for y1 and y2
-    y1Average = _y1Values.reduce((a, b) => a + b) / _y1Values.length;
-    if (_y2Values.isNotEmpty) {
-      y2Average = _y1Values.reduce((a, b) => a + b) / _y2Values.length;
-    }
-    print(y1Average);
+    _setYAverage();
   }
 
   void setMaxGroupNameWidth(TextStyle textStyle) {
@@ -200,6 +194,20 @@ class ModularBarChartData with StringSize{
         maxGroupNameWidthWithSpace = StringSize.getWidthOfString(name + "  ", textStyle);
       }
     });
+  }
+
+  void _setNumberOfBarsInGroups() {
+    numBarsInGroups = xSubGroups.length;
+    if (numBarsInGroups <= 1) { numBarsInGroups = 1; }
+    if (type == BarChartType.GroupedStacked || type == BarChartType.GroupedSeparated) { numBarsInGroups = 1; }
+  }
+
+  void _setYAverage() {
+    // TODO Stack average
+    y1Average = _y1Values.reduce((a, b) => a + b) / _y1Values.length;
+    if (_y2Values.isNotEmpty) {
+      y2Average = _y2Values.reduce((a, b) => a + b) / _y2Values.length;
+    }
   }
 
   void adjustAxisValueRange(double yAxisHeight, {@required List<double> valueRangeToBeAdjusted, double start = 0, double end = 0,}) {

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_event.dart';
 import 'package:provider/provider.dart';
 import 'package:touchable/touchable.dart';
 
@@ -32,26 +33,33 @@ class SingleGroupedCanvas extends StatelessWidget {
   Widget build(BuildContext context) {
     final ModularBarChartData dataModel = context.read<ModularBarChartData>();
     final BarChartStyle style = context.read<BarChartStyle>();
+
     final bool clickable = style.clickable;
 
-    return CanvasTouchDetector(
-      builder: (BuildContext context) => CustomPaint(
-        painter: SingleGroupDataPainter(
-          context: context,
-          dataModel: dataModel,
-          dataIndex: groupIndex,
-          style: style,
-          xSectionLength: size.width,
-          barWidth: barWidth,
-          dataAnimation: dataAnimation,
-          onBarSelected: (data, details) { onBarSelected(groupIndex, data, details); },
-          groupSelected: isSelected ? true : false,
-          barSelected: barSelected,
-          clickable: clickable,
-        ),
-        size: size,
-        willChange: true,
-      )
+    return Consumer<BarChartEvent>(
+      builder: (context, event, child) {
+        //print('in consumer: ${event.showAverageLine}');
+        return CanvasTouchDetector(
+          builder: (BuildContext context) => CustomPaint(
+            painter: SingleGroupDataPainter(
+              context: context,
+              dataModel: dataModel,
+              dataIndex: groupIndex,
+              style: style,
+              xSectionLength: size.width,
+              barWidth: barWidth,
+              dataAnimation: dataAnimation,
+              onBarSelected: (data, details) { onBarSelected(groupIndex, data, details); },
+              groupSelected: isSelected,
+              barSelected: barSelected,
+              showAverageLine: event.showAverageLine,
+              clickable: clickable,
+            ),
+            size: size,
+            willChange: true,
+          )
+        );
+      },
     );
   }
 }
