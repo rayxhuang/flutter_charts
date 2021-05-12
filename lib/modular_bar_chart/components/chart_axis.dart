@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +30,8 @@ class ChartAxisHorizontalWrapper extends StatelessWidget {
     final DisplayInfo displayInfo = context.read<DisplayInfo>();
     final ModularBarChartData dataModel = displayInfo.dataModel;
     final BarChartStyle style = displayInfo.style;
+    //final double axisLineHeight
+
     final int numGroupNames = (dataModel.xGroups.length / displayInfo.numOfGroupNamesToCombine).ceil();
     final int difference = numGroupNames * displayInfo.numOfGroupNamesToCombine - dataModel.xGroups.length;
     final double singleCombinedGroupNameWidth = singleCanvasSize.width * displayInfo.numOfGroupNamesToCombine;
@@ -71,9 +72,11 @@ class ChartAxisHorizontalWrapper extends StatelessWidget {
                       ? singleCombinedGroupNameWidth - difference * singleCanvasSize.width
                       : singleCombinedGroupNameWidth,
                   height: displayInfo.bottomAxisHeight - style.xAxisStyle.tickStyle.tickLength - style.xAxisStyle.strokeWidth,
-                  child: Text(
-                    dataModel.xGroups[index * displayInfo.numOfGroupNamesToCombine],
-                    maxLines: 1,
+                  child: Center(
+                    child: Text(
+                      dataModel.xGroups[index * displayInfo.numOfGroupNamesToCombine],
+                      maxLines: 1,
+                    ),
                   ),
                 );
               },
@@ -107,118 +110,6 @@ class ChartAxisHorizontalWrapper extends StatelessWidget {
     );
   }
 }
-
-// @immutable
-// class ChartAxisHorizontalWrapper extends StatelessWidget {
-//   final Size containerSize;
-//   final Size singleCanvasSize;
-//   final ScrollController scrollController;
-//   final ScrollController labelController;
-//   final List<double> labelInfo;
-//   final bool isMini;
-//
-//   const ChartAxisHorizontalWrapper({
-//     @required this.containerSize,
-//     @required this.singleCanvasSize,
-//     @required this.scrollController,
-//     @required this.labelController,
-//     @required this.labelInfo,
-//     this.isMini = false,
-//   });
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final ModularBarChartData dataModel = context.read<ModularBarChartData>();
-//     final BarChartStyle style = context.read<BarChartStyle>();
-//     final int numGroupsToCombine = labelInfo[2].toInt();
-//     final int numGroupNames = (dataModel.xGroups.length / numGroupsToCombine).ceil();
-//     final int difference = numGroupNames * numGroupsToCombine - dataModel.xGroups.length;
-//     final double singleCombinedGroupNameWidth = singleCanvasSize.width * numGroupsToCombine;
-//
-//     final double rotatedBoxWidth = singleCanvasSize.width * numGroupsToCombine;
-//     final bool widthIsGreaterThanHeight = rotatedBoxWidth >= labelInfo[0] ? true : false;
-//     final double startingValue = widthIsGreaterThanHeight ? 0 : 0.5 * pi;
-//     final int quarterTurn = widthIsGreaterThanHeight ? 0 : -1;
-//     return SizedBox.fromSize(
-//       size: containerSize,
-//       child: Column(
-//         children: [
-//           SizedBox(
-//             height: style.xAxisStyle.tickStyle.tickLength + style.xAxisStyle.strokeWidth,
-//             child: ListView.builder(
-//                 padding: EdgeInsets.zero,
-//                 controller: scrollController,
-//                 scrollDirection: Axis.horizontal,
-//                 physics: ClampingScrollPhysics(),
-//                 itemCount: dataModel.xGroups.length,
-//                 itemBuilder: (context, index) =>
-//                     _buildSingleGroupXAxisCanvas(
-//                       dataModel: dataModel,
-//                       style: style,
-//                       index: index,
-//                       numGroupsToCombine: numGroupsToCombine,
-//                     )
-//             ),
-//           ),
-//           SizedBox(
-//             height: labelInfo[0] - style.xAxisStyle.strokeWidth,
-//             child: ListView.builder(
-//               padding: EdgeInsets.zero,
-//               controller: labelController,
-//               scrollDirection: Axis.horizontal,
-//               physics: ClampingScrollPhysics(),
-//               itemCount: numGroupNames,
-//               itemBuilder: (context, index) {
-//                 final bool notEnoughGroupsAtTheEnd = index == numGroupNames - 1 && difference > 0 ? true : false;
-//                 return SizedBox(
-//                   width: notEnoughGroupsAtTheEnd
-//                       ? singleCombinedGroupNameWidth - difference * singleCanvasSize.width
-//                       : singleCombinedGroupNameWidth,
-//                   height: labelInfo[0],
-//                   child: Transform.rotate(
-//                     angle: startingValue - labelInfo[1],
-//                     child: Center(
-//                       child: RotatedBox(
-//                         quarterTurns: quarterTurn,
-//                         child: Text(
-//                           dataModel.xGroups[index * numGroupsToCombine],
-//                           maxLines: 1,
-//                         ),
-//                       ),
-//                     ),
-//                   ),
-//                 );
-//               },
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-//
-//   CustomPaint _buildSingleGroupXAxisCanvas({
-//     @required ModularBarChartData dataModel,
-//     @required BarChartStyle style,
-//     @required int index,
-//     @required int numGroupsToCombine,
-//   }) {
-//     final bool isFirstOfAll = index == 0 ? true : false;
-//     final bool isLastOfAll = index == dataModel.xGroups.length - 1 ? true : false;
-//     final bool isFirstInGroup = index.remainder(numGroupsToCombine) == 0 ? true : false;
-//     final bool isLastInGroup = index.remainder(numGroupsToCombine) == numGroupsToCombine - 1 ? true : false;
-//     final bool paintTickOnLeft = !isFirstOfAll &&  isFirstInGroup;
-//     final bool paintTickOnRight = !isLastOfAll && isLastInGroup;
-//     return CustomPaint(
-//       painter: HorizontalAxisSingleGroupPainter(
-//         groupName: dataModel.xGroups[index],
-//         axisStyle: style.xAxisStyle,
-//         paintTickOnLeft: paintTickOnLeft,
-//         paintTickOnRight: paintTickOnRight,
-//       ),
-//       size: Size(singleCanvasSize.width, style.xAxisStyle.tickStyle.tickLength),
-//     );
-//   }
-// }
 
 @immutable
 class HorizontalAxisSimpleWrapper extends StatelessWidget {
@@ -316,28 +207,42 @@ class HorizontalAxisSimplePainter extends CustomPainter {
 }
 
 @immutable
-class ChartAxisVerticalWithLabel extends StatelessWidget with StringSize, AxisInfo {
+class VerticalAxisWithLabel extends StatelessWidget {
   // This widget display the label and data of a vertical axis
-  final double axisHeight;
   final bool isRightAxis;
 
-  ChartAxisVerticalWithLabel({ @required this.axisHeight, this.isRightAxis = false });
+  VerticalAxisWithLabel({ this.isRightAxis = false });
 
   @override
   Widget build(BuildContext context) {
     final DisplayInfo displayInfo = context.read<DisplayInfo>();
-    final BarChartStyle style = displayInfo.style;
+
     final AxisStyle axisStyle = isRightAxis
-        ? style.y2AxisStyle
-        : style.y1AxisStyle;
+        ? displayInfo.style.y2AxisStyle
+        : displayInfo.style.y1AxisStyle;
+
     final List<double> yValueRange = isRightAxis
         ? displayInfo.y2ValueRange
         : displayInfo.y1ValueRange;
-    final Widget axisLabel = style.isMini
+
+    final double combinedWidth = isRightAxis
+        ? displayInfo.rightAxisCombinedWidth
+        : displayInfo.leftAxisCombinedWidth;
+
+    final double axisWidth = isRightAxis
+        ? displayInfo.rightAxisWidth
+        : displayInfo.leftAxisWidth;
+
+    final double labelWidth = isRightAxis
+        ? displayInfo.rightAxisLabelWidth
+        : displayInfo.leftAxisLabelWidth;
+
+    // Does not display label when in mini mode
+    final Widget axisLabel = displayInfo.isMini
         ? SizedBox()
         : SizedBox(
-          width: axisHeight,
-          height: getVerticalAxisLabelWidth(label: axisStyle.label),
+          width: displayInfo.canvasHeight,
+          height: labelWidth,
           child: Center(
             child: Text(
               axisStyle.label.text,
@@ -347,40 +252,36 @@ class ChartAxisVerticalWithLabel extends StatelessWidget with StringSize, AxisIn
         );
 
     return SizedBox(
-      height: axisHeight,
-      width: getVerticalAxisCombinedWidth(
-        axisMaxValue: yValueRange[1],
-        style: axisStyle,
-        isMini: style.isMini
-      ),
-      child: Row(
-        children: [
-          isRightAxis
-              ? SizedBox()
-              : RotatedBox(
-                quarterTurns: 1,
-                child: axisLabel
-              ),
-          SizedBox(
-            width: getVerticalAxisWidth(max: yValueRange[1], style: axisStyle, isMini: style.isMini),
-            height: axisHeight,
-            child: CustomPaint(
-              painter: VerticalAxisPainter(
-                valueRange: yValueRange,
-                axisStyle: axisStyle,
-                isRight: isRightAxis,
-                isMini: style.isMini,
+        height: displayInfo.canvasHeight,
+        width: combinedWidth,
+        child: Row(
+          children: [
+            isRightAxis
+                ? SizedBox()
+                : RotatedBox(
+                  quarterTurns: 1,
+                  child: axisLabel
+                ),
+            SizedBox(
+              width: axisWidth,
+              height: displayInfo.canvasHeight,
+              child: CustomPaint(
+                painter: VerticalAxisPainter(
+                  valueRange: yValueRange,
+                  axisStyle: axisStyle,
+                  isRight: isRightAxis,
+                  isMini: displayInfo.isMini,
+                ),
               ),
             ),
-          ),
-          isRightAxis
-              ? RotatedBox(
-                quarterTurns: 3,
-                child: axisLabel
-              )
-              : SizedBox(),
-        ],
-      )
+            isRightAxis
+                ? RotatedBox(
+                  quarterTurns: 3,
+                  child: axisLabel
+                )
+                : SizedBox(),
+          ],
+        )
     );
   }
 }
@@ -489,4 +390,25 @@ class VerticalAxisPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+@immutable
+class BottomAxisLabel extends StatelessWidget {
+  const BottomAxisLabel({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final DisplayInfo displayInfo = context.read<DisplayInfo>();
+    final BarChartLabel label = displayInfo.style.xAxisStyle.label;
+    return SizedBox(
+      width: displayInfo.canvasWidth,
+      height: displayInfo.bottomLabelHeight,
+      child: Center(
+        child: Text(
+          label.text,
+          style: label.textStyle,
+        ),
+      ),
+    );
+  }
 }

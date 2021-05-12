@@ -94,7 +94,7 @@ class ModularBarChartData with StringSize {
 
   // Data processing variables
   List<String> _xGroups = [], _xSubGroups = [];
-  List<double> _y1Values = [], _y2Values = [], _stackedValues = [], _y1ValueRange = [0, 0, 0], _y2ValueRange = [0, 0, 0];
+  List<double> _y1Values = [], _y2Values = [], _stackedValues = [], _y1ValueRange = [0, 0], _y2ValueRange = [0, 0];
   List<BarChartDataDouble> _bars = [], _points = [];
   List<BarChartDataDoubleGrouped> _groupedBars = [];
   int _numBarsInGroups = 1;

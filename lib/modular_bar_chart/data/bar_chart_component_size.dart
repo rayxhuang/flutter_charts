@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_charts/modular_bar_chart/mixin/axis_info_mixin.dart';
 import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
@@ -7,7 +8,7 @@ import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
 import 'bar_chart_data.dart';
 import 'bar_chart_style.dart';
 
-class DisplayInfo extends ChangeNotifier with StringSize, AxisInfo {
+class DisplayInfo extends ChangeNotifier with StringSize{
   final ModularBarChartData dataModel;
   final BarChartStyle style;
   final Size parentSize;
@@ -19,17 +20,23 @@ class DisplayInfo extends ChangeNotifier with StringSize, AxisInfo {
   });
 
   double _maxGroupNameWidth = 0, _maxGroupNameWidthWithSpace = 0;
-  double _leftAxisWidth = 0, _rightAxisWidth = 0, _canvasWidth = 0, _xSectionWidth = 0, _barWidth = 0;
+  double _leftAxisCombinedWidth = 0, _leftAxisWidth = 0, _leftAxisLabelWidth = 0;
+  double _rightAxisCombinedWidth = 0, _rightAxisWidth = 0, _rightAxisLabelWidth = 0;
+  double _canvasWidth = 0, _xSectionWidth = 0, _barWidth = 0;
   double _titleHeight = 0, _spacingHeight = 0, _bottomAxisHeight = 0, _bottomLabelHeight = 0, _bottomLegendHeight = 0,
   _canvasHeight = 0, _valueOnBarHeight = 0;
   Size _canvasSize = Size.zero;
-  bool _hasYAxisOnTheRight = false, _needResetYAxisWidth = false;
+  bool _hasYAxisOnTheRight = false, _needResetYAxisWidth = false, _isMini = false;
   List<double> _displayY1Range = [0, 0], _displayY2Range = [0, 0];
   double _y1UnitPerPixel = 0, _y2UnitPerPixel = 0;
   int _numOfGroupNamesToCombine = 1;
 
+  double get leftAxisCombinedWidth => _leftAxisCombinedWidth;
   double get leftAxisWidth => _leftAxisWidth;
+  double get leftAxisLabelWidth => _leftAxisLabelWidth;
+  double get rightAxisCombinedWidth => _rightAxisCombinedWidth;
   double get rightAxisWidth => _rightAxisWidth;
+  double get rightAxisLabelWidth => _rightAxisLabelWidth;
   double get canvasWidth => _canvasWidth;
   double get xSectionWidth => _xSectionWidth;
   double get barWidth => _barWidth;
@@ -41,6 +48,7 @@ class DisplayInfo extends ChangeNotifier with StringSize, AxisInfo {
   double get canvasHeight => _canvasHeight;
   Size get canvasSize => _canvasSize;
 
+  bool get isMini => _isMini;
   bool get hasYAxisOnTheRight => _hasYAxisOnTheRight;
   double get y1Min => _displayY1Range[0];
   double get y1Max => _displayY1Range[1];
@@ -53,6 +61,9 @@ class DisplayInfo extends ChangeNotifier with StringSize, AxisInfo {
   int get numOfGroupNamesToCombine => _numOfGroupNamesToCombine;
 
   void init(){
+    // Set isMini?
+    _setIsMini();
+
     // Set whether the chart has y axis on the right
     _setHasYAxisOnTheRight();
 
@@ -92,6 +103,8 @@ class DisplayInfo extends ChangeNotifier with StringSize, AxisInfo {
     if (_needResetYAxisWidth) { _setCanvasSize(); }
   }
 
+  void _setIsMini() => _isMini = style.isMini;
+
   void _setHasYAxisOnTheRight() => _hasYAxisOnTheRight = dataModel.type == BarChartType.GroupedSeparated;
 
   void _setValueOnBarHeight() => _valueOnBarHeight = StringSize.getWidthOfString('1', const TextStyle());
@@ -110,25 +123,29 @@ class DisplayInfo extends ChangeNotifier with StringSize, AxisInfo {
   }
 
   void _setLeftAxisWidth(){
-    _leftAxisWidth = getVerticalAxisCombinedWidth(
+    _leftAxisWidth = _getVerticalAxisWidth(
       axisMaxValue: _needResetYAxisWidth ? _displayY1Range[1] : dataModel.y1ValueRange[1],
-      style: style.y1AxisStyle,
-      isMini: style.isMini,
+      axisStyle: style.y1AxisStyle,
     );
+    _leftAxisLabelWidth = _isMini ? 0 : _getVerticalAxisLabelWidth(label: style.y1AxisStyle.label);
+    _leftAxisCombinedWidth = _leftAxisWidth + _leftAxisLabelWidth;
   }
 
   void _setRightAxisWidth(){
-    _rightAxisWidth = hasYAxisOnTheRight
-        ? getVerticalAxisCombinedWidth(
-          axisMaxValue: _needResetYAxisWidth ? _displayY2Range[1] : dataModel.y2ValueRange[1],
-          style: style.y2AxisStyle,
-          isMini: style.isMini,
-        )
-        : 0;
+    if (_hasYAxisOnTheRight) {
+      _rightAxisWidth = _getVerticalAxisWidth(
+        axisMaxValue: _needResetYAxisWidth ? _displayY2Range[1] : dataModel.y2ValueRange[1],
+        axisStyle: style.y2AxisStyle,
+      );
+      if (!style.isMini) {
+        _rightAxisLabelWidth = _getVerticalAxisLabelWidth(label: style.y2AxisStyle.label);
+      }
+    }
+    _rightAxisCombinedWidth = _rightAxisWidth + _rightAxisLabelWidth;
   }
 
   void _setCanvasWidth() {
-    _canvasWidth = parentSize.width - _leftAxisWidth - _rightAxisWidth;
+    _canvasWidth = parentSize.width - _leftAxisCombinedWidth - _rightAxisCombinedWidth;
     if (_canvasWidth < 0) { _canvasWidth = 0; }
   }
 
@@ -179,17 +196,17 @@ class DisplayInfo extends ChangeNotifier with StringSize, AxisInfo {
     _setCanvasHeight();
   }
 
-  void _setTitleHeight() => _titleHeight = StringSize.getHeight(style.title);
+  void _setTitleHeight() => _titleHeight = style.isMini ? StringSize.getHeight(style.title) : kMinInteractiveDimensionCupertino;
 
   void _setSpacingHeight() => _spacingHeight = 0.5 * StringSize.getHeightOfString('I', style.y1AxisStyle.tickStyle.labelTextStyle);
 
   void _setBottomAxisHeight() {
     final double labelHeight = StringSize.getHeightOfString('I', style.xAxisStyle.tickStyle.labelTextStyle);
     final TickStyle tickStyle = style.xAxisStyle.tickStyle;
-    _bottomAxisHeight = labelHeight + tickStyle.tickLength + tickStyle.tickMargin;
+    _bottomAxisHeight = labelHeight + tickStyle.tickLength + tickStyle.tickMargin + style.xAxisStyle.strokeWidth / 2;
   }
 
-  void _setBottomLabelHeight() => _bottomLabelHeight = style.isMini ? 0 : StringSize.getHeight(style.xAxisStyle.label);
+  void _setBottomLabelHeight() => _bottomLabelHeight = StringSize.getHeight(style.xAxisStyle.label);
 
   void _setBottomLegendHeight() => style.legendStyle.visible && !style.isMini ? StringSize.getHeightOfString('I', style.legendStyle.legendTextStyle) : 0;
 
@@ -242,13 +259,8 @@ class DisplayInfo extends ChangeNotifier with StringSize, AxisInfo {
         ? valueRangeToBeAdjusted[1] = end
         : valueRangeToBeAdjusted[1] = value;
 
-    // If after adjustment, number of digit changed then...
-    // TODO
     final int newDigit = int.tryParse(value.toStringAsExponential().substring(value.toStringAsExponential().indexOf('e+') + 2));
-    if (newDigit > expInt) {
-      print('We need to fix this, e.g 999 -> 1000, width might be wrong, try call init again');
-      _needResetYAxisWidth = true;
-    }
+    if (newDigit > expInt) { _needResetYAxisWidth = true; }
   }
 
   void _setYUnitPerPixel() {
@@ -273,5 +285,18 @@ class DisplayInfo extends ChangeNotifier with StringSize, AxisInfo {
     } else {
       _numOfGroupNamesToCombine = 1;
     }
+  }
+  
+  double _getVerticalAxisLabelWidth({@required BarChartLabel label}) => label.text == '' ? 0 : StringSize.getHeight(label);
+
+  double _getVerticalAxisWidth({
+    @required double axisMaxValue,
+    @required AxisStyle axisStyle,
+  }) {
+    final int decimal = axisStyle.tickStyle.tickDecimal;
+    final TextStyle textStyle = axisStyle.tickStyle.labelTextStyle;
+    final double valueWidth = StringSize.getWidthOfString(axisMaxValue.toStringAsFixed(decimal), textStyle);
+    final double tickWidth = axisStyle.tickStyle.tickMargin + (style.isMini ? 0 : axisStyle.tickStyle.tickLength);
+    return valueWidth + tickWidth;
   }
 }

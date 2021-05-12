@@ -137,18 +137,7 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
           child: Consumer<DisplayInfo>(
             builder: (context, size, child) {
               final DisplayInfo displayInfo = context.read<DisplayInfo>();
-              //final ModularBarChartData dataModel = displayInfo.dataModel;
               final BarChartStyle style = displayInfo.style;
-
-              // TODO
-              // double a = 2 * StringSize.getHeightOfString('I', style.xAxisStyle.tickStyle.labelTextStyle);
-              // final List<double> bottomAxisHeightInformation = getXRotatedHeight(
-              //   axisStyle: style.xAxisStyle,
-              //   nameMaxWidth: dataModel.maxGroupNameWidth + a - a,
-              //   nameMaxWidthWithSpace: dataModel.maxGroupNameWidthWithSpace,
-              //   xSectionLength: xSectionWidth,
-              // );
-              // Adjust y Max to fit number on bar and populate data
 
               // Canvas and bottom axis
               Widget chartCanvasWithAxis;
@@ -170,7 +159,7 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
               }
 
               // Left Axis
-              final ChartAxisVerticalWithLabel leftAxis = ChartAxisVerticalWithLabel(axisHeight: displayInfo.canvasHeight,);
+              final VerticalAxisWithLabel leftAxis = VerticalAxisWithLabel();
 
               // TODO Change the height of title in full mode
               // Title
@@ -180,13 +169,7 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
               );
 
               // Bottom Label
-              final Widget bottomLabel = !style.isMini
-                  ? ChartTitle(
-                width: displayInfo.canvasWidth,
-                isXAxisLabel: true,
-                hasRightAxis: displayInfo.hasYAxisOnTheRight,
-              )
-                  : SizedBox();
+              final Widget bottomLabel = BottomAxisLabel();
 
               // Bottom Legend
               final Widget bottomLegend = style.legendStyle.visible && !style.isMini
@@ -195,10 +178,7 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
 
               // Right Axis
               final Widget rightAxis = displayInfo.hasYAxisOnTheRight
-                  ? ChartAxisVerticalWithLabel(
-                axisHeight: displayInfo.canvasHeight,
-                isRightAxis: true,
-              )
+                  ? VerticalAxisWithLabel(isRightAxis: true)
                   : SizedBox();
 
               // TODO Too small to have a canvas?
@@ -367,7 +347,6 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
   }
 
   Widget _buildMiniChart({@required DisplayInfo displayInfo,}) {
-    // TODO Correct data is done, work on x Axis
     final Size canvasSize = displayInfo.canvasSize;
     final ModularBarChartData dataModel = displayInfo.dataModel;
     final BarChartStyle style = displayInfo.style;
@@ -385,12 +364,6 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
         HorizontalAxisSimpleWrapper(
           size: Size(canvasSize.width, style.xAxisStyle.strokeWidth),
         ),
-        Center(
-          child: Text(
-            style.xAxisStyle.label.text,
-            style: style.xAxisStyle.label.textStyle,
-          ),
-        )
       ],
     );
   }

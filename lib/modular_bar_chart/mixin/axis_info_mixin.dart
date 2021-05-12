@@ -44,22 +44,4 @@ mixin AxisInfo {
     @required double canvasWidth,
     @required double xSectionLength,
   }) => [xSectionLength * dataModel.xGroups.length, canvasWidth].reduce(max);
-
-  double getVerticalAxisCombinedWidth({
-    @required double axisMaxValue, 
-    @required AxisStyle style, 
-    bool isMini = false,
-  }) {
-    final double label = isMini ? 0 : getVerticalAxisLabelWidth(label: style.label);
-    return label + getVerticalAxisWidth(max: axisMaxValue, style: style, isMini: isMini);
-  }
-
-  double getVerticalAxisLabelWidth({@required BarChartLabel label}) => label.text == '' ? 0 : 5 + StringSize.getHeight(label);
-
-  double getVerticalAxisWidth({
-    @required double max,
-    @required AxisStyle style,
-    bool isMini = false,
-  }) => StringSize.getWidthOfString(max.toStringAsFixed(style.tickStyle.tickDecimal), style.tickStyle.labelTextStyle)
-          + style.tickStyle.tickMargin + (isMini ? 0 : style.tickStyle.tickLength);
 }
