@@ -180,12 +180,13 @@ class ModularBarChartData with StringSize {
       _xSubGroups = map.keys.toList();
       for (int i = 0; i < 2; i++) {
         final String name = _xSubGroups[i];
+        final double value = map[name];
         if (i == 0) {
-          _y1Values.add(map[name]);
-          _bars.add(BarChartDataDouble(group: key, data: map[name], separatedGroupName: name));
+          _y1Values.add(value);
+          _bars.add(BarChartDataDouble(group: key, data: value, separatedGroupName: name));
         } else {
-          _y2Values.add(map[name]);
-          _points.add(BarChartDataDouble(group: key, data: map[name], separatedGroupName: name));
+          _y2Values.add(value);
+          _points.add(BarChartDataDouble(group: key, data: value, separatedGroupName: name));
         }
       }
     });

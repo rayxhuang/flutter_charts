@@ -23,7 +23,7 @@ class DisplayInfo extends ChangeNotifier with StringSize, AxisInfo {
   double _titleHeight = 0, _spacingHeight = 0, _bottomAxisHeight = 0, _bottomLabelHeight = 0, _bottomLegendHeight = 0,
   _canvasHeight = 0, _valueOnBarHeight = 0;
   Size _canvasSize = Size.zero;
-  bool _hasYAxisOnTheRight = false;
+  bool _hasYAxisOnTheRight = false, _needResetYAxisWidth = false;
   List<double> _displayY1Range = [0, 0], _displayY2Range = [0, 0];
   double _y1UnitPerPixel = 0, _y2UnitPerPixel = 0;
   int _numOfGroupNamesToCombine = 1;
@@ -88,6 +88,8 @@ class DisplayInfo extends ChangeNotifier with StringSize, AxisInfo {
 
     // Combine group names
     _combineGroupName();
+
+    if (_needResetYAxisWidth) { _setCanvasSize(); }
   }
 
   void _setHasYAxisOnTheRight() => _hasYAxisOnTheRight = dataModel.type == BarChartType.GroupedSeparated;
@@ -109,7 +111,7 @@ class DisplayInfo extends ChangeNotifier with StringSize, AxisInfo {
 
   void _setLeftAxisWidth(){
     _leftAxisWidth = getVerticalAxisCombinedWidth(
-      axisMaxValue: dataModel.y1ValueRange[1],
+      axisMaxValue: _needResetYAxisWidth ? _displayY1Range[1] : dataModel.y1ValueRange[1],
       style: style.y1AxisStyle,
       isMini: style.isMini,
     );
@@ -118,7 +120,7 @@ class DisplayInfo extends ChangeNotifier with StringSize, AxisInfo {
   void _setRightAxisWidth(){
     _rightAxisWidth = hasYAxisOnTheRight
         ? getVerticalAxisCombinedWidth(
-          axisMaxValue: dataModel.y2ValueRange[1],
+          axisMaxValue: _needResetYAxisWidth ? _displayY2Range[1] : dataModel.y2ValueRange[1],
           style: style.y2AxisStyle,
           isMini: style.isMini,
         )
@@ -218,6 +220,7 @@ class DisplayInfo extends ChangeNotifier with StringSize, AxisInfo {
         axisStyle: style.y2AxisStyle,
       );
     }
+    if (_needResetYAxisWidth) { _setComponentWidth(); }
   }
 
   void _adjustDisplayValueRangeHelper({
@@ -243,7 +246,8 @@ class DisplayInfo extends ChangeNotifier with StringSize, AxisInfo {
     // TODO
     final int newDigit = int.tryParse(value.toStringAsExponential().substring(value.toStringAsExponential().indexOf('e+') + 2));
     if (newDigit > expInt) {
-      print('We need to fix this, e.g 999 -> 1000, width might be wrong');
+      print('We need to fix this, e.g 999 -> 1000, width might be wrong, try call init again');
+      _needResetYAxisWidth = true;
     }
   }
 
