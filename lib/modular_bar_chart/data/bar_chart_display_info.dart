@@ -18,6 +18,7 @@ class DisplayInfo extends ChangeNotifier with StringSize{
     @required this.parentSize,
   });
 
+  String _longestGroupName = '';
   double _maxGroupNameWidth = 0, _maxGroupNameWidthWithSpace = 0;
   double _leftAxisCombinedWidth = 0, _leftAxisWidth = 0, _leftAxisLabelWidth = 0;
   double _rightAxisCombinedWidth = 0, _rightAxisWidth = 0, _rightAxisLabelWidth = 0;
@@ -30,6 +31,7 @@ class DisplayInfo extends ChangeNotifier with StringSize{
   double _y1UnitPerPixel = 0, _y2UnitPerPixel = 0;
   int _numOfGroupNamesToCombine = 1;
 
+  String get longestGroupName => _longestGroupName;
   double get leftAxisCombinedWidth => _leftAxisCombinedWidth;
   double get leftAxisWidth => _leftAxisWidth;
   double get leftAxisLabelWidth => _leftAxisLabelWidth;
@@ -108,6 +110,7 @@ class DisplayInfo extends ChangeNotifier with StringSize{
     // Combine group names
     _combineGroupName();
 
+    // Reset the width in case of e.g 999 -> 1000, which the number of digits changed
     if (_needResetYAxisWidth) { _setCanvasSize(); }
 
     // Set Canvas wrapper size
@@ -163,12 +166,14 @@ class DisplayInfo extends ChangeNotifier with StringSize{
   void _setMaxGroupNameWidth() {
     // Calculate max width for group names
     _maxGroupNameWidth = 0;
+    _longestGroupName = '';
     final TextStyle textStyle = style.xAxisStyle.label.textStyle;
     dataModel.xGroups.forEach((name) {
       double singleNameWidth = StringSize.getWidthOfString(name, textStyle);
       if ( singleNameWidth >= _maxGroupNameWidth) {
         _maxGroupNameWidth = singleNameWidth;
         _maxGroupNameWidthWithSpace = StringSize.getWidthOfString(name + "  ", textStyle);
+        _longestGroupName = name;
       }
     });
   }
@@ -219,11 +224,15 @@ class DisplayInfo extends ChangeNotifier with StringSize{
     final double labelHeight = StringSize.getHeightOfString('I', style.xAxisStyle.tickStyle.labelTextStyle);
     final TickStyle tickStyle = style.xAxisStyle.tickStyle;
     _bottomAxisHeight = labelHeight + tickStyle.tickLength + tickStyle.tickMargin + style.xAxisStyle.strokeWidth / 2;
+    if (_isMini) {
+      _bottomAxisHeight = style.xAxisStyle.strokeWidth / 2;
+    }
   }
 
   void _setBottomLabelHeight() => _bottomLabelHeight = StringSize.getHeight(style.xAxisStyle.label);
 
-  void _setBottomLegendHeight() => style.legendStyle.visible && !style.isMini ? StringSize.getHeightOfString('I', style.legendStyle.legendTextStyle) : 0;
+  void _setBottomLegendHeight() =>
+      _bottomLegendHeight = (style.legendStyle.visible && !_isMini) ? StringSize.getHeightOfString('I', style.legendStyle.legendTextStyle) + 4 : 0;
 
   void _setCanvasHeight() {
     _canvasHeight = parentSize.height -

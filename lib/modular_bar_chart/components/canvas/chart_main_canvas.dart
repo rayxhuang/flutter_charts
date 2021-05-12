@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 
-import '../chart_single_group_canvas.dart';
+import 'chart_single_group_canvas.dart';
 
 class MainCanvas extends StatefulWidget {
   final BarChartAnimation animation;

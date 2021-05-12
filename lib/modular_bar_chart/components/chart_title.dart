@@ -135,6 +135,53 @@ class ChartToolBar extends StatelessWidget {
   final Function(BarChartEvent) toggleValueOnBar;
   final Function(BarChartEvent) toggleGridLine;
 
+  Widget _buildLeftDisplayText(BarChartEvent event) {
+    return Text(
+      event.leftDisplayText,
+      style: TextStyle(
+        color: Colors.red,
+      ),
+    );
+  }
+
+  Widget _buildRightDisplayText(BarChartEvent event) {
+    return Text(
+      event.rightDisplayText,
+    );
+  }
+
+  Widget _buildAvgLineButton(BarChartEvent event) {
+    return ChartToolBarButton(
+      icon: CupertinoIcons.minus,
+      onPressed: () => toggleAverageLine(event),
+      message: 'Show average line',
+    );
+  }
+
+  Widget _buildValueOnBarButton(BarChartEvent event) {
+    return ChartToolBarButton(
+      icon: CupertinoIcons.textformat_123,
+      onPressed: () => toggleValueOnBar(event),
+      message: 'Show value on bar',
+    );
+  }
+
+  Widget _buildGridLineButton(BarChartEvent event) {
+    return ChartToolBarButton(
+      icon: CupertinoIcons.line_horizontal_3,
+      onPressed: () => toggleGridLine(event),
+      message: 'Show grid line',
+    );
+  }
+
+  Widget _buildGoBackButton(BarChartEvent event) {
+    return ChartToolBarButton(
+      icon: CupertinoIcons.chevron_compact_up,
+      onPressed: onPressed,
+      message: 'Go back',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<BarChartEvent>(
@@ -147,45 +194,22 @@ class ChartToolBar extends StatelessWidget {
           children: [
             SizedBox(
               width: maxLengthOfDisplayText,
-              child: Text(
-                event.leftDisplayText,
-                style: TextStyle(
-                  color: Colors.red,
-                ),
-              ),
+              child: _buildLeftDisplayText(event),
             ),
             Expanded(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  ChartToolBarButton(
-                    icon: CupertinoIcons.minus,
-                    onPressed: () => toggleAverageLine(event),
-                    message: 'Show average line',
-                  ),
-                  ChartToolBarButton(
-                    icon: CupertinoIcons.textformat_123,
-                    onPressed: () => toggleValueOnBar(event),
-                    message: 'Show value on bar',
-                  ),
-                  ChartToolBarButton(
-                    icon: CupertinoIcons.line_horizontal_3,
-                    onPressed: () => toggleGridLine(event),
-                    message: 'Show grid line',
-                  ),
-                  ChartToolBarButton(
-                    icon: CupertinoIcons.chevron_compact_up,
-                    onPressed: onPressed,
-                    message: 'Go back',
-                  ),
+                  _buildAvgLineButton(event),
+                  _buildValueOnBarButton(event),
+                  _buildGridLineButton(event),
+                  _buildGoBackButton(event),
                 ],
               ),
             ),
             SizedBox(
               width: maxLengthOfDisplayText,
-              child: Text(
-                event.rightDisplayText
-              ),
+              child: _buildRightDisplayText(event),
             ),
           ],
         );

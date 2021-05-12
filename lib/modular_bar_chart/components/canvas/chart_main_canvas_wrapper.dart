@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_charts/modular_bar_chart/components/stateful/chart_main_canvas.dart';
-import 'package:flutter_charts/modular_bar_chart/components/stateful/chart_mini_canvas_in_view_container.dart';
+import 'package:flutter_charts/modular_bar_chart/components/canvas/chart_main_canvas.dart';
+import 'package:flutter_charts/modular_bar_chart/components/canvas/chart_mini_canvas_in_view_container.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_display_info.dart';
 import 'package:provider/provider.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
@@ -9,7 +9,7 @@ import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 import '../chart_axis.dart';
-import '../chart_mini_canvas.dart';
+import 'chart_mini_canvas.dart';
 
 class ChartCanvasWrapper extends StatefulWidget {
   const ChartCanvasWrapper();
@@ -55,7 +55,7 @@ class _ChartCanvasWrapperState extends State<ChartCanvasWrapper> with SingleTick
     final bool displayMiniCanvas = displayInfo.displayMiniCanvas && !displayInfo.isMini;
 
     // Bottom Axis
-    final Widget bottomAxis = ChartAxisHorizontalWrapper(
+    final Widget bottomAxis = HorizontalAxisWrapper(
       scrollController: _scrollController2,
       labelController: _scrollController3,
     );

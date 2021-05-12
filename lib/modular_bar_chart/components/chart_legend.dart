@@ -8,23 +8,18 @@ import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 
 class ChartLegendHorizontal extends StatelessWidget with StringSize{
-  final double width;
-
-  ChartLegendHorizontal({ @required this.width, });
+  const ChartLegendHorizontal();
 
   @override
   Widget build(BuildContext context) {
     final DisplayInfo displayInfo = context.read<DisplayInfo>();
     final ModularBarChartData dataModel = displayInfo.dataModel;
     final BarChartStyle style = displayInfo.style;
-    final double height = StringSize.getHeightOfString(dataModel.xSubGroups.first, style.legendStyle.legendTextStyle) + 4;
+    final double width = displayInfo.canvasWidth;
+    final double height = displayInfo.bottomLegendHeight;
 
     // Calculate width for each legend
-    double maxWidthOfOneLegend = double.negativeInfinity;
-    dataModel.xSubGroups.forEach((name) {
-      double singleLegendWidth = StringSize.getWidthOfString(name, style.legendStyle.legendTextStyle);
-      if ( singleLegendWidth >= maxWidthOfOneLegend) { maxWidthOfOneLegend = singleLegendWidth; }
-    });
+    final double maxWidthOfOneLegend = StringSize.getWidthOfString(displayInfo.longestGroupName, style.legendStyle.legendTextStyle);
     double legendWidth;
     if (maxWidthOfOneLegend * dataModel.xSubGroups.length <= width) {
       legendWidth = width / dataModel.xSubGroups.length;
@@ -41,34 +36,53 @@ class ChartLegendHorizontal extends StatelessWidget with StringSize{
         physics: const ClampingScrollPhysics(),
         itemCount: dataModel.xSubGroups.length,
         itemBuilder: (BuildContext context, int index) {
-          final String groupName = dataModel.xSubGroups[index];
-          return SizedBox(
+          return HorizontalLegendTile(
+            index: index,
             width: legendWidth,
-            height: height,
-            child: Tooltip(
-              message: groupName,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(Icons.circle, color: dataModel.subGroupColors[groupName], size: 8,),
-                  SizedBox(width: 5,),
-                  Expanded(
-                    child: Text(
-                      groupName,
-                      style: style.legendStyle.legendTextStyle,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           );
         },
       ),
     );
   }
+}
 
-  Size size(TextStyle textStyle) => Size(width, StringSize.getHeightOfString('I', textStyle) + 4);
+@immutable
+class HorizontalLegendTile extends StatelessWidget {
+  const HorizontalLegendTile({
+    Key key,
+    @required this.index,
+    @required this.width,
+  }) : super(key: key);
 
-  static double getHeight(BarChartLabel label) => StringSize.getHeightOfString('I', label.textStyle) + 4;
+  final int index;
+  final double width;
+
+  @override
+  Widget build(BuildContext context) {
+    final DisplayInfo displayInfo = context.read<DisplayInfo>();
+    final ModularBarChartData dataModel = displayInfo.dataModel;
+    final String groupName = dataModel.xSubGroups[index];
+    final Color color = dataModel.subGroupColors[groupName];
+    return SizedBox(
+      width: width,
+      height: displayInfo.bottomLegendHeight,
+      child: Tooltip(
+        message: groupName,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(Icons.circle, color: color, size: 8,),
+            SizedBox(width: 5,),
+            Expanded(
+              child: Text(
+                groupName,
+                style: displayInfo.style.legendStyle.legendTextStyle,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

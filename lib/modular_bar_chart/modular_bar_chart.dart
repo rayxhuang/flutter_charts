@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'dart:core';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_charts/modular_bar_chart/components/chart_mini_canvas.dart';
+import 'package:flutter_charts/modular_bar_chart/components/canvas/chart_mini_canvas.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_display_info.dart';
 
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
@@ -13,7 +13,7 @@ import 'package:provider/provider.dart';
 import 'components/chart_axis.dart';
 import 'components/chart_legend.dart';
 import 'components/chart_title.dart';
-import 'components/stateful/chart_main_canvas_wrapper.dart';
+import 'components/canvas/chart_main_canvas_wrapper.dart';
 
 @immutable
 class ModularBarChart extends StatelessWidget with StringSize {
@@ -236,7 +236,7 @@ class ModularBarChart extends StatelessWidget with StringSize {
               final BarChartStyle style = displayInfo.style;
 
               // Canvas and bottom axis
-              Widget chartCanvasWithAxis = displayInfo.isMini
+              final Widget chartCanvasWithAxis = displayInfo.isMini
                   ? _buildMiniChart(displayInfo: displayInfo)
                   : ChartCanvasWrapper();
 
@@ -254,7 +254,7 @@ class ModularBarChart extends StatelessWidget with StringSize {
 
               // Bottom Legend
               final Widget bottomLegend = style.legendStyle.visible && !style.isMini
-                  ? ChartLegendHorizontal(width: displayInfo.canvasWidth)
+                  ? ChartLegendHorizontal()
                   : SizedBox();
 
               // Right Axis
