@@ -69,28 +69,28 @@ class _MainCanvasState extends State<MainCanvas> with SingleTickerProviderStateM
     barSelected = bar;
     tapDownDetails = details;
     final currentBarDetailOverlay = OverlayEntry(
-        builder: (context) {
-          final String separatedGroupName = dataModel.type == BarChartType.GroupedSeparated
-              ? bar.separatedGroupName
-              : bar.group;
-          final String detailString = (dataModel.type == BarChartType.Ungrouped)
-              ? '${bar.group}: ${bar.data.toStringAsFixed(2)}'
-              : '$separatedGroupName\n${dataModel.xGroups[index]}: ${bar.data.toStringAsFixed(2)}';
-          final TextStyle detailTextStyle = const TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.normal,
-            fontSize: 14,
-          );
-          final double width = StringSize.getWidthOfString(detailString, detailTextStyle) + 16;
-          final double height = StringSize.getHeightOfString(detailString, detailTextStyle) + 10;
-          return _buildOverlayWidget(
-            tapDownDetails: details,
-            height: height,
-            width: width,
-            detailString: detailString,
-            detailTextStyle: detailTextStyle,
-          );
-        }
+      builder: (context) {
+        final String separatedGroupName = dataModel.type == BarChartType.GroupedSeparated
+            ? bar.separatedGroupName
+            : bar.group;
+        final String detailString = (dataModel.type == BarChartType.Ungrouped)
+            ? '${bar.group}: ${bar.data.toStringAsFixed(2)}'
+            : '$separatedGroupName\n${dataModel.xGroups[index]}: ${bar.data.toStringAsFixed(2)}';
+        final TextStyle detailTextStyle = const TextStyle(
+          color: Colors.black,
+          fontWeight: FontWeight.normal,
+          fontSize: 14,
+        );
+        final double width = StringSize.getWidthOfString(detailString, detailTextStyle) + 16;
+        final double height = StringSize.getHeightOfString(detailString, detailTextStyle) + 10;
+        return _buildOverlayWidget(
+          tapDownDetails: details,
+          height: height,
+          width: width,
+          detailString: detailString,
+          detailTextStyle: detailTextStyle,
+        );
+      }
     );
     overlayState.insert(currentBarDetailOverlay);
     barDetailOverlay.add(currentBarDetailOverlay);

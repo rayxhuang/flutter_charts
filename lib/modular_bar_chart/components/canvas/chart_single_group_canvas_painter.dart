@@ -99,43 +99,46 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
     double x1FromBottomLeft = style.groupMargin;
     double x2FromBottomLeft = x1FromBottomLeft + displayInfo.barWidth;
     double y1FromBottomLeft = (bar.data - displayInfo.y1Min) / displayInfo.y1UnitPerPixel;
-    if (bar == barSelected) {
-      double x1 = x1FromBottomLeft - 2;
-      double x2 = x2FromBottomLeft + 2;
-      double y = y1FromBottomLeft + 2;
-      drawBarHighlight(
-        canvas: originCanvas,
-        bottomLeft: bottomLeft,
-        x1: x1,
-        x2: x2,
-        y1: y,
-        barAnimationFraction: dataAnimation.value,
-      );
-    }
-    drawBar(
-      canvas: clickable ? canvas : originCanvas,
-      data: bar,
-      bottomLeft: bottomLeft,
-      x1: x1FromBottomLeft,
-      x2: x2FromBottomLeft,
-      y1: y1FromBottomLeft,
-      style: style.barStyle,
-      paint: paint,
-      barAnimationFraction: dataAnimation.value,
-      onBarSelected: (data, details) {
-        onBarSelected(data, details);
-      },
-    );
 
-    if (dataAnimation.value == 1 && showValueOnBar) {
-      drawValueOnBar(
-        canvas: originCanvas,
-        value: bar.data.toStringAsFixed(0),
+    if (bar.data >= displayInfo.y1FilterMin && bar.data <= displayInfo.y1FilterMax) {
+      if (bar == barSelected) {
+        double x1 = x1FromBottomLeft - 2;
+        double x2 = x2FromBottomLeft + 2;
+        double y = y1FromBottomLeft + 2;
+        drawBarHighlight(
+          canvas: originCanvas,
+          bottomLeft: bottomLeft,
+          x1: x1,
+          x2: x2,
+          y1: y,
+          barAnimationFraction: dataAnimation.value,
+        );
+      }
+      drawBar(
+        canvas: clickable ? canvas : originCanvas,
+        data: bar,
         bottomLeft: bottomLeft,
         x1: x1FromBottomLeft,
+        x2: x2FromBottomLeft,
         y1: y1FromBottomLeft,
-        barWidth: displayInfo.barWidth,
+        style: style.barStyle,
+        paint: paint,
+        barAnimationFraction: dataAnimation.value,
+        onBarSelected: (data, details) {
+          onBarSelected(data, details);
+        },
       );
+
+      if (dataAnimation.value == 1 && showValueOnBar) {
+        drawValueOnBar(
+          canvas: originCanvas,
+          value: bar.data.toStringAsFixed(0),
+          bottomLeft: bottomLeft,
+          x1: x1FromBottomLeft,
+          y1: y1FromBottomLeft,
+          barWidth: displayInfo.barWidth,
+        );
+      }
     }
   }
 

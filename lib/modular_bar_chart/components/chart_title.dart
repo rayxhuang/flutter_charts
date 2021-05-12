@@ -2,46 +2,30 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_charts/modular_bar_chart/components/chart_filter_panel.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_display_info.dart';
-import 'package:flutter_charts/modular_bar_chart/data/bar_chart_event.dart';
 import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
 import 'package:provider/provider.dart';
 
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 
-class ChartTitle extends StatefulWidget with StringSize {
-  final double width;
-  final bool hasRightAxis;
+@immutable
+class ChartTitle extends StatelessWidget with StringSize {
+  const ChartTitle();
 
-  const ChartTitle({
-    @required this.width,
-    this.hasRightAxis = false,
-  });
+  void _toggleToolBar(DisplayInfo displayInfo) => displayInfo.toggleToolBar();
 
-  @override
-  _ChartTitleState createState() => _ChartTitleState();
-}
+  void _toggleAverageLine(DisplayInfo displayInfo) => displayInfo.toggleAverageLine();
 
-class _ChartTitleState extends State<ChartTitle> {
-  bool showToolbar;
+  void _toggleValueOnBar(DisplayInfo displayInfo) => displayInfo.toggleValueOnBar();
 
-  @override
-  void initState() {
-    super.initState();
-    showToolbar = false;
-  }
+  void _toggleGridLine(DisplayInfo displayInfo) => displayInfo.toggleGridLine();
 
-  void _toggleToolBar() => setState(() { showToolbar = !showToolbar; });
+  void _toggleFilterPanel(DisplayInfo displayInfo) => displayInfo.toggleFilterPanel();
 
-  void _toggleAverageLine(BarChartEvent event) => event.toggleAverageLine(hasRightAxis: widget.hasRightAxis);
-
-  void _toggleValueOnBar(BarChartEvent event) => event.toggleValueOnBar();
-
-  void _toggleGridLine(BarChartEvent event) => event.toggleGridLine();
-
-  Widget _buildMiniTitle(BarChartLabel label) {
+  Widget _buildMiniTitle(BarChartLabel label, double width) {
     return SizedBox(
-      width: widget.width,
+      width: width,
       height: StringSize.getHeight(label),
       child: Center(
         child: Text(
@@ -52,36 +36,41 @@ class _ChartTitleState extends State<ChartTitle> {
     );
   }
 
-  Widget _buildInteractiveTitleBar(BarChartLabel label) {
-    return SizedBox(
-      width: widget.width,
-      height: kMinInteractiveDimensionCupertino,
-      child: AnimatedSwitcher(
+  Widget _buildInteractiveTitleBar(BarChartLabel label, double width, bool showToolBar) {
+    return AnimatedSwitcher(
         duration: const Duration(milliseconds: 500),
-        child: showToolbar
+        child: showToolBar
             ? ChartToolBar(
-              onPressed: _toggleToolBar,
+              toggleToolBar: _toggleToolBar,
               toggleAverageLine: _toggleAverageLine,
               toggleValueOnBar: _toggleValueOnBar,
               toggleGridLine: _toggleGridLine,
+              toggleFilterPanel: _toggleFilterPanel,
+              w: width,
             )
-            : ChartTitleBar(
-              label: label,
-              onPressed: _toggleToolBar,
+            : SizedBox(
+              width: width,
+              height: kMinInteractiveDimensionCupertino,
+              child: ChartTitleBar(
+                label: label,
+                onPressed: _toggleToolBar,
+              ),
             ),
-      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final DisplayInfo displayInfo = context.read<DisplayInfo>();
-    final BarChartLabel label = displayInfo.style.title;
-    if (displayInfo.style.isMini) {
-      return _buildMiniTitle(label);
-    } else {
-      return _buildInteractiveTitleBar(label);
-    }
+    return Consumer<DisplayInfo>(
+      builder: (context, displayInfo, child) {
+        final BarChartLabel label = displayInfo.style.title;
+        if (displayInfo.style.isMini) {
+          return _buildMiniTitle(label, displayInfo.parentSize.width);
+        } else {
+          return _buildInteractiveTitleBar(label,displayInfo.parentSize.width, displayInfo.showToolBar);
+        }
+      },
+    );
   }
 }
 
@@ -93,7 +82,7 @@ class ChartTitleBar extends StatelessWidget {
   });
 
   final BarChartLabel label;
-  final VoidCallback onPressed;
+  final Function(DisplayInfo) onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +100,7 @@ class ChartTitleBar extends StatelessWidget {
         SizedBox(width: 4),
         ChartToolBarButton(
           icon: CupertinoIcons.chevron_down,
-          onPressed: onPressed,
+          onPressed: () => onPressed(context.read<DisplayInfo>()),
           message: 'Options',
         ),
         Spacer(),
@@ -124,94 +113,149 @@ class ChartTitleBar extends StatelessWidget {
 class ChartToolBar extends StatelessWidget {
   const ChartToolBar({
     Key key,
-    @required this.onPressed,
+    @required this.toggleToolBar,
     @required this.toggleAverageLine,
     @required this.toggleValueOnBar,
     @required this.toggleGridLine,
+    @required this.toggleFilterPanel,
+    this.w
   }) : super(key: key);
 
-  final VoidCallback onPressed;
-  final Function(BarChartEvent) toggleAverageLine;
-  final Function(BarChartEvent) toggleValueOnBar;
-  final Function(BarChartEvent) toggleGridLine;
+  final Function(DisplayInfo) toggleToolBar;
+  final Function(DisplayInfo) toggleAverageLine;
+  final Function(DisplayInfo) toggleValueOnBar;
+  final Function(DisplayInfo) toggleGridLine;
+  final Function(DisplayInfo) toggleFilterPanel;
+  final double w;
 
-  Widget _buildLeftDisplayText(BarChartEvent event) {
+  Widget _buildLeftDisplayText(DisplayInfo displayInfo) {
     return Text(
-      event.leftDisplayText,
+      displayInfo.leftDisplayText,
       style: TextStyle(
         color: Colors.red,
       ),
     );
   }
 
-  Widget _buildRightDisplayText(BarChartEvent event) {
+  Widget _buildRightDisplayText(DisplayInfo displayInfo) {
     return Text(
-      event.rightDisplayText,
+      displayInfo.rightDisplayText,
     );
   }
 
-  Widget _buildAvgLineButton(BarChartEvent event) {
+  Widget _buildAvgLineButton(DisplayInfo displayInfo) {
     return ChartToolBarButton(
       icon: CupertinoIcons.minus,
-      onPressed: () => toggleAverageLine(event),
+      onPressed: () => toggleAverageLine(displayInfo),
       message: 'Show average line',
     );
   }
 
-  Widget _buildValueOnBarButton(BarChartEvent event) {
+  Widget _buildValueOnBarButton(DisplayInfo displayInfo) {
     return ChartToolBarButton(
       icon: CupertinoIcons.textformat_123,
-      onPressed: () => toggleValueOnBar(event),
+      onPressed: () => toggleValueOnBar(displayInfo),
       message: 'Show value on bar',
     );
   }
 
-  Widget _buildGridLineButton(BarChartEvent event) {
+  Widget _buildGridLineButton(DisplayInfo displayInfo) {
     return ChartToolBarButton(
       icon: CupertinoIcons.line_horizontal_3,
-      onPressed: () => toggleGridLine(event),
+      onPressed: () => toggleGridLine(displayInfo),
       message: 'Show grid line',
     );
   }
 
-  Widget _buildGoBackButton(BarChartEvent event) {
+  Widget _buildGoBackButton(DisplayInfo displayInfo) {
     return ChartToolBarButton(
       icon: CupertinoIcons.chevron_compact_up,
-      onPressed: onPressed,
+      onPressed: () => toggleToolBar(displayInfo),
       message: 'Go back',
+    );
+  }
+
+  Widget _buildFilterButton(DisplayInfo displayInfo) {
+    return ChartToolBarButton(
+      icon: CupertinoIcons.slider_horizontal_3,
+      onPressed: () => toggleFilterPanel(displayInfo),
+      message: 'Filter data',
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BarChartEvent>(
-      builder: (context, event, child) {
+    return Consumer<DisplayInfo>(
+      builder: (context, displayInfo, child) {
         final double maxLengthOfDisplayText = [
-          StringSize.getWidthOfString(event.leftDisplayText, TextStyle()),
-          StringSize.getWidthOfString(event.rightDisplayText, TextStyle())
+          StringSize.getWidthOfString(displayInfo.leftDisplayText, TextStyle()),
+          StringSize.getWidthOfString(displayInfo.rightDisplayText, TextStyle())
         ].reduce(max);
-        return Row(
-          children: [
-            SizedBox(
-              width: maxLengthOfDisplayText,
-              child: _buildLeftDisplayText(event),
-            ),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 500),
+          child: !displayInfo.showFilterPanel
+              ? SizedBox(
+                height: kMinInteractiveDimensionCupertino,
+                width: w,
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: maxLengthOfDisplayText,
+                      child: _buildLeftDisplayText(displayInfo),
+                    ),
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildValueOnBarButton(displayInfo),
+                          _buildAvgLineButton(displayInfo),
+                          _buildGridLineButton(displayInfo),
+                          _buildFilterButton(displayInfo),
+                          _buildGoBackButton(displayInfo),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      width: maxLengthOfDisplayText,
+                      child: _buildRightDisplayText(displayInfo),
+                    ),
+                  ],
+                ),
+              )
+              //: FilterPanel(),
+              : Column(
                 children: [
-                  _buildAvgLineButton(event),
-                  _buildValueOnBarButton(event),
-                  _buildGridLineButton(event),
-                  _buildGoBackButton(event),
+                  SizedBox(
+                    height: kMinInteractiveDimensionCupertino,
+                    width: w,
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: maxLengthOfDisplayText,
+                          child: _buildLeftDisplayText(displayInfo),
+                        ),
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildValueOnBarButton(displayInfo),
+                              _buildAvgLineButton(displayInfo),
+                              _buildGridLineButton(displayInfo),
+                              _buildFilterButton(displayInfo),
+                              _buildGoBackButton(displayInfo),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          width: maxLengthOfDisplayText,
+                          child: _buildRightDisplayText(displayInfo),
+                        ),
+                      ],
+                    ),
+                  ),
+                  FilterPanel(yMin: displayInfo.y1Min, yMax: displayInfo.y1Max,),
                 ],
-              ),
-            ),
-            SizedBox(
-              width: maxLengthOfDisplayText,
-              child: _buildRightDisplayText(event),
-            ),
-          ],
+              )
         );
       },
     );

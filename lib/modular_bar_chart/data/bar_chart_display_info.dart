@@ -64,6 +64,65 @@ class DisplayInfo extends ChangeNotifier with StringSize{
   double get y2UnitPerPixel => _y2UnitPerPixel;
   int get numOfGroupNamesToCombine => _numOfGroupNamesToCombine;
 
+  // Events
+  bool _showToolBar = false;
+  bool _showAverageLine = false;
+  bool _showValueOnBar = false;
+  bool _showGridLine = false;
+  bool _showFilterPanel = false;
+  String _leftDisplayText = '';
+  String _rightDisplayText = '';
+  RangeValues _y1RangeFilter;
+  bool get showToolBar => _showToolBar;
+  bool get showAverageLine => _showAverageLine;
+  bool get showValueOnBar =>  _showValueOnBar;
+  bool get showGridLine => _showGridLine;
+  bool get showFilterPanel => _showFilterPanel;
+  String get leftDisplayText => _leftDisplayText;
+  String get rightDisplayText => _rightDisplayText;
+  double get y1FilterMin => _y1RangeFilter.start;
+  double get y1FilterMax => _y1RangeFilter.end;
+
+  void toggleToolBar() {
+    _showToolBar =! _showToolBar;
+    notifyListeners();
+  }
+
+  void toggleAverageLine() {
+    _showAverageLine = !_showAverageLine;
+    if (_showAverageLine) {
+      _leftDisplayText = 'Avg: ${dataModel.y1Average.toStringAsFixed(2)}';
+      if (_hasYAxisOnTheRight) {
+        _rightDisplayText = 'Avg: ${dataModel.y2Average.toStringAsFixed(2)}';
+      }
+    } else {
+      _leftDisplayText = '';
+      _rightDisplayText = '';
+    }
+    notifyListeners();
+  }
+
+  void toggleValueOnBar() {
+    _showValueOnBar = !_showValueOnBar;
+    notifyListeners();
+  }
+
+  void toggleGridLine() {
+    _showGridLine = !_showGridLine;
+    notifyListeners();
+  }
+
+  void toggleFilterPanel() {
+    _showFilterPanel = !_showFilterPanel;
+    notifyListeners();
+  }
+
+  void setY1RangeFilter(RangeValues values) {
+    _y1RangeFilter = values;
+    print('Filter is now: $_y1RangeFilter');
+    notifyListeners();
+  }
+
   void init(){
     // Set isMini?
     _setIsMini();
@@ -115,6 +174,8 @@ class DisplayInfo extends ChangeNotifier with StringSize{
 
     // Set Canvas wrapper size
     _setCanvasWrapperSize();
+
+    _y1RangeFilter = RangeValues(y1Min, y1Max);
   }
 
   void _setIsMini() => _isMini = style.isMini;

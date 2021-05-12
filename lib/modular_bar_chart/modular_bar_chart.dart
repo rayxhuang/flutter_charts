@@ -6,7 +6,6 @@ import 'package:flutter_charts/modular_bar_chart/components/canvas/chart_mini_ca
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_display_info.dart';
 
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
-import 'package:flutter_charts/modular_bar_chart/data/bar_chart_event.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
 import 'package:provider/provider.dart';
@@ -179,13 +178,6 @@ class ModularBarChart extends StatelessWidget with StringSize {
             child: leftAxisWithLabel,
           ),
 
-          // Title
-          Positioned(
-            top: 0,
-            left: 0,
-            child: title,
-          ),
-
           // Bottom Label
           Positioned(
             top: titleHeight + spacingHeight + canvasWrapperSize.height,
@@ -205,6 +197,13 @@ class ModularBarChart extends StatelessWidget with StringSize {
             top: titleHeight + spacingHeight,
             left: leftAxisWidth + canvasWrapperSize.width,
             child: rightAxisWithLabel,
+          ),
+
+          // Title
+          Positioned(
+            top: 0,
+            left: 0,
+            child: title,
           ),
         ]),
       ),
@@ -226,55 +225,45 @@ class ModularBarChart extends StatelessWidget with StringSize {
                 return sizeInfo;
               }
             ),
-            ChangeNotifierProvider<BarChartEvent>(
-              create: (_) => BarChartEvent(dataModel: dataModel, style: style)
-            ),
           ],
-          child: Consumer<DisplayInfo>(
-            builder: (context, size, child) {
-              final DisplayInfo displayInfo = context.read<DisplayInfo>();
-              final BarChartStyle style = displayInfo.style;
+          builder: (context, child) {
+            final DisplayInfo displayInfo = context.read<DisplayInfo>();
+            // Canvas and bottom axis
+            final Widget chartCanvasWithAxis = displayInfo.isMini
+                ? _buildMiniChart(displayInfo: displayInfo)
+                : ChartCanvasWrapper();
 
-              // Canvas and bottom axis
-              final Widget chartCanvasWithAxis = displayInfo.isMini
-                  ? _buildMiniChart(displayInfo: displayInfo)
-                  : ChartCanvasWrapper();
+            // Left Axis
+            final VerticalAxisWithLabel leftAxis = VerticalAxisWithLabel();
 
-              // Left Axis
-              final VerticalAxisWithLabel leftAxis = VerticalAxisWithLabel();
+            // Title
+            final ChartTitle chartTitle = ChartTitle();
 
-              // Title
-              final ChartTitle chartTitle = ChartTitle(
-                width: parentSize.width,
-                hasRightAxis: displayInfo.hasYAxisOnTheRight,
-              );
+            // Bottom Label
+            final Widget bottomLabel = BottomAxisLabel();
 
-              // Bottom Label
-              final Widget bottomLabel = BottomAxisLabel();
+            // Bottom Legend
+            final Widget bottomLegend = displayInfo.style.legendStyle.visible && !displayInfo.isMini
+                ? ChartLegendHorizontal()
+                : SizedBox();
 
-              // Bottom Legend
-              final Widget bottomLegend = style.legendStyle.visible && !style.isMini
-                  ? ChartLegendHorizontal()
-                  : SizedBox();
+            // Right Axis
+            final Widget rightAxis = displayInfo.hasYAxisOnTheRight
+                ? VerticalAxisWithLabel(isRightAxis: true)
+                : SizedBox();
 
-              // Right Axis
-              final Widget rightAxis = displayInfo.hasYAxisOnTheRight
-                  ? VerticalAxisWithLabel(isRightAxis: true)
-                  : SizedBox();
-
-              // TODO Too small to have a canvas?
-              return _buildChart(
-                displayInfo: displayInfo,
-                title: chartTitle,
-                spacing: SizedBox(height: displayInfo.spacingHeight,),
-                leftAxisWithLabel: leftAxis,
-                mainCanvasWithBottomAxis: chartCanvasWithAxis,
-                bottomLabel: bottomLabel,
-                bottomLegend: bottomLegend,
-                rightAxisWithLabel: rightAxis,
-              );
-            },
-          ),
+            // TODO Too small to have a canvas?
+            return _buildChart(
+              displayInfo: displayInfo,
+              title: chartTitle,
+              spacing: SizedBox(height: displayInfo.spacingHeight,),
+              leftAxisWithLabel: leftAxis,
+              mainCanvasWithBottomAxis: chartCanvasWithAxis,
+              bottomLabel: bottomLabel,
+              bottomLegend: bottomLegend,
+              rightAxisWithLabel: rightAxis,
+            );
+          },
         );
       }
     );
