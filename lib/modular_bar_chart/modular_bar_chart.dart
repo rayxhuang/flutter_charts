@@ -137,7 +137,7 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
           child: Consumer<DisplayInfo>(
             builder: (context, size, child) {
               final DisplayInfo displayInfo = context.read<DisplayInfo>();
-              final ModularBarChartData dataModel = displayInfo.dataModel;
+              //final ModularBarChartData dataModel = displayInfo.dataModel;
               final BarChartStyle style = displayInfo.style;
 
               // TODO
@@ -154,7 +154,7 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
               Widget chartCanvasWithAxis;
               Size chartCanvasWithAxisSize;
               if (style.isMini) {
-                chartCanvasWithAxis = _buildMiniChart(canvasSize: displayInfo.canvasSize, dataModel: dataModel, style: style, barWidth: displayInfo.barWidth);
+                chartCanvasWithAxis = _buildMiniChart(displayInfo: displayInfo);
                 chartCanvasWithAxisSize = displayInfo.canvasSize;
               } else {
                 final Size wrapperSize = Size(displayInfo.canvasWidth, displayInfo.canvasHeight + displayInfo.bottomAxisHeight);
@@ -166,6 +166,7 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
                   animation: style.animation,
                 );
                 chartCanvasWithAxisSize = wrapperSize;
+                print(chartCanvasWithAxisSize);
               }
 
               // Left Axis
@@ -365,13 +366,12 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
     return Size(parentWidth, parentHeight);
   }
 
-  Widget _buildMiniChart({
-    @required Size canvasSize,
-    @required ModularBarChartData dataModel,
-    @required BarChartStyle style,
-    @required double barWidth,
-  }) {
+  Widget _buildMiniChart({@required DisplayInfo displayInfo,}) {
     // TODO Correct data is done, work on x Axis
+    final Size canvasSize = displayInfo.canvasSize;
+    final ModularBarChartData dataModel = displayInfo.dataModel;
+    final BarChartStyle style = displayInfo.style;
+    final double barWidth = displayInfo.barWidth;
     final double xSectionLength =
       getXSectionLengthFromBarWidth(dataModel: dataModel, style: style, barWidth: barWidth);
     final double xLength =

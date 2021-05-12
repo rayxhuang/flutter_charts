@@ -28,9 +28,60 @@ class ChartAxisHorizontalWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final ModularBarChartData dataModel = context.read<ModularBarChartData>();
-    // final BarChartStyle style = context.read<BarChartStyle>();
-    return SizedBox.fromSize(size: containerSize,);
+    final DisplayInfo displayInfo = context.read<DisplayInfo>();
+    final ModularBarChartData dataModel = displayInfo.dataModel;
+    final BarChartStyle style = displayInfo.style;
+    final int numGroupNames = (dataModel.xGroups.length / displayInfo.numOfGroupNamesToCombine).ceil();
+    final int difference = numGroupNames * displayInfo.numOfGroupNamesToCombine - dataModel.xGroups.length;
+    final double singleCombinedGroupNameWidth = singleCanvasSize.width * displayInfo.numOfGroupNamesToCombine;
+
+    return SizedBox.fromSize(
+      size: containerSize,
+      child: Column(
+        children: [
+          SizedBox(
+            height: style.xAxisStyle.tickStyle.tickLength + style.xAxisStyle.strokeWidth,
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              controller: scrollController,
+              scrollDirection: Axis.horizontal,
+              physics: ClampingScrollPhysics(),
+              itemCount: dataModel.xGroups.length,
+              itemBuilder: (context, index) =>
+                _buildSingleGroupXAxisCanvas(
+                  dataModel: dataModel,
+                  style: style,
+                  index: index,
+                  numGroupsToCombine: displayInfo.numOfGroupNamesToCombine,
+                )
+            ),
+          ),
+          SizedBox(
+            height: displayInfo.bottomAxisHeight - style.xAxisStyle.tickStyle.tickLength - style.xAxisStyle.strokeWidth,
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              controller: labelController,
+              scrollDirection: Axis.horizontal,
+              physics: ClampingScrollPhysics(),
+              itemCount: numGroupNames,
+              itemBuilder: (context, index) {
+                final bool notEnoughGroupsAtTheEnd = index == numGroupNames - 1 && difference > 0 ? true : false;
+                return SizedBox(
+                  width: notEnoughGroupsAtTheEnd
+                      ? singleCombinedGroupNameWidth - difference * singleCanvasSize.width
+                      : singleCombinedGroupNameWidth,
+                  height: displayInfo.bottomAxisHeight - style.xAxisStyle.tickStyle.tickLength - style.xAxisStyle.strokeWidth,
+                  child: Text(
+                    dataModel.xGroups[index * displayInfo.numOfGroupNamesToCombine],
+                    maxLines: 1,
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   CustomPaint _buildSingleGroupXAxisCanvas({

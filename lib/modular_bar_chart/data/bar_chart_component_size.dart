@@ -26,6 +26,7 @@ class DisplayInfo extends ChangeNotifier with StringSize, AxisInfo {
   bool _hasYAxisOnTheRight = false;
   List<double> _displayY1Range = [0, 0], _displayY2Range = [0, 0];
   double _y1UnitPerPixel = 0, _y2UnitPerPixel = 0;
+  int _numOfGroupNamesToCombine = 1;
 
   double get leftAxisWidth => _leftAxisWidth;
   double get rightAxisWidth => _rightAxisWidth;
@@ -49,6 +50,7 @@ class DisplayInfo extends ChangeNotifier with StringSize, AxisInfo {
   List<double> get y2ValueRange => _displayY2Range;
   double get y1UnitPerPixel => _y1UnitPerPixel;
   double get y2UnitPerPixel => _y2UnitPerPixel;
+  int get numOfGroupNamesToCombine => _numOfGroupNamesToCombine;
 
   void init(){
     // Set whether the chart has y axis on the right
@@ -83,6 +85,9 @@ class DisplayInfo extends ChangeNotifier with StringSize, AxisInfo {
 
     // Set Y unit per pixel
     _setYUnitPerPixel();
+
+    // Combine group names
+    _combineGroupName();
   }
 
   void _setHasYAxisOnTheRight() => _hasYAxisOnTheRight = dataModel.type == BarChartType.GroupedSeparated;
@@ -245,5 +250,24 @@ class DisplayInfo extends ChangeNotifier with StringSize, AxisInfo {
   void _setYUnitPerPixel() {
     _y1UnitPerPixel = (y1Max - y1Min) / _canvasHeight;
     if (_hasYAxisOnTheRight) { _y2UnitPerPixel = (y2Max - y2Min) / _canvasHeight; }
+  }
+
+  void _combineGroupName() {
+    if (_maxGroupNameWidth > _xSectionWidth) {
+      bool success = false;
+      int maxCombineGroup = 3, numGroupsToBeCombined = 1;
+      for (int i = 1; i < maxCombineGroup + 1; i++) {
+        double w = i * _xSectionWidth;
+        if (w >= _maxGroupNameWidth) {
+          success = true;
+          numGroupsToBeCombined = i;
+          break;
+        }
+      }
+      if (!success) { numGroupsToBeCombined = maxCombineGroup; }
+      _numOfGroupNamesToCombine = numGroupsToBeCombined;
+    } else {
+      _numOfGroupNamesToCombine = 1;
+    }
   }
 }
