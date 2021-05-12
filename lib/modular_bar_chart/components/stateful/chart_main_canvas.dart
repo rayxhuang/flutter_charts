@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_charts/modular_bar_chart/data/bar_chart_component_size.dart';
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_display_info.dart';
 import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
 import 'package:provider/provider.dart';
 
@@ -10,16 +10,10 @@ import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 import '../chart_single_group_canvas.dart';
 
 class MainCanvas extends StatefulWidget {
-  final Size canvasSize;
-  final double xSectionLength;
-  final double barWidth;
   final BarChartAnimation animation;
   final ScrollController scrollController;
 
   const MainCanvas({
-    @required this.canvasSize,
-    @required this.xSectionLength,
-    @required this.barWidth,
     @required this.animation,
     @required this.scrollController,
   });
@@ -55,36 +49,6 @@ class _MainCanvasState extends State<MainCanvas> with SingleTickerProviderStateM
     _dataAnimationController.forward();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final Size canvasSize = widget.canvasSize;
-    final ModularBarChartData dataModel = context.read<DisplayInfo>().dataModel;
-    return SizedBox.fromSize(
-      size: canvasSize,
-      child: ListView.builder(
-        padding: EdgeInsets.zero,
-        controller: widget.scrollController,
-        scrollDirection: Axis.horizontal,
-        physics: ClampingScrollPhysics(),
-        itemCount: dataModel.xGroups.length,
-        itemBuilder: (context, index) {
-          return SingleGroupedCanvas(
-            groupIndex: index,
-            isSelected: index == indexSelected ? true : false,
-            barSelected: barSelected,
-            size: Size(widget.xSectionLength, canvasSize.height),
-            dataAnimation: dataAnimation,
-            onBarSelected: (index, bar, details) {
-              setState(() {
-                _createOverlay(context: context, dataModel: dataModel, index: index, bar: bar, details: details);
-              });
-            },
-          );
-        },
-      ),
-    );
-  }
-
   void _createOverlay({
     @required BuildContext context,
     @required ModularBarChartData dataModel,
@@ -105,33 +69,33 @@ class _MainCanvasState extends State<MainCanvas> with SingleTickerProviderStateM
     barSelected = bar;
     tapDownDetails = details;
     final currentBarDetailOverlay = OverlayEntry(
-      builder: (context) {
-        final String separatedGroupName = dataModel.type == BarChartType.GroupedSeparated
-            ? bar.separatedGroupName
-            : bar.group;
-        final String detailString = (dataModel.type == BarChartType.Ungrouped)
-            ? '${bar.group}: ${bar.data.toStringAsFixed(2)}'
-            : '$separatedGroupName\n${dataModel.xGroups[index]}: ${bar.data.toStringAsFixed(2)}';
-        final TextStyle detailTextStyle = const TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.normal,
-          fontSize: 14,
-        );
-        final double width = StringSize.getWidthOfString(detailString, detailTextStyle) + 16;
-        final double height = StringSize.getHeightOfString(detailString, detailTextStyle) + 10;
-        return _buildOverlayWidget(
-          tapDownDetails: details,
-          height: height,
-          width: width,
-          detailString: detailString,
-          detailTextStyle: detailTextStyle,
-        );
-      }
+        builder: (context) {
+          final String separatedGroupName = dataModel.type == BarChartType.GroupedSeparated
+              ? bar.separatedGroupName
+              : bar.group;
+          final String detailString = (dataModel.type == BarChartType.Ungrouped)
+              ? '${bar.group}: ${bar.data.toStringAsFixed(2)}'
+              : '$separatedGroupName\n${dataModel.xGroups[index]}: ${bar.data.toStringAsFixed(2)}';
+          final TextStyle detailTextStyle = const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.normal,
+            fontSize: 14,
+          );
+          final double width = StringSize.getWidthOfString(detailString, detailTextStyle) + 16;
+          final double height = StringSize.getHeightOfString(detailString, detailTextStyle) + 10;
+          return _buildOverlayWidget(
+            tapDownDetails: details,
+            height: height,
+            width: width,
+            detailString: detailString,
+            detailTextStyle: detailTextStyle,
+          );
+        }
     );
     overlayState.insert(currentBarDetailOverlay);
     barDetailOverlay.add(currentBarDetailOverlay);
     needsRemoval.add(true);
-    registerRemoval(barDetailOverlay.length - 1);
+    _registerRemoval(barDetailOverlay.length - 1);
   }
 
   Widget _buildOverlayWidget({
@@ -166,12 +130,42 @@ class _MainCanvasState extends State<MainCanvas> with SingleTickerProviderStateM
     );
   }
 
-  void registerRemoval(int i) async {
+  void _registerRemoval(int i) async {
     await Future.delayed(const Duration(seconds: 2)).then((_) => {
       if (needsRemoval[i]) {
         barDetailOverlay[i].remove(),
         needsRemoval[i] = false
       }
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final DisplayInfo displayInfo = context.read<DisplayInfo>();
+    final ModularBarChartData dataModel = displayInfo.dataModel;
+    return SizedBox.fromSize(
+      size: displayInfo.canvasSize,
+      child: ListView.builder(
+        padding: EdgeInsets.zero,
+        controller: widget.scrollController,
+        scrollDirection: Axis.horizontal,
+        physics: ClampingScrollPhysics(),
+        itemCount: dataModel.xGroups.length,
+        itemBuilder: (context, index) {
+          return SingleGroupedCanvas(
+            groupIndex: index,
+            isSelected: index == indexSelected,
+            barSelected: barSelected,
+            size: Size(displayInfo.xSectionWidth, displayInfo.canvasHeight),
+            dataAnimation: dataAnimation,
+            onBarSelected: (index, bar, details) {
+              setState(() {
+                _createOverlay(context: context, dataModel: dataModel, index: index, bar: bar, details: details);
+              });
+            },
+          );
+        },
+      ),
+    );
   }
 }

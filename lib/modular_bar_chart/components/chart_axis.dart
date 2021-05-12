@@ -1,88 +1,43 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_charts/modular_bar_chart/data/bar_chart_component_size.dart';
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_display_info.dart';
 import 'package:provider/provider.dart';
 
-import 'package:flutter_charts/modular_bar_chart/mixin/axis_info_mixin.dart';
-import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 
 @immutable
 class ChartAxisHorizontalWrapper extends StatelessWidget {
-  final Size containerSize;
-  final Size singleCanvasSize;
   final ScrollController scrollController;
   final ScrollController labelController;
-  final bool isMini;
 
   const ChartAxisHorizontalWrapper({
-    @required this.containerSize,
-    @required this.singleCanvasSize,
     @required this.scrollController,
     @required this.labelController,
-    this.isMini = false,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    final DisplayInfo displayInfo = context.read<DisplayInfo>();
+  Widget _buildXAxis({
+    @required DisplayInfo displayInfo,
+  }) {
     final ModularBarChartData dataModel = displayInfo.dataModel;
     final BarChartStyle style = displayInfo.style;
-    //final double axisLineHeight
-
-    final int numGroupNames = (dataModel.xGroups.length / displayInfo.numOfGroupNamesToCombine).ceil();
-    final int difference = numGroupNames * displayInfo.numOfGroupNamesToCombine - dataModel.xGroups.length;
-    final double singleCombinedGroupNameWidth = singleCanvasSize.width * displayInfo.numOfGroupNamesToCombine;
-
-    return SizedBox.fromSize(
-      size: containerSize,
-      child: Column(
-        children: [
-          SizedBox(
-            height: style.xAxisStyle.tickStyle.tickLength + style.xAxisStyle.strokeWidth,
-            child: ListView.builder(
-              padding: EdgeInsets.zero,
-              controller: scrollController,
-              scrollDirection: Axis.horizontal,
-              physics: ClampingScrollPhysics(),
-              itemCount: dataModel.xGroups.length,
-              itemBuilder: (context, index) =>
-                _buildSingleGroupXAxisCanvas(
+    return SizedBox(
+      height: style.xAxisStyle.tickStyle.tickLength + style.xAxisStyle.strokeWidth,
+      child: ListView.builder(
+          padding: EdgeInsets.zero,
+          controller: scrollController,
+          scrollDirection: Axis.horizontal,
+          physics: ClampingScrollPhysics(),
+          itemCount: dataModel.xGroups.length,
+          itemBuilder: (context, index) =>
+              _buildSingleGroupXAxisCanvas(
                   dataModel: dataModel,
                   style: style,
                   index: index,
                   numGroupsToCombine: displayInfo.numOfGroupNamesToCombine,
-                )
-            ),
-          ),
-          SizedBox(
-            height: displayInfo.bottomAxisHeight - style.xAxisStyle.tickStyle.tickLength - style.xAxisStyle.strokeWidth,
-            child: ListView.builder(
-              padding: EdgeInsets.zero,
-              controller: labelController,
-              scrollDirection: Axis.horizontal,
-              physics: ClampingScrollPhysics(),
-              itemCount: numGroupNames,
-              itemBuilder: (context, index) {
-                final bool notEnoughGroupsAtTheEnd = index == numGroupNames - 1 && difference > 0 ? true : false;
-                return SizedBox(
-                  width: notEnoughGroupsAtTheEnd
-                      ? singleCombinedGroupNameWidth - difference * singleCanvasSize.width
-                      : singleCombinedGroupNameWidth,
-                  height: displayInfo.bottomAxisHeight - style.xAxisStyle.tickStyle.tickLength - style.xAxisStyle.strokeWidth,
-                  child: Center(
-                    child: Text(
-                      dataModel.xGroups[index * displayInfo.numOfGroupNamesToCombine],
-                      maxLines: 1,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
+                  xSectionWidth: displayInfo.xSectionWidth
+              )
       ),
     );
   }
@@ -92,6 +47,7 @@ class ChartAxisHorizontalWrapper extends StatelessWidget {
     @required BarChartStyle style,
     @required int index,
     @required int numGroupsToCombine,
+    @required double xSectionWidth,
   }) {
     final bool isFirstOfAll = index == 0 ? true : false;
     final bool isLastOfAll = index == dataModel.xGroups.length - 1 ? true : false;
@@ -106,7 +62,57 @@ class ChartAxisHorizontalWrapper extends StatelessWidget {
         paintTickOnLeft: paintTickOnLeft,
         paintTickOnRight: paintTickOnRight,
       ),
-      size: Size(singleCanvasSize.width, style.xAxisStyle.tickStyle.tickLength),
+      size: Size(xSectionWidth, style.xAxisStyle.tickStyle.tickLength),
+    );
+  }
+
+  Widget _buildXGroupName({@required DisplayInfo displayInfo}) {
+    final ModularBarChartData dataModel = displayInfo.dataModel;
+    final BarChartStyle style = displayInfo.style;
+
+    final Size singleCanvasSize = Size(displayInfo.xSectionWidth, style.xAxisStyle.tickStyle.tickLength);
+    final int numGroupNames = (dataModel.xGroups.length / displayInfo.numOfGroupNamesToCombine).ceil();
+    final int difference = numGroupNames * displayInfo.numOfGroupNamesToCombine - dataModel.xGroups.length;
+    final double singleCombinedGroupNameWidth = singleCanvasSize.width * displayInfo.numOfGroupNamesToCombine;
+    return SizedBox(
+      height: displayInfo.bottomAxisHeight - style.xAxisStyle.tickStyle.tickLength - style.xAxisStyle.strokeWidth,
+      child: ListView.builder(
+        padding: EdgeInsets.zero,
+        controller: labelController,
+        scrollDirection: Axis.horizontal,
+        physics: ClampingScrollPhysics(),
+        itemCount: numGroupNames,
+        itemBuilder: (context, index) {
+          final bool notEnoughGroupsAtTheEnd = index == numGroupNames - 1 && difference > 0 ? true : false;
+          return SizedBox(
+            width: notEnoughGroupsAtTheEnd
+                ? singleCombinedGroupNameWidth - difference * singleCanvasSize.width
+                : singleCombinedGroupNameWidth,
+            height: displayInfo.bottomAxisHeight - style.xAxisStyle.tickStyle.tickLength - style.xAxisStyle.strokeWidth,
+            child: Center(
+              child: Text(
+                dataModel.xGroups[index * displayInfo.numOfGroupNamesToCombine],
+                maxLines: 1,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final DisplayInfo displayInfo = context.read<DisplayInfo>();
+
+    return SizedBox.fromSize(
+      size: Size(displayInfo.canvasWidth, displayInfo.bottomAxisHeight),
+      child: Column(
+        children: [
+          _buildXAxis(displayInfo: displayInfo),
+          _buildXGroupName(displayInfo: displayInfo)
+        ],
+      ),
     );
   }
 }

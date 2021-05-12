@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_charts/modular_bar_chart/data/bar_chart_component_size.dart';
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_display_info.dart';
 import 'package:touchable/touchable.dart';
 
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';

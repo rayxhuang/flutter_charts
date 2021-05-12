@@ -8,7 +8,6 @@ import 'package:touchable/touchable.dart';
 mixin Drawing {
   void drawGridLine({
     @required Canvas canvas,
-    //@required List<double> valueRange,
     @required int numberOfTicksInBetween,
     @required Offset start,
     @required double length,
@@ -17,7 +16,7 @@ mixin Drawing {
   }) {
     final Paint gridLinePaint = Paint()
       ..color = color ?? Colors.grey
-      ..strokeWidth = 0.1;
+      ..strokeWidth = 0.3;
     final double heightPerLine = height / (numberOfTicksInBetween + 1);
     for (int i = 1; i  < numberOfTicksInBetween + 1; i++) {
       final Offset p1 = start.translate(0, i * -heightPerLine);

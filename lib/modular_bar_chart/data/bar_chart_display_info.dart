@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_charts/modular_bar_chart/mixin/axis_info_mixin.dart';
 import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
 
 import 'bar_chart_data.dart';
@@ -22,11 +21,11 @@ class DisplayInfo extends ChangeNotifier with StringSize{
   double _maxGroupNameWidth = 0, _maxGroupNameWidthWithSpace = 0;
   double _leftAxisCombinedWidth = 0, _leftAxisWidth = 0, _leftAxisLabelWidth = 0;
   double _rightAxisCombinedWidth = 0, _rightAxisWidth = 0, _rightAxisLabelWidth = 0;
-  double _canvasWidth = 0, _xSectionWidth = 0, _barWidth = 0;
+  double _canvasWidth = 0, _xSectionWidth = 0, _barWidth = 0, _xTotalLength;
   double _titleHeight = 0, _spacingHeight = 0, _bottomAxisHeight = 0, _bottomLabelHeight = 0, _bottomLegendHeight = 0,
   _canvasHeight = 0, _valueOnBarHeight = 0;
-  Size _canvasSize = Size.zero;
-  bool _hasYAxisOnTheRight = false, _needResetYAxisWidth = false, _isMini = false;
+  Size _canvasSize = Size.zero, _canvasWrapperSize = Size.zero;
+  bool _hasYAxisOnTheRight = false, _needResetYAxisWidth = false, _isMini = false, _displayMiniCanvas = false;
   List<double> _displayY1Range = [0, 0], _displayY2Range = [0, 0];
   double _y1UnitPerPixel = 0, _y2UnitPerPixel = 0;
   int _numOfGroupNamesToCombine = 1;
@@ -40,6 +39,7 @@ class DisplayInfo extends ChangeNotifier with StringSize{
   double get canvasWidth => _canvasWidth;
   double get xSectionWidth => _xSectionWidth;
   double get barWidth => _barWidth;
+  double get xTotalLength => _xTotalLength;
   double get titleHeight => _titleHeight;
   double get spacingHeight => _spacingHeight;
   double get bottomAxisHeight => _bottomAxisHeight;
@@ -47,9 +47,11 @@ class DisplayInfo extends ChangeNotifier with StringSize{
   double get bottomLegendHeight => _bottomLegendHeight;
   double get canvasHeight => _canvasHeight;
   Size get canvasSize => _canvasSize;
+  Size get canvasWrapperSize => _canvasWrapperSize;
 
   bool get isMini => _isMini;
   bool get hasYAxisOnTheRight => _hasYAxisOnTheRight;
+  bool get displayMiniCanvas => _displayMiniCanvas;
   double get y1Min => _displayY1Range[0];
   double get y1Max => _displayY1Range[1];
   double get y2Min => _displayY2Range[0];
@@ -88,6 +90,12 @@ class DisplayInfo extends ChangeNotifier with StringSize{
     // Set xSectionWidth, this may also set a new bar width
     _setXSectionWidth();
 
+    // Set xTotalLength
+    _setXTotalLength();
+
+    // Set displayMiniCanvas bool
+    _setDisplayMiniCanvas();
+
     // Adjust the displayed y value range
     _adjustDisplayValueRange();
 
@@ -101,6 +109,9 @@ class DisplayInfo extends ChangeNotifier with StringSize{
     _combineGroupName();
 
     if (_needResetYAxisWidth) { _setCanvasSize(); }
+
+    // Set Canvas wrapper size
+    _setCanvasWrapperSize();
   }
 
   void _setIsMini() => _isMini = style.isMini;
@@ -176,6 +187,10 @@ class DisplayInfo extends ChangeNotifier with StringSize{
     }
   }
 
+  void _setXTotalLength() => _xTotalLength = [_xSectionWidth * dataModel.xGroups.length, _canvasWidth].reduce(max);
+
+  void _setDisplayMiniCanvas() => _displayMiniCanvas = _barWidth == style.barStyle.barWidth;
+
   void _setComponentHeight() {
     // Set title Height;
     _setTitleHeight();
@@ -223,6 +238,8 @@ class DisplayInfo extends ChangeNotifier with StringSize{
   }
 
   void _setCanvasSize() => _canvasSize = Size(_canvasWidth, _canvasHeight);
+
+  void _setCanvasWrapperSize() => _canvasWrapperSize = isMini ? _canvasSize : Size(_canvasWidth, _canvasHeight + _bottomAxisHeight);
 
   void _adjustDisplayValueRange() {
     _adjustDisplayValueRangeHelper(

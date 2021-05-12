@@ -1,10 +1,9 @@
-import 'dart:math';
 import 'dart:ui';
 import 'dart:core';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_charts/modular_bar_chart/components/chart_mini_canvas.dart';
-import 'package:flutter_charts/modular_bar_chart/data/bar_chart_component_size.dart';
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_display_info.dart';
 
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_event.dart';
@@ -15,10 +14,9 @@ import 'components/chart_axis.dart';
 import 'components/chart_legend.dart';
 import 'components/chart_title.dart';
 import 'components/stateful/chart_main_canvas_wrapper.dart';
-import 'mixin/axis_info_mixin.dart';
 
 @immutable
-class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
+class ModularBarChart extends StatelessWidget with StringSize {
   final Map<String, dynamic> data;
   final ModularBarChartData dataModel;
   final BarChartStyle style;
@@ -115,6 +113,104 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
 
   String get title => this.style.title.text;
 
+  Size _getParentSize({
+    @required BoxConstraints constraint,
+    @required BuildContext context,
+  }) {
+    final double parentHeight = constraint.maxHeight < double.infinity
+        ? constraint.maxHeight
+        : MediaQuery.of(context).size.height;
+    final double parentWidth = constraint.maxWidth < double.infinity
+        ? constraint.maxWidth
+        : MediaQuery.of(context).size.width;
+    return Size(parentWidth, parentHeight);
+  }
+
+  Widget _buildMiniChart({@required DisplayInfo displayInfo,}) {
+    final Size canvasSize = displayInfo.canvasSize;
+    final BarChartStyle style = displayInfo.style;
+    return Column(
+      children: [
+        ChartCanvasMini(containerSize: canvasSize),
+        HorizontalAxisSimpleWrapper(
+          size: Size(canvasSize.width, style.xAxisStyle.strokeWidth),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChart({
+    @required DisplayInfo displayInfo,
+    @required Widget title,
+    @required Widget spacing,
+    @required Widget leftAxisWithLabel,
+    @required Widget mainCanvasWithBottomAxis,
+    @required Widget bottomLabel,
+    @required Widget bottomLegend,
+    @required Widget rightAxisWithLabel,
+  }) {
+    final Size canvasWrapperSize = displayInfo.canvasWrapperSize;
+    final double titleHeight = displayInfo.titleHeight;
+    final double spacingHeight = displayInfo.spacingHeight;
+    final double leftAxisWidth = displayInfo.leftAxisCombinedWidth;
+    final double bottomLabelHeight = displayInfo.bottomLabelHeight;
+    return SizedBox.fromSize(
+      size: displayInfo.parentSize,
+      child: Padding(
+        padding: EdgeInsets.zero,
+        child: Stack(children: [
+          // Spacing between title and axis
+          Positioned(
+            left: 0,
+            top: titleHeight,
+            child: spacing,
+          ),
+
+          // Canvas and bottom axis
+          Positioned(
+            top: titleHeight + spacingHeight,
+            left: leftAxisWidth,
+            child: mainCanvasWithBottomAxis,
+          ),
+
+          // Left Axis
+          Positioned(
+            top: titleHeight + spacingHeight,
+            child: leftAxisWithLabel,
+          ),
+
+          // Title
+          Positioned(
+            top: 0,
+            left: 0,
+            child: title,
+          ),
+
+          // Bottom Label
+          Positioned(
+            top: titleHeight + spacingHeight + canvasWrapperSize.height,
+            left: leftAxisWidth,
+            child: bottomLabel,
+          ),
+
+          // Bottom Legends
+          Positioned(
+            top: titleHeight + spacingHeight + canvasWrapperSize.height + bottomLabelHeight,
+            left: leftAxisWidth,
+            child: bottomLegend,
+          ),
+
+          // Right Axis
+          Positioned(
+            top: titleHeight + spacingHeight,
+            left: leftAxisWidth + canvasWrapperSize.width,
+            child: rightAxisWithLabel,
+          ),
+        ]),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -140,28 +236,13 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
               final BarChartStyle style = displayInfo.style;
 
               // Canvas and bottom axis
-              Widget chartCanvasWithAxis;
-              Size chartCanvasWithAxisSize;
-              if (style.isMini) {
-                chartCanvasWithAxis = _buildMiniChart(displayInfo: displayInfo);
-                chartCanvasWithAxisSize = displayInfo.canvasSize;
-              } else {
-                final Size wrapperSize = Size(displayInfo.canvasWidth, displayInfo.canvasHeight + displayInfo.bottomAxisHeight);
-                chartCanvasWithAxis = ChartCanvasWrapper(
-                  size: wrapperSize,
-                  canvasSize: displayInfo.canvasSize,
-                  barWidth: displayInfo.barWidth,
-                  displayMiniCanvas: displayInfo.barWidth == style.barStyle.barWidth ? true : false,
-                  animation: style.animation,
-                );
-                chartCanvasWithAxisSize = wrapperSize;
-                print(chartCanvasWithAxisSize);
-              }
+              Widget chartCanvasWithAxis = displayInfo.isMini
+                  ? _buildMiniChart(displayInfo: displayInfo)
+                  : ChartCanvasWrapper();
 
               // Left Axis
               final VerticalAxisWithLabel leftAxis = VerticalAxisWithLabel();
 
-              // TODO Change the height of title in full mode
               // Title
               final ChartTitle chartTitle = ChartTitle(
                 width: parentSize.width,
@@ -183,8 +264,7 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
 
               // TODO Too small to have a canvas?
               return _buildChart(
-                parentSize: parentSize,
-                canvasSize: chartCanvasWithAxisSize,
+                displayInfo: displayInfo,
                 title: chartTitle,
                 spacing: SizedBox(height: displayInfo.spacingHeight,),
                 leftAxisWithLabel: leftAxis,
@@ -192,10 +272,6 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
                 bottomLabel: bottomLabel,
                 bottomLegend: bottomLegend,
                 rightAxisWithLabel: rightAxis,
-                titleHeight: displayInfo.titleHeight,
-                spacingHeight: displayInfo.spacingHeight,
-                leftAxisWidth: displayInfo.leftAxisWidth,
-                bottomLabelHeight: displayInfo.bottomLabelHeight,
               );
             },
           ),
@@ -333,170 +409,62 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
     // );
   }
 
-  Size _getParentSize({
-    @required BoxConstraints constraint,
-    @required BuildContext context,
-  }) {
-    final double parentHeight = constraint.maxHeight < double.infinity
-        ? constraint.maxHeight
-        : MediaQuery.of(context).size.height;
-    final double parentWidth = constraint.maxWidth < double.infinity
-        ? constraint.maxWidth
-        : MediaQuery.of(context).size.width;
-    return Size(parentWidth, parentHeight);
-  }
-
-  Widget _buildMiniChart({@required DisplayInfo displayInfo,}) {
-    final Size canvasSize = displayInfo.canvasSize;
-    final ModularBarChartData dataModel = displayInfo.dataModel;
-    final BarChartStyle style = displayInfo.style;
-    final double barWidth = displayInfo.barWidth;
-    final double xSectionLength =
-      getXSectionLengthFromBarWidth(dataModel: dataModel, style: style, barWidth: barWidth);
-    final double xLength =
-      getXAxisTotalLength(dataModel: dataModel, canvasWidth: canvasSize.width, xSectionLength: xSectionLength);
-    return Column(
-      children: [
-        ChartCanvasMini(
-          containerSize: canvasSize,
-          canvasSize: Size(xLength, canvasSize.height)
-        ),
-        HorizontalAxisSimpleWrapper(
-          size: Size(canvasSize.width, style.xAxisStyle.strokeWidth),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildChart({
-    @required Size parentSize,
-    @required Size canvasSize,
-    @required Widget title,
-    @required Widget spacing,
-    @required Widget leftAxisWithLabel,
-    @required Widget mainCanvasWithBottomAxis,
-    @required Widget bottomLabel,
-    @required Widget bottomLegend,
-    @required Widget rightAxisWithLabel,
-    @required double titleHeight,
-    @required double spacingHeight,
-    @required double leftAxisWidth,
-    @required double bottomLabelHeight,
-  }) {
-    return SizedBox.fromSize(
-      size: parentSize,
-      child: Padding(
-        // TODO padding
-        padding: EdgeInsets.all(0),
-        child: Stack(children: [
-          // Spacing between title and axis
-          Positioned(
-            left: 0,
-            top: titleHeight,
-            child: spacing,
-          ),
-
-          // Canvas and bottom axis
-          Positioned(
-            top: titleHeight + spacingHeight,
-            left: leftAxisWidth,
-            child: mainCanvasWithBottomAxis,
-          ),
-
-          // Left Axis
-          Positioned(
-            top: titleHeight + spacingHeight,
-            child: leftAxisWithLabel,
-          ),
-
-          // Title
-          Positioned(
-            top: 0,
-            left: 0,
-            child: title,
-          ),
-
-          // Bottom Label
-          Positioned(
-            top: titleHeight + spacingHeight + canvasSize.height,
-            left: leftAxisWidth,
-            child: bottomLabel,
-          ),
-
-          // Bottom Legends
-          Positioned(
-            top: titleHeight + spacingHeight + canvasSize.height + bottomLabelHeight,
-            left: leftAxisWidth,
-            child: bottomLegend,
-          ),
-
-          // Right Axis
-          Positioned(
-            top: titleHeight + spacingHeight,
-            left: leftAxisWidth + canvasSize.width,
-            child: rightAxisWithLabel,
-          ),
-        ]),
-      ),
-    );
-  }
-
-  List<double> getXRotatedHeight({
-    @required AxisStyle axisStyle,
-    @required double nameMaxWidth,
-    @required double nameMaxWidthWithSpace,
-    @required double xSectionLength,
-  }) {
-    double rotatedAngle = 0;
-    if (nameMaxWidth > xSectionLength) {
-      final double ratio = 2;
-      //final double maxHeight = xSectionLength * ratio;
-      double maxHeight = 30, maxRotatedAngle = 0, spaceLeft = 0;
-      bool success = false;
-      // print('got it');
-      // print(xSectionLength);
-      // print(maxHeight);
-      double maxCombineGroup = 3, numGroupsToBeCombined = 1;
-      for (int i = 1; i < maxCombineGroup + 1; i++) {
-        double w = i * xSectionLength;
-        if (w >= nameMaxWidth) {
-          // print('success at $i, simple width: $w');
-          // print('text len: $nameMaxWidth');
-          success = true;
-          numGroupsToBeCombined = i.toDouble();
-          final double tickLength = axisStyle.tickStyle.tickLength + axisStyle.tickStyle.tickMargin;
-          maxHeight = StringSize.getHeightOfString('I', axisStyle.tickStyle.labelTextStyle) + tickLength;
-          break;
-        }
-        double diagonalLength = sqrt(pow(w, 2) + pow(maxHeight, 2));
-        if (diagonalLength >= nameMaxWidthWithSpace) {
-          // print('success at $i, dia len: $diagonalLength');
-          // print('text len: $nameMaxWidthWithSpace');
-          maxRotatedAngle = asin(maxHeight / diagonalLength);
-          success = true;
-          numGroupsToBeCombined = i.toDouble();
-          spaceLeft = diagonalLength - nameMaxWidthWithSpace;
-          //print('space left: $spaceLeft');
-          break;
-        }
-      }
-      if (!success) {
-        maxRotatedAngle = asin(maxHeight / sqrt(pow(maxCombineGroup * xSectionLength, 2) + pow(maxHeight, 2)));
-        numGroupsToBeCombined = maxCombineGroup;
-      }
-      // print('success? $success');
-      // print('max angle: $maxRotatedAngle');
-      // print('groups combined: $numGroupsToBeCombined');
-      final List<double> result = [maxHeight, maxRotatedAngle, numGroupsToBeCombined, spaceLeft];
-      //print(result);
-      return result;
-    } else {
-      final double tickLength = axisStyle.tickStyle.tickLength + axisStyle.tickStyle.tickMargin;
-      return [
-        StringSize.getHeightOfString('I', axisStyle.tickStyle.labelTextStyle) + tickLength,
-        0,
-        1
-      ];
-    }
-  }
+  // List<double> getXRotatedHeight({
+  //   @required AxisStyle axisStyle,
+  //   @required double nameMaxWidth,
+  //   @required double nameMaxWidthWithSpace,
+  //   @required double xSectionLength,
+  // }) {
+  //   double rotatedAngle = 0;
+  //   if (nameMaxWidth > xSectionLength) {
+  //     final double ratio = 2;
+  //     //final double maxHeight = xSectionLength * ratio;
+  //     double maxHeight = 30, maxRotatedAngle = 0, spaceLeft = 0;
+  //     bool success = false;
+  //     // print('got it');
+  //     // print(xSectionLength);
+  //     // print(maxHeight);
+  //     double maxCombineGroup = 3, numGroupsToBeCombined = 1;
+  //     for (int i = 1; i < maxCombineGroup + 1; i++) {
+  //       double w = i * xSectionLength;
+  //       if (w >= nameMaxWidth) {
+  //         // print('success at $i, simple width: $w');
+  //         // print('text len: $nameMaxWidth');
+  //         success = true;
+  //         numGroupsToBeCombined = i.toDouble();
+  //         final double tickLength = axisStyle.tickStyle.tickLength + axisStyle.tickStyle.tickMargin;
+  //         maxHeight = StringSize.getHeightOfString('I', axisStyle.tickStyle.labelTextStyle) + tickLength;
+  //         break;
+  //       }
+  //       double diagonalLength = sqrt(pow(w, 2) + pow(maxHeight, 2));
+  //       if (diagonalLength >= nameMaxWidthWithSpace) {
+  //         // print('success at $i, dia len: $diagonalLength');
+  //         // print('text len: $nameMaxWidthWithSpace');
+  //         maxRotatedAngle = asin(maxHeight / diagonalLength);
+  //         success = true;
+  //         numGroupsToBeCombined = i.toDouble();
+  //         spaceLeft = diagonalLength - nameMaxWidthWithSpace;
+  //         //print('space left: $spaceLeft');
+  //         break;
+  //       }
+  //     }
+  //     if (!success) {
+  //       maxRotatedAngle = asin(maxHeight / sqrt(pow(maxCombineGroup * xSectionLength, 2) + pow(maxHeight, 2)));
+  //       numGroupsToBeCombined = maxCombineGroup;
+  //     }
+  //     // print('success? $success');
+  //     // print('max angle: $maxRotatedAngle');
+  //     // print('groups combined: $numGroupsToBeCombined');
+  //     final List<double> result = [maxHeight, maxRotatedAngle, numGroupsToBeCombined, spaceLeft];
+  //     //print(result);
+  //     return result;
+  //   } else {
+  //     final double tickLength = axisStyle.tickStyle.tickLength + axisStyle.tickStyle.tickMargin;
+  //     return [
+  //       StringSize.getHeightOfString('I', axisStyle.tickStyle.labelTextStyle) + tickLength,
+  //       0,
+  //       1
+  //     ];
+  //   }
+  // }
 }
