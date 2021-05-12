@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_component_size.dart';
 import 'package:provider/provider.dart';
 
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
@@ -18,8 +19,9 @@ class ChartCanvasMini extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ModularBarChartData dataModel = context.read<ModularBarChartData>();
-    final BarChartStyle style = context.read<BarChartStyle>();
+    final DisplayInfo displayInfo = context.read<DisplayInfo>();
+    final ModularBarChartData dataModel = displayInfo.dataModel;
+    final BarChartStyle style = displayInfo.style;
     return SizedBox.fromSize(
       size: containerSize,
       child: FittedBox(
@@ -29,7 +31,8 @@ class ChartCanvasMini extends StatelessWidget {
             painter: MiniCanvasPainter(
               size: canvasSize,
               dataModel: dataModel,
-              style: style
+              style: style,
+              displayInfo: displayInfo,
             ),
             size: canvasSize,
           ),

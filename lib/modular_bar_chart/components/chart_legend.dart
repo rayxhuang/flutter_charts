@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_component_size.dart';
 import 'package:provider/provider.dart';
 
 import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
@@ -13,19 +14,20 @@ class ChartLegendHorizontal extends StatelessWidget with StringSize{
 
   @override
   Widget build(BuildContext context) {
-    final ModularBarChartData data = context.read<ModularBarChartData>();
-    final BarChartStyle style = context.read<BarChartStyle>();
-    final double height = StringSize.getHeightOfString(data.xSubGroups.first, style.legendStyle.legendTextStyle) + 4;
+    final DisplayInfo displayInfo = context.read<DisplayInfo>();
+    final ModularBarChartData dataModel = displayInfo.dataModel;
+    final BarChartStyle style = displayInfo.style;
+    final double height = StringSize.getHeightOfString(dataModel.xSubGroups.first, style.legendStyle.legendTextStyle) + 4;
 
     // Calculate width for each legend
     double maxWidthOfOneLegend = double.negativeInfinity;
-    data.xSubGroups.forEach((name) {
+    dataModel.xSubGroups.forEach((name) {
       double singleLegendWidth = StringSize.getWidthOfString(name, style.legendStyle.legendTextStyle);
       if ( singleLegendWidth >= maxWidthOfOneLegend) { maxWidthOfOneLegend = singleLegendWidth; }
     });
     double legendWidth;
-    if (maxWidthOfOneLegend * data.xSubGroups.length <= width) {
-      legendWidth = width / data.xSubGroups.length;
+    if (maxWidthOfOneLegend * dataModel.xSubGroups.length <= width) {
+      legendWidth = width / dataModel.xSubGroups.length;
     } else {
       int numLegendOnScreen = width ~/ 50;
       legendWidth = width / numLegendOnScreen;
@@ -37,9 +39,9 @@ class ChartLegendHorizontal extends StatelessWidget with StringSize{
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const ClampingScrollPhysics(),
-        itemCount: data.xSubGroups.length,
+        itemCount: dataModel.xSubGroups.length,
         itemBuilder: (BuildContext context, int index) {
-          final String groupName = data.xSubGroups[index];
+          final String groupName = dataModel.xSubGroups[index];
           return SizedBox(
             width: legendWidth,
             height: height,
@@ -48,7 +50,7 @@ class ChartLegendHorizontal extends StatelessWidget with StringSize{
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Icon(Icons.circle, color: data.subGroupColors[groupName], size: 8,),
+                  Icon(Icons.circle, color: dataModel.subGroupColors[groupName], size: 8,),
                   SizedBox(width: 5,),
                   Expanded(
                     child: Text(

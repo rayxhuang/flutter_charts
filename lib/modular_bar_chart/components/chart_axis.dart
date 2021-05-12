@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_component_size.dart';
 import 'package:provider/provider.dart';
 
 import 'package:flutter_charts/modular_bar_chart/mixin/axis_info_mixin.dart';
@@ -27,8 +28,8 @@ class ChartAxisHorizontalWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ModularBarChartData dataModel = context.read<ModularBarChartData>();
-    final BarChartStyle style = context.read<BarChartStyle>();
+    // final ModularBarChartData dataModel = context.read<ModularBarChartData>();
+    // final BarChartStyle style = context.read<BarChartStyle>();
     return SizedBox.fromSize(size: containerSize,);
   }
 
@@ -178,7 +179,7 @@ class HorizontalAxisSimpleWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final BarChartStyle style = context.read<BarChartStyle>();
+    final BarChartStyle style = context.read<DisplayInfo>().style;
     return SizedBox.fromSize(
       size: size,
       child: CustomPaint(
@@ -220,12 +221,6 @@ class HorizontalAxisSingleGroupPainter extends CustomPainter {
       ..strokeWidth = axisStyle.strokeWidth
       ..strokeCap = axisStyle.strokeCap
       ..color = tick.tickColor;
-    // final TextStyle tickTextStyle = tick.labelTextStyle;
-    // final TextPainter _textPainter = TextPainter(
-    //   text: TextSpan(),
-    //   textDirection: TextDirection.ltr,
-    // );
-    // _textPainter.layout();
 
     Offset p1, p2;
 
@@ -241,15 +236,6 @@ class HorizontalAxisSingleGroupPainter extends CustomPainter {
       p2 = p1.translate(0, tick.tickLength);
       canvas.drawLine(p1, p2, tickPaint);
     }
-
-    // // Draw group name
-    // _textPainter.text = TextSpan(text: '$groupName', style: tickTextStyle);
-    // _textPainter.layout(maxWidth: size.width);
-    // //Draw the tick value text
-    // _textPainter.paint(canvas, Offset(
-    //     (size.width - _textPainter.width) / 2,
-    //     tick.tickLength + tick.tickMargin
-    // ));
   }
 
   @override
@@ -286,25 +272,16 @@ class ChartAxisVerticalWithLabel extends StatelessWidget with StringSize, AxisIn
 
   ChartAxisVerticalWithLabel({ @required this.axisHeight, this.isRightAxis = false });
 
-  Size size(double maxValue, AxisStyle axisStyle, {bool isMini = false})
-    => Size(
-      getVerticalAxisCombinedWidth(
-        axisMaxValue: maxValue,
-        style: axisStyle,
-        isMini: isMini,
-      ),
-      axisHeight
-    );
-
   @override
   Widget build(BuildContext context) {
-    final BarChartStyle style = context.read<BarChartStyle>();
+    final DisplayInfo displayInfo = context.read<DisplayInfo>();
+    final BarChartStyle style = displayInfo.style;
     final AxisStyle axisStyle = isRightAxis
         ? style.y2AxisStyle
         : style.y1AxisStyle;
     final List<double> yValueRange = isRightAxis
-        ? context.read<ModularBarChartData>().y2ValueRange
-        : context.read<ModularBarChartData>().y1ValueRange;
+        ? displayInfo.y2ValueRange
+        : displayInfo.y1ValueRange;
     final Widget axisLabel = style.isMini
         ? SizedBox()
         : SizedBox(
@@ -321,7 +298,7 @@ class ChartAxisVerticalWithLabel extends StatelessWidget with StringSize, AxisIn
     return SizedBox(
       height: axisHeight,
       width: getVerticalAxisCombinedWidth(
-        axisMaxValue: yValueRange[2],
+        axisMaxValue: yValueRange[1],
         style: axisStyle,
         isMini: style.isMini
       ),
@@ -334,7 +311,7 @@ class ChartAxisVerticalWithLabel extends StatelessWidget with StringSize, AxisIn
                 child: axisLabel
               ),
           SizedBox(
-            width: getVerticalAxisWidth(max: yValueRange[2], style: axisStyle, isMini: style.isMini),
+            width: getVerticalAxisWidth(max: yValueRange[1], style: axisStyle, isMini: style.isMini),
             height: axisHeight,
             child: CustomPaint(
               painter: VerticalAxisPainter(
@@ -377,7 +354,7 @@ class VerticalAxisPainter extends CustomPainter {
     final axisPaint = Paint();
     axisPaint..color = axisStyle.axisColor;
     axisPaint..strokeWidth = axisStyle.strokeWidth;
-    axisPaint..strokeCap = axisStyle.strokeCap;
+    // TODO use square at origin
     axisPaint..strokeCap = StrokeCap.square;
 
     final Offset start = Offset(isRight ? 0 : size.width, 0);
@@ -387,7 +364,7 @@ class VerticalAxisPainter extends CustomPainter {
     // TODO Auto num ticks in mini mode
     final TickStyle tickStyle = axisStyle.tickStyle;
     final double lengthPerTick = length / (axisStyle.numTicks - 1);
-    final double yMax = valueRange[2], yMin = valueRange[0];
+    final double yMax = valueRange[1], yMin = valueRange[0];
     final double valuePerTick = (yMax - yMin) / (axisStyle.numTicks - 1);
 
     Offset p1;

@@ -210,8 +210,6 @@ class ModularBarChartData with StringSize {
     if (type == BarChartType.GroupedStacked || type == BarChartType.GroupedSeparated) { _numBarsInGroups = 1; }
   }
 
-  void _setValueOnBarHeight() => _valueOnBarHeight = StringSize.getWidthOfString('1', const TextStyle());
-
   void _setYAverage() {
     if (type == BarChartType.GroupedStacked) {
       _y1Average = _stackedValues.reduce((a, b) => a + b) / _xGroups.length;
@@ -251,25 +249,8 @@ class ModularBarChartData with StringSize {
     // Set the number of bars in one group
     _setNumberOfBarsInGroups();
 
-    // Set the height on value string on bar
-    _setValueOnBarHeight();
-
     // Set average for y1 and y2
     _setYAverage();
-  }
-
-  void adjustAxisValueRange({@required double yAxisHeight, @required List<double> valueRangeToBeAdjusted, double start = 0, double end = 0,}) {
-    start <= valueRangeToBeAdjusted[0]
-        ? valueRangeToBeAdjusted[0] = start
-        : valueRangeToBeAdjusted[0] = valueRangeToBeAdjusted[0];
-
-    String max = valueRangeToBeAdjusted[1].toStringAsExponential();
-    int expInt = int.tryParse(max.substring(max.indexOf('e+') + 2));
-    num exp = pow(10, expInt - 1);
-    double value = (((valueRangeToBeAdjusted[1] * (1 + (_valueOnBarHeight) / yAxisHeight) / exp).ceil() + 5) * exp).toDouble();
-    end >= value
-        ? valueRangeToBeAdjusted[2] = end
-        : valueRangeToBeAdjusted[2] = value;
   }
 
   void populateDataWithMinimumValue() {

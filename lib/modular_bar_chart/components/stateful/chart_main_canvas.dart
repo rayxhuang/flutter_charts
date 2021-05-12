@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_component_size.dart';
 import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
 import 'package:provider/provider.dart';
 
@@ -57,7 +58,7 @@ class _MainCanvasState extends State<MainCanvas> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     final Size canvasSize = widget.canvasSize;
-    final ModularBarChartData dataModel = context.read<ModularBarChartData>();
+    final ModularBarChartData dataModel = context.read<DisplayInfo>().dataModel;
     return SizedBox.fromSize(
       size: canvasSize,
       child: ListView.builder(
@@ -72,7 +73,6 @@ class _MainCanvasState extends State<MainCanvas> with SingleTickerProviderStateM
             isSelected: index == indexSelected ? true : false,
             barSelected: barSelected,
             size: Size(widget.xSectionLength, canvasSize.height),
-            barWidth: widget.barWidth,
             dataAnimation: dataAnimation,
             onBarSelected: (index, bar, details) {
               setState(() {

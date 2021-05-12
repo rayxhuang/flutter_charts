@@ -122,12 +122,10 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
         final Size parentSize = _getParentSize(constraint: constraint, context: context);
         return MultiProvider(
           providers: [
-            Provider<ModularBarChartData>(create: (_) => dataModel),
-            Provider<BarChartStyle>(create: (_) => style),
-            ChangeNotifierProvider<BarChartComponentSize>(
+            ChangeNotifierProvider<DisplayInfo>(
               create: (_) {
-                final BarChartComponentSize sizeInfo = BarChartComponentSize(dataModel: dataModel, style: style, parentSize: parentSize);
-                // init will calculate component sizes
+                final DisplayInfo sizeInfo = DisplayInfo(dataModel: dataModel, style: style, parentSize: parentSize);
+                // init will calculate and set all component sizes
                 sizeInfo.init();
                 return sizeInfo;
               }
@@ -136,23 +134,12 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
               create: (_) => BarChartEvent(dataModel: dataModel, style: style)
             ),
           ],
-          child: Consumer<BarChartComponentSize>(
+          child: Consumer<DisplayInfo>(
             builder: (context, size, child) {
-              final ModularBarChartData dataModel = context.read<ModularBarChartData>();
-              final BarChartStyle style = context.read<BarChartStyle>();
-              final BarChartComponentSize sizeInfo = context.read<BarChartComponentSize>();
+              final DisplayInfo displayInfo = context.read<DisplayInfo>();
+              final ModularBarChartData dataModel = displayInfo.dataModel;
+              final BarChartStyle style = displayInfo.style;
 
-              // Width information
-              final bool hasYAxisOnTheRight = sizeInfo.hasYAxisOnTheRight;
-              final double leftAxisWidth = sizeInfo.leftAxisWidth;
-              final double rightAxisWidth = sizeInfo.rightAxisWidth;
-              final double canvasWidth = sizeInfo.canvasWidth;
-              final double xSectionWidth = sizeInfo.xSectionWidth;
-              final double barWidth = sizeInfo.barWidth;
-
-              // Height information
-              final double titleHeight = sizeInfo.titleHeight;
-              final double spacingHeight = sizeInfo.spacingHeight;
               // TODO
               // double a = 2 * StringSize.getHeightOfString('I', style.xAxisStyle.tickStyle.labelTextStyle);
               // final List<double> bottomAxisHeightInformation = getXRotatedHeight(
@@ -161,62 +148,54 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
               //   nameMaxWidthWithSpace: dataModel.maxGroupNameWidthWithSpace,
               //   xSectionLength: xSectionWidth,
               // );
-
-              final double bottomAxisHeight = sizeInfo.bottomAxisHeight;
-              final double bottomLabelHeight = sizeInfo.bottomLabelHeight;
-              final double bottomLegendHeight = sizeInfo.bottomLegendHeight;
-              final double canvasHeight = sizeInfo.canvasHeight;
-              final Size canvasSize = Size(canvasWidth, canvasHeight);
               // Adjust y Max to fit number on bar and populate data
-              _adjustVerticalAxisValueRange(canvasHeight: canvasHeight, hasYAxisOnTheRight: hasYAxisOnTheRight);
-              dataModel.populateDataWithMinimumValue();
 
               // Canvas and bottom axis
               Widget chartCanvasWithAxis;
               Size chartCanvasWithAxisSize;
               if (style.isMini) {
-                chartCanvasWithAxis = _buildMiniChart(canvasSize: canvasSize, dataModel: dataModel, style: style, barWidth: barWidth);
-                chartCanvasWithAxisSize = canvasSize;
+                chartCanvasWithAxis = _buildMiniChart(canvasSize: displayInfo.canvasSize, dataModel: dataModel, style: style, barWidth: displayInfo.barWidth);
+                chartCanvasWithAxisSize = displayInfo.canvasSize;
               } else {
-                final Size wrapperSize = Size(canvasWidth, canvasHeight + bottomAxisHeight);
+                final Size wrapperSize = Size(displayInfo.canvasWidth, displayInfo.canvasHeight + displayInfo.bottomAxisHeight);
                 chartCanvasWithAxis = ChartCanvasWrapper(
                   size: wrapperSize,
-                  canvasSize: canvasSize,
-                  barWidth: barWidth,
-                  displayMiniCanvas: barWidth == style.barStyle.barWidth ? true : false,
+                  canvasSize: displayInfo.canvasSize,
+                  barWidth: displayInfo.barWidth,
+                  displayMiniCanvas: displayInfo.barWidth == style.barStyle.barWidth ? true : false,
                   animation: style.animation,
                 );
                 chartCanvasWithAxisSize = wrapperSize;
               }
 
               // Left Axis
-              final ChartAxisVerticalWithLabel leftAxis = ChartAxisVerticalWithLabel(axisHeight: canvasHeight,);
+              final ChartAxisVerticalWithLabel leftAxis = ChartAxisVerticalWithLabel(axisHeight: displayInfo.canvasHeight,);
 
               // TODO Change the height of title in full mode
               // Title
               final ChartTitle chartTitle = ChartTitle(
                 width: parentSize.width,
-                hasRightAxis: hasYAxisOnTheRight,
+                hasRightAxis: displayInfo.hasYAxisOnTheRight,
               );
 
               // Bottom Label
               final Widget bottomLabel = !style.isMini
                   ? ChartTitle(
-                width: canvasWidth,
+                width: displayInfo.canvasWidth,
                 isXAxisLabel: true,
-                hasRightAxis: hasYAxisOnTheRight,
+                hasRightAxis: displayInfo.hasYAxisOnTheRight,
               )
                   : SizedBox();
 
               // Bottom Legend
               final Widget bottomLegend = style.legendStyle.visible && !style.isMini
-                  ? ChartLegendHorizontal(width: canvasWidth)
+                  ? ChartLegendHorizontal(width: displayInfo.canvasWidth)
                   : SizedBox();
 
               // Right Axis
-              final Widget rightAxis = hasYAxisOnTheRight
+              final Widget rightAxis = displayInfo.hasYAxisOnTheRight
                   ? ChartAxisVerticalWithLabel(
-                axisHeight: canvasHeight,
+                axisHeight: displayInfo.canvasHeight,
                 isRightAxis: true,
               )
                   : SizedBox();
@@ -226,16 +205,16 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
                 parentSize: parentSize,
                 canvasSize: chartCanvasWithAxisSize,
                 title: chartTitle,
-                spacing: SizedBox(height: spacingHeight,),
+                spacing: SizedBox(height: displayInfo.spacingHeight,),
                 leftAxisWithLabel: leftAxis,
                 mainCanvasWithBottomAxis: chartCanvasWithAxis,
                 bottomLabel: bottomLabel,
                 bottomLegend: bottomLegend,
                 rightAxisWithLabel: rightAxis,
-                titleHeight: titleHeight,
-                spacingHeight: spacingHeight,
-                leftAxisWidth: leftAxisWidth,
-                bottomLabelHeight: bottomLabelHeight,
+                titleHeight: displayInfo.titleHeight,
+                spacingHeight: displayInfo.spacingHeight,
+                leftAxisWidth: displayInfo.leftAxisWidth,
+                bottomLabelHeight: displayInfo.bottomLabelHeight,
               );
             },
           ),
@@ -384,26 +363,6 @@ class ModularBarChart extends StatelessWidget with StringSize, AxisInfo {
         ? constraint.maxWidth
         : MediaQuery.of(context).size.width;
     return Size(parentWidth, parentHeight);
-  }
-
-  void _adjustVerticalAxisValueRange({
-    @required double canvasHeight,
-    @required hasYAxisOnTheRight
-  }) {
-    dataModel.adjustAxisValueRange(
-      yAxisHeight: canvasHeight,
-      valueRangeToBeAdjusted: dataModel.y1ValueRange,
-      start: style.y1AxisStyle.preferredStartValue,
-      end: style.y1AxisStyle.preferredEndValue,
-    );
-    if (hasYAxisOnTheRight) {
-      dataModel.adjustAxisValueRange(
-        yAxisHeight: canvasHeight,
-        valueRangeToBeAdjusted: dataModel.y2ValueRange,
-        start: style.y2AxisStyle.preferredStartValue,
-        end: style.y2AxisStyle.preferredEndValue,
-      );
-    }
   }
 
   Widget _buildMiniChart({

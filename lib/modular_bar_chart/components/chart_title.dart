@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_component_size.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_event.dart';
 import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
 import 'package:provider/provider.dart';
@@ -48,9 +49,10 @@ class _ChartTitleState extends State<ChartTitle> {
 
   @override
   Widget build(BuildContext context) {
+    final DisplayInfo displayInfo = context.read<DisplayInfo>();
     final BarChartLabel label = widget.isXAxisLabel
-        ? context.read<BarChartStyle>().xAxisStyle.label
-        : context.read<BarChartStyle>().title;
+        ? displayInfo.style.xAxisStyle.label
+        : displayInfo.style.title;
     return SizedBox(
       width: widget.width,
       height: StringSize.getHeight(label),

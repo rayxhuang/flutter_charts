@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_component_size.dart';
 
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
@@ -10,50 +11,42 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
   final Size size;
   final ModularBarChartData dataModel;
   final BarChartStyle style;
+  final DisplayInfo displayInfo;
 
   MiniCanvasPainter({
     @required this.size,
     @required this.dataModel,
-    this.style = const BarChartStyle(),
+    @required this.displayInfo,
+    @required this.style,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final double xSectionLength = size.width / dataModel.xGroups.length;
-    final double y1UnitPerPixel = (dataModel.y1ValueRange[2] - dataModel.y1ValueRange[0]) / size.height;
+    //final double xSectionLength = size.width / dataModel.xGroups.length;
+    final double xSectionLength = displayInfo.xSectionWidth;
     final BarChartType type = dataModel.type;
-    double y2UnitPerPixel = double.negativeInfinity;
-    if (type == BarChartType.GroupedSeparated) {
-      y2UnitPerPixel = (dataModel.y2ValueRange[2] - dataModel.y2ValueRange[0]) / size.height;
-    }
-
     if (type == BarChartType.Ungrouped) {
       drawUngroupedData(
         canvas: canvas,
         xSectionLength: xSectionLength,
-        y1UnitPerPixel: y1UnitPerPixel,
         bottomLeft: Offset(0, size.height)
       );
     } else if (type == BarChartType.Grouped) {
       drawGroupedData(
         canvas: canvas,
         xSectionLength: xSectionLength,
-        y1UnitPerPixel: y1UnitPerPixel,
         bottomLeft: Offset(0, size.height)
       );
     } else if (type == BarChartType.GroupedStacked) {
       drawGroupedStackedData(
         canvas: canvas,
         xSectionLength: xSectionLength,
-        y1UnitPerPixel: y1UnitPerPixel,
         bottomLeft: Offset(0, size.height)
       );
     } else if (type == BarChartType.GroupedSeparated) {
       drawGroupedSeparatedData(
         canvas: canvas,
         xSectionLength: xSectionLength,
-        y1UnitPerPixel: y1UnitPerPixel,
-        y2UnitPerPixel: y2UnitPerPixel,
         bottomLeft: Offset(0, size.height),
       );
     }
@@ -62,7 +55,6 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
   void drawUngroupedData({
     @required Canvas canvas,
     @required double xSectionLength,
-    @required double y1UnitPerPixel,
     @required Offset bottomLeft
   }) {
     //This is the bar paint
@@ -72,7 +64,7 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
       int i = dataModel.xGroups.indexOf(bar.group);
       double x1FromBottomLeft = i * xSectionLength + style.groupMargin;
       double x2FromBottomLeft = x1FromBottomLeft + style.barStyle.barWidth;
-      double y1FromBottomLeft = (bar.data - dataModel.y1ValueRange[0]) / y1UnitPerPixel;
+      double y1FromBottomLeft = (bar.data - displayInfo.y1Min) / displayInfo.y1UnitPerPixel;
       drawBar(
         canvas: canvas,
         data: bar,
@@ -89,7 +81,6 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
   void drawGroupedData({
     @required Canvas canvas,
     @required double xSectionLength,
-    @required double y1UnitPerPixel,
     @required Offset bottomLeft
   }) {
     //This is the bar paint
@@ -104,7 +95,7 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
             : style.barStyle.barInGroupMargin;
         double x1FromBottomLeft = j * xSectionLength + i * style.barStyle.barWidth + style.groupMargin + inGroupMargin * i;
         double x2FromBottomLeft = x1FromBottomLeft + style.barStyle.barWidth;
-        double y1FromBottomLeft = (barList[i].data - dataModel.y1ValueRange[0]) / y1UnitPerPixel;
+        double y1FromBottomLeft = (barList[i].data - displayInfo.y1Min) / displayInfo.y1UnitPerPixel;
         drawBar(
           canvas: canvas,
           data: barList[i],
@@ -122,7 +113,6 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
   void drawGroupedStackedData({
     @required Canvas canvas,
     @required double xSectionLength,
-    @required double y1UnitPerPixel,
     @required Offset bottomLeft
   }) {
     //This is the bar paint
@@ -138,7 +128,7 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
         paint..color = dataModel.subGroupColors[barList[i].group];
         double x1FromBottomLeft = j * xSectionLength + style.groupMargin;
         double x2FromBottomLeft = x1FromBottomLeft + style.barStyle.barWidth;
-        double y1FromBottomLeft = (totalHeight - dataModel.y1ValueRange[0] - previousYValue) / y1UnitPerPixel;
+        double y1FromBottomLeft = (totalHeight - dataModel.y1ValueRange[0] - previousYValue) / displayInfo.y1UnitPerPixel;
         drawBar(
           canvas: canvas,
           data: barList[i],
@@ -158,14 +148,11 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
   void drawGroupedSeparatedData({
     @required Canvas canvas,
     @required double xSectionLength,
-    @required double y1UnitPerPixel,
-    @required double y2UnitPerPixel,
     @required Offset bottomLeft,
   }) {
     drawUngroupedData(
       canvas: canvas,
       xSectionLength: xSectionLength,
-      y1UnitPerPixel: y1UnitPerPixel,
       bottomLeft: bottomLeft,
     );
 
@@ -178,7 +165,7 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
       paint..color = Colors.blue;
       paint..strokeWidth = 2;
       double x1FromBottomLeft = i * xSectionLength + style.groupMargin + style.barStyle.barWidth / 2;
-      double y1FromBottomLeft = (current.data - dataModel.y2ValueRange[0]) / y2UnitPerPixel;
+      double y1FromBottomLeft = (current.data - displayInfo.y2Min) / displayInfo.y2UnitPerPixel;
       Offset currentPosition = bottomLeft.translate(x1FromBottomLeft, -y1FromBottomLeft);
       drawPoint(
         canvas: canvas,
@@ -197,7 +184,7 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
         double value = current.data < previous.data
             ? current.data + differenceOfPrevious
             : current.data - differenceOfPrevious;
-        double y = (value - dataModel.y2ValueRange[0]) / y2UnitPerPixel;
+        double y = (value - displayInfo.y2Min) / displayInfo.y2UnitPerPixel;
         previousPosition = bottomLeft.translate(i * xSectionLength, -y);
         canvas.drawLine(currentPosition, previousPosition, paint);
       }
@@ -207,7 +194,7 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
         double value = current.data < next.data
             ? current.data + differenceOfNext
             : current.data - differenceOfNext;
-        double y = (value - dataModel.y2ValueRange[0]) / y2UnitPerPixel;
+        double y = (value - displayInfo.y2Min) / displayInfo.y2UnitPerPixel;
         nextPosition = bottomLeft.translate((i + 1) * xSectionLength, -y);
         canvas.drawLine(currentPosition, nextPosition, paint);
       }
