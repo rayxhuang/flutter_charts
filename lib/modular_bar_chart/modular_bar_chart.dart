@@ -2,17 +2,15 @@ import 'dart:ui';
 import 'dart:core';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_charts/modular_bar_chart/components/canvas/chart_mini_canvas.dart';
+import 'package:flutter_charts/modular_bar_chart/components/chart_display_area.dart';
+import 'package:flutter_charts/modular_bar_chart/components/chart_filter_panel.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_display_info.dart';
 
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
 import 'package:provider/provider.dart';
-import 'components/chart_axis.dart';
-import 'components/chart_legend.dart';
 import 'components/chart_title.dart';
-import 'components/canvas/chart_main_canvas_wrapper.dart';
 
 @immutable
 class ModularBarChart extends StatelessWidget with StringSize {
@@ -125,91 +123,6 @@ class ModularBarChart extends StatelessWidget with StringSize {
     return Size(parentWidth, parentHeight);
   }
 
-  Widget _buildMiniChart({@required DisplayInfo displayInfo,}) {
-    final Size canvasSize = displayInfo.canvasSize;
-    final BarChartStyle style = displayInfo.style;
-    return Column(
-      children: [
-        ChartCanvasMini(containerSize: canvasSize),
-        HorizontalAxisSimpleWrapper(
-          size: Size(canvasSize.width, style.xAxisStyle.strokeWidth),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildChart({
-    @required DisplayInfo displayInfo,
-    @required Widget title,
-    @required Widget spacing,
-    @required Widget leftAxisWithLabel,
-    @required Widget mainCanvasWithBottomAxis,
-    @required Widget bottomLabel,
-    @required Widget bottomLegend,
-    @required Widget rightAxisWithLabel,
-  }) {
-    final Size canvasWrapperSize = displayInfo.canvasWrapperSize;
-    final double titleHeight = displayInfo.titleHeight;
-    final double spacingHeight = displayInfo.spacingHeight;
-    final double leftAxisWidth = displayInfo.leftAxisCombinedWidth;
-    final double bottomLabelHeight = displayInfo.bottomLabelHeight;
-    return SizedBox.fromSize(
-      size: displayInfo.parentSize,
-      child: Padding(
-        padding: EdgeInsets.zero,
-        child: Stack(children: [
-          // Spacing between title and axis
-          Positioned(
-            left: 0,
-            top: titleHeight,
-            child: spacing,
-          ),
-
-          // Canvas and bottom axis
-          Positioned(
-            top: titleHeight + spacingHeight,
-            left: leftAxisWidth,
-            child: mainCanvasWithBottomAxis,
-          ),
-
-          // Left Axis
-          Positioned(
-            top: titleHeight + spacingHeight,
-            child: leftAxisWithLabel,
-          ),
-
-          // Bottom Label
-          Positioned(
-            top: titleHeight + spacingHeight + canvasWrapperSize.height,
-            left: leftAxisWidth,
-            child: bottomLabel,
-          ),
-
-          // Bottom Legends
-          Positioned(
-            top: titleHeight + spacingHeight + canvasWrapperSize.height + bottomLabelHeight,
-            left: leftAxisWidth,
-            child: bottomLegend,
-          ),
-
-          // Right Axis
-          Positioned(
-            top: titleHeight + spacingHeight,
-            left: leftAxisWidth + canvasWrapperSize.width,
-            child: rightAxisWithLabel,
-          ),
-
-          // Title
-          Positioned(
-            top: 0,
-            left: 0,
-            child: title,
-          ),
-        ]),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -219,51 +132,28 @@ class ModularBarChart extends StatelessWidget with StringSize {
           providers: [
             ChangeNotifierProvider<DisplayInfo>(
               create: (_) {
-                final DisplayInfo sizeInfo = DisplayInfo(dataModel: dataModel, style: style, parentSize: parentSize);
                 // init will calculate and set all component sizes
-                sizeInfo.init();
+                final DisplayInfo sizeInfo = DisplayInfo.init(dataModel: dataModel, style: style, parentSize: parentSize);
                 return sizeInfo;
               }
             ),
           ],
-          builder: (context, child) {
-            final DisplayInfo displayInfo = context.read<DisplayInfo>();
-            // Canvas and bottom axis
-            final Widget chartCanvasWithAxis = displayInfo.isMini
-                ? _buildMiniChart(displayInfo: displayInfo)
-                : ChartCanvasWrapper();
-
-            // Left Axis
-            final VerticalAxisWithLabel leftAxis = VerticalAxisWithLabel();
-
-            // Title
-            final ChartTitle chartTitle = ChartTitle();
-
-            // Bottom Label
-            final Widget bottomLabel = BottomAxisLabel();
-
-            // Bottom Legend
-            final Widget bottomLegend = displayInfo.style.legendStyle.visible && !displayInfo.isMini
-                ? ChartLegendHorizontal()
-                : SizedBox();
-
-            // Right Axis
-            final Widget rightAxis = displayInfo.hasYAxisOnTheRight
-                ? VerticalAxisWithLabel(isRightAxis: true)
-                : SizedBox();
-
-            // TODO Too small to have a canvas?
-            return _buildChart(
-              displayInfo: displayInfo,
-              title: chartTitle,
-              spacing: SizedBox(height: displayInfo.spacingHeight,),
-              leftAxisWithLabel: leftAxis,
-              mainCanvasWithBottomAxis: chartCanvasWithAxis,
-              bottomLabel: bottomLabel,
-              bottomLegend: bottomLegend,
-              rightAxisWithLabel: rightAxis,
-            );
-          },
+          child: Consumer<DisplayInfo>(
+            builder: (context, displayInfo, child) {
+              return Column(
+                children: [
+                  ChartTitle(),
+                  SizedBox(height: displayInfo.spacingHeight,),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: displayInfo.showFilterPanel
+                        ? FilterPanel(yMin: displayInfo.originalY1Min, yMax: displayInfo.originalY1Max,)
+                        : ChartDisplayArea(),
+                  ),
+                ],
+              );
+            },
+          ),
         );
       }
     );

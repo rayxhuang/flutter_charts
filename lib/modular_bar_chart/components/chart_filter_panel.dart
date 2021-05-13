@@ -27,7 +27,7 @@ class _FilterPanelState extends State<FilterPanel> {
     final DisplayInfo displayInfo = context.read<DisplayInfo>();
     return SizedBox(
       width: displayInfo.parentSize.width,
-      height: displayInfo.parentSize.height - kMinInteractiveDimensionCupertino,
+      height: displayInfo.parentSize.height - displayInfo.spacingHeight - kMinInteractiveDimensionCupertino,
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(12))
@@ -48,8 +48,8 @@ class _FilterPanelState extends State<FilterPanel> {
                   )
                 ),
                 child: RangeSlider(
-                  min: displayInfo.y1Min,
-                  max: displayInfo.y1Max,
+                  min: displayInfo.originalY1Min,
+                  max: displayInfo.originalY1Max,
                   values: values1,
                   onChanged: (values){ setState(() {
                     values1 = values;

@@ -139,6 +139,86 @@ class HorizontalAxisSimpleWrapper extends StatelessWidget {
   }
 }
 
+// @immutable
+// class VerticalAxisWithLabel extends StatelessWidget {
+//   // This widget display the label and data of a vertical axis
+//   final bool isRightAxis;
+//
+//   VerticalAxisWithLabel({ this.isRightAxis = false });
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final DisplayInfo displayInfo = context.read<DisplayInfo>();
+//
+//     final AxisStyle axisStyle = isRightAxis
+//         ? displayInfo.style.y2AxisStyle
+//         : displayInfo.style.y1AxisStyle;
+//
+//     final List<double> yValueRange = isRightAxis
+//         ? displayInfo.y2ValueRange
+//         : displayInfo.y1ValueRange;
+//
+//     final double combinedWidth = isRightAxis
+//         ? displayInfo.rightAxisCombinedWidth
+//         : displayInfo.leftAxisCombinedWidth;
+//
+//     final double axisWidth = isRightAxis
+//         ? displayInfo.rightAxisWidth
+//         : displayInfo.leftAxisWidth;
+//
+//     final double labelWidth = isRightAxis
+//         ? displayInfo.rightAxisLabelWidth
+//         : displayInfo.leftAxisLabelWidth;
+//
+//     // Does not display label when in mini mode
+//     final Widget axisLabel = displayInfo.isMini
+//         ? SizedBox()
+//         : SizedBox(
+//           width: displayInfo.canvasHeight,
+//           height: labelWidth,
+//           child: Center(
+//             child: Text(
+//               axisStyle.label.text,
+//               style: axisStyle.label.textStyle,
+//             ),
+//           ),
+//         );
+//
+//     return SizedBox(
+//         height: displayInfo.canvasHeight,
+//         width: combinedWidth,
+//         child: Row(
+//           children: [
+//             isRightAxis
+//                 ? SizedBox()
+//                 : RotatedBox(
+//                   quarterTurns: 1,
+//                   child: axisLabel
+//                 ),
+//             SizedBox(
+//               width: axisWidth,
+//               height: displayInfo.canvasHeight,
+//               child: CustomPaint(
+//                 painter: VerticalAxisPainter(
+//                   valueRange: yValueRange,
+//                   axisStyle: axisStyle,
+//                   isRight: isRightAxis,
+//                   isMini: displayInfo.isMini,
+//                 ),
+//               ),
+//             ),
+//             isRightAxis
+//                 ? RotatedBox(
+//                   quarterTurns: 3,
+//                   child: axisLabel
+//                 )
+//                 : SizedBox(),
+//           ],
+//         )
+//     );
+//   }
+// }
+
 @immutable
 class VerticalAxisWithLabel extends StatelessWidget {
   // This widget display the label and data of a vertical axis
@@ -148,73 +228,75 @@ class VerticalAxisWithLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final DisplayInfo displayInfo = context.read<DisplayInfo>();
+    return Consumer<DisplayInfo>(
+      builder: (context, displayInfo, child) {
+        final AxisStyle axisStyle = isRightAxis
+            ? displayInfo.style.y2AxisStyle
+            : displayInfo.style.y1AxisStyle;
 
-    final AxisStyle axisStyle = isRightAxis
-        ? displayInfo.style.y2AxisStyle
-        : displayInfo.style.y1AxisStyle;
+        final List<double> yValueRange = isRightAxis
+            ? displayInfo.y2ValueRange
+            : displayInfo.y1ValueRange;
 
-    final List<double> yValueRange = isRightAxis
-        ? displayInfo.y2ValueRange
-        : displayInfo.y1ValueRange;
+        final double combinedWidth = isRightAxis
+            ? displayInfo.rightAxisCombinedWidth
+            : displayInfo.leftAxisCombinedWidth;
 
-    final double combinedWidth = isRightAxis
-        ? displayInfo.rightAxisCombinedWidth
-        : displayInfo.leftAxisCombinedWidth;
+        final double axisWidth = isRightAxis
+            ? displayInfo.rightAxisWidth
+            : displayInfo.leftAxisWidth;
 
-    final double axisWidth = isRightAxis
-        ? displayInfo.rightAxisWidth
-        : displayInfo.leftAxisWidth;
+        final double labelWidth = isRightAxis
+            ? displayInfo.rightAxisLabelWidth
+            : displayInfo.leftAxisLabelWidth;
 
-    final double labelWidth = isRightAxis
-        ? displayInfo.rightAxisLabelWidth
-        : displayInfo.leftAxisLabelWidth;
-
-    // Does not display label when in mini mode
-    final Widget axisLabel = displayInfo.isMini
-        ? SizedBox()
-        : SizedBox(
-          width: displayInfo.canvasHeight,
-          height: labelWidth,
-          child: Center(
-            child: Text(
-              axisStyle.label.text,
-              style: axisStyle.label.textStyle,
-            ),
-          ),
-        );
-
-    return SizedBox(
-        height: displayInfo.canvasHeight,
-        width: combinedWidth,
-        child: Row(
-          children: [
-            isRightAxis
-                ? SizedBox()
-                : RotatedBox(
-                  quarterTurns: 1,
-                  child: axisLabel
-                ),
-            SizedBox(
-              width: axisWidth,
-              height: displayInfo.canvasHeight,
-              child: CustomPaint(
-                painter: VerticalAxisPainter(
-                  valueRange: yValueRange,
-                  axisStyle: axisStyle,
-                  isRight: isRightAxis,
-                  isMini: displayInfo.isMini,
+        // Does not display label when in mini mode
+        final Widget axisLabel = displayInfo.isMini
+            ? SizedBox()
+            : SizedBox(
+              width: displayInfo.canvasHeight,
+              height: labelWidth,
+              child: Center(
+                child: Text(
+                  axisStyle.label.text,
+                  style: axisStyle.label.textStyle,
                 ),
               ),
-            ),
-            isRightAxis
-                ? RotatedBox(
-                  quarterTurns: 3,
-                  child: axisLabel
-                )
-                : SizedBox(),
-          ],
-        )
+            );
+
+        return SizedBox(
+            height: displayInfo.canvasHeight,
+            width: combinedWidth,
+            child: Row(
+              children: [
+                isRightAxis
+                    ? SizedBox()
+                    : RotatedBox(
+                      quarterTurns: 1,
+                      child: axisLabel
+                    ),
+                SizedBox(
+                  width: axisWidth,
+                  height: displayInfo.canvasHeight,
+                  child: CustomPaint(
+                    painter: VerticalAxisPainter(
+                      valueRange: yValueRange,
+                      axisStyle: axisStyle,
+                      isRight: isRightAxis,
+                      isMini: displayInfo.isMini,
+                    ),
+                  ),
+                ),
+                isRightAxis
+                    ? RotatedBox(
+                      quarterTurns: 3,
+                      child: axisLabel
+                    )
+                    : SizedBox(),
+              ],
+            )
+        );
+      }
     );
   }
 }

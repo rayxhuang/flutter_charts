@@ -193,69 +193,34 @@ class ChartToolBar extends StatelessWidget {
         ].reduce(max);
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 500),
-          child: !displayInfo.showFilterPanel
-              ? SizedBox(
-                height: kMinInteractiveDimensionCupertino,
-                width: w,
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: maxLengthOfDisplayText,
-                      child: _buildLeftDisplayText(displayInfo),
-                    ),
-                    Expanded(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildValueOnBarButton(displayInfo),
-                          _buildAvgLineButton(displayInfo),
-                          _buildGridLineButton(displayInfo),
-                          _buildFilterButton(displayInfo),
-                          _buildGoBackButton(displayInfo),
-                        ],
-                      ),
-                    ),
-                    SizedBox(
-                      width: maxLengthOfDisplayText,
-                      child: _buildRightDisplayText(displayInfo),
-                    ),
-                  ],
+          child: SizedBox(
+            height: kMinInteractiveDimensionCupertino,
+            width: w,
+            child: Row(
+              children: [
+                SizedBox(
+                  width: maxLengthOfDisplayText,
+                  child: _buildLeftDisplayText(displayInfo),
                 ),
-              )
-              //: FilterPanel(),
-              : Column(
-                children: [
-                  SizedBox(
-                    height: kMinInteractiveDimensionCupertino,
-                    width: w,
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: maxLengthOfDisplayText,
-                          child: _buildLeftDisplayText(displayInfo),
-                        ),
-                        Expanded(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              _buildValueOnBarButton(displayInfo),
-                              _buildAvgLineButton(displayInfo),
-                              _buildGridLineButton(displayInfo),
-                              _buildFilterButton(displayInfo),
-                              _buildGoBackButton(displayInfo),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          width: maxLengthOfDisplayText,
-                          child: _buildRightDisplayText(displayInfo),
-                        ),
-                      ],
-                    ),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildValueOnBarButton(displayInfo),
+                      _buildAvgLineButton(displayInfo),
+                      _buildGridLineButton(displayInfo),
+                      _buildFilterButton(displayInfo),
+                      _buildGoBackButton(displayInfo),
+                    ],
                   ),
-                  FilterPanel(yMin: displayInfo.y1Min, yMax: displayInfo.y1Max,),
-                ],
-              )
+                ),
+                SizedBox(
+                  width: maxLengthOfDisplayText,
+                  child: _buildRightDisplayText(displayInfo),
+                ),
+              ],
+            ),
+          )
         );
       },
     );

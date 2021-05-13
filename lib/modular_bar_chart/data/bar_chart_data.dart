@@ -270,6 +270,76 @@ class ModularBarChartData with StringSize {
       });
     }
   }
+
+  ModularBarChartData applyFilter({
+    RangeValues y1Filter
+  }) {
+    if (type == BarChartType.Ungrouped) {
+      Map<String, double> filteredData = {};
+      rawData.forEach((group, value) {
+        if (value is double) {
+          if (value.within(y1Filter)) {
+            filteredData[group] = value;
+          }
+        }
+      });
+      if (filteredData.isNotEmpty) {
+        return returnNewData(filteredData);
+      }
+    } else if (type == BarChartType.Grouped) {
+      Map<String, Map<String, double>> filteredData = {};
+      List<String> initialisedGroup = [];
+      rawData.forEach((group, map) {
+        map.forEach((subgroup, value) {
+          if (value is double) {
+            if (value.within(y1Filter)) {
+              if (!initialisedGroup.contains(group)) {
+                initialisedGroup.add(group);
+                filteredData[group] = {};
+              }
+              filteredData[group][subgroup] = value;
+            }
+          }
+        });
+      });
+      if (filteredData.isNotEmpty) {
+        return returnNewData(filteredData);
+      }
+    } else if (type == BarChartType.GroupedStacked) {
+      Map<String, Map<String, double>> filteredData = {};
+      List<String> initialisedGroup = [];
+      rawData.forEach((group, map) {
+        double localSum = 0;
+        map.forEach((subgroup, value) {
+          localSum += value;
+        });
+        if (localSum.within(y1Filter)) {
+          if (!initialisedGroup.contains(group)) {
+            initialisedGroup.add(group);
+            filteredData[group] = {};
+          }
+          filteredData[group] = rawData[group];
+        }
+      });
+      if (filteredData.isNotEmpty) {
+        return returnNewData(filteredData);
+      }
+    }
+    return this;
+  }
+
+  ModularBarChartData returnNewData(Map<String, dynamic> filteredData) {
+    final ModularBarChartData newDataModel = ModularBarChartData._(
+      rawData: filteredData,
+      type: this.type,
+      sortXAxis: this.sortXAxis,
+      xGroupComparator: this.xGroupComparator,
+      xSubGroupComparator: this.xSubGroupComparator,
+      subGroupColors: this.subGroupColors,
+    );
+    newDataModel._analyseData();
+    return newDataModel;
+  }
 }
 
 @immutable
@@ -337,4 +407,10 @@ class BarChartLabel {
       fontSize: 20,
     )
   });
+}
+
+extension WithinRange on double {
+  bool within(RangeValues range) {
+    return (this <= range.end && this >= range.start);
+  }
 }

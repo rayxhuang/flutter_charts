@@ -8,15 +8,33 @@ import 'bar_chart_data.dart';
 import 'bar_chart_style.dart';
 
 class DisplayInfo extends ChangeNotifier with StringSize{
-  final ModularBarChartData dataModel;
+  final ModularBarChartData originalDataModel;
+  ModularBarChartData dataModel;
   final BarChartStyle style;
   final Size parentSize;
 
-  DisplayInfo({
+  DisplayInfo._({
+    @required this.originalDataModel,
     @required this.dataModel,
     @required this.style,
     @required this.parentSize,
   });
+
+  factory DisplayInfo.init({
+    @required ModularBarChartData dataModel,
+    @required BarChartStyle style,
+    @required Size parentSize,
+  }) {
+    final DisplayInfo displayInfo = DisplayInfo._(
+      originalDataModel: dataModel,
+      dataModel: dataModel,
+      style: style,
+      parentSize: parentSize,
+    );
+    displayInfo._init();
+    displayInfo._setOriginalDisplayRange();
+    return displayInfo;
+  }
 
   String _longestGroupName = '';
   double _maxGroupNameWidth = 0, _maxGroupNameWidthWithSpace = 0;
@@ -28,6 +46,7 @@ class DisplayInfo extends ChangeNotifier with StringSize{
   Size _canvasSize = Size.zero, _canvasWrapperSize = Size.zero;
   bool _hasYAxisOnTheRight = false, _needResetYAxisWidth = false, _isMini = false, _displayMiniCanvas = false;
   List<double> _displayY1Range = [0, 0], _displayY2Range = [0, 0];
+  List<double> _originalDisplayY1Range = [0, 0], _originalDisplayY2Range = [0, 0];
   double _y1UnitPerPixel = 0, _y2UnitPerPixel = 0;
   int _numOfGroupNamesToCombine = 1;
 
@@ -58,6 +77,10 @@ class DisplayInfo extends ChangeNotifier with StringSize{
   double get y1Max => _displayY1Range[1];
   double get y2Min => _displayY2Range[0];
   double get y2Max => _displayY2Range[1];
+  double get originalY1Min => _originalDisplayY1Range[0];
+  double get originalY1Max => _originalDisplayY1Range[1];
+  double get originalY2Min => _originalDisplayY2Range[0];
+  double get originalY2Max => _originalDisplayY2Range[1];
   List<double> get y1ValueRange => _displayY1Range;
   List<double> get y2ValueRange => _displayY2Range;
   double get y1UnitPerPixel => _y1UnitPerPixel;
@@ -120,10 +143,12 @@ class DisplayInfo extends ChangeNotifier with StringSize{
   void setY1RangeFilter(RangeValues values) {
     _y1RangeFilter = values;
     print('Filter is now: $_y1RangeFilter');
+    dataModel = originalDataModel.applyFilter(y1Filter: _y1RangeFilter);
+    _init();
     notifyListeners();
   }
 
-  void init(){
+  void _init(){
     // Set isMini?
     _setIsMini();
 
@@ -176,6 +201,11 @@ class DisplayInfo extends ChangeNotifier with StringSize{
     _setCanvasWrapperSize();
 
     _y1RangeFilter = RangeValues(y1Min, y1Max);
+  }
+
+  void _setOriginalDisplayRange() {
+    _originalDisplayY1Range = [_displayY1Range[0], _displayY1Range[1]];
+    _originalDisplayY2Range = [_displayY2Range[0], _displayY2Range[1]];
   }
 
   void _setIsMini() => _isMini = style.isMini;
