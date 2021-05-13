@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_charts/modular_bar_chart/components/chart_filter_panel.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_display_info.dart';
 import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
 import 'package:provider/provider.dart';
@@ -38,24 +37,24 @@ class ChartTitle extends StatelessWidget with StringSize {
 
   Widget _buildInteractiveTitleBar(BarChartLabel label, double width, bool showToolBar) {
     return AnimatedSwitcher(
-        duration: const Duration(milliseconds: 500),
-        child: showToolBar
-            ? ChartToolBar(
-              toggleToolBar: _toggleToolBar,
-              toggleAverageLine: _toggleAverageLine,
-              toggleValueOnBar: _toggleValueOnBar,
-              toggleGridLine: _toggleGridLine,
-              toggleFilterPanel: _toggleFilterPanel,
-              w: width,
-            )
-            : SizedBox(
-              width: width,
-              height: kMinInteractiveDimensionCupertino,
-              child: ChartTitleBar(
-                label: label,
-                onPressed: _toggleToolBar,
-              ),
+      duration: const Duration(milliseconds: 500),
+      child: showToolBar
+          ? ChartToolBar(
+            toggleToolBar: _toggleToolBar,
+            toggleAverageLine: _toggleAverageLine,
+            toggleValueOnBar: _toggleValueOnBar,
+            toggleGridLine: _toggleGridLine,
+            toggleFilterPanel: _toggleFilterPanel,
+            w: width,
+          )
+          : SizedBox(
+            width: width,
+            height: kMinInteractiveDimensionCupertino,
+            child: ChartTitleBar(
+              label: label,
+              onPressed: _toggleToolBar,
             ),
+          ),
     );
   }
 

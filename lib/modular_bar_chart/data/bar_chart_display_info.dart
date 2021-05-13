@@ -33,6 +33,7 @@ class DisplayInfo extends ChangeNotifier with StringSize{
     );
     displayInfo._init();
     displayInfo._setOriginalDisplayRange();
+    displayInfo._setInitialSelectedXGroups();
     return displayInfo;
   }
 
@@ -96,6 +97,10 @@ class DisplayInfo extends ChangeNotifier with StringSize{
   String _leftDisplayText = '';
   String _rightDisplayText = '';
   RangeValues _y1RangeFilter;
+  RangeValues _y2RangeFilter;
+  Map<String, bool> _selectedXGroups = {};
+  Map<String, bool> _selectedXSubGroups = {};
+
   bool get showToolBar => _showToolBar;
   bool get showAverageLine => _showAverageLine;
   bool get showValueOnBar =>  _showValueOnBar;
@@ -103,8 +108,14 @@ class DisplayInfo extends ChangeNotifier with StringSize{
   bool get showFilterPanel => _showFilterPanel;
   String get leftDisplayText => _leftDisplayText;
   String get rightDisplayText => _rightDisplayText;
+  RangeValues get y1RangeFilter => _y1RangeFilter;
+  RangeValues get y2RangeFilter => _y2RangeFilter;
   double get y1FilterMin => _y1RangeFilter.start;
   double get y1FilterMax => _y1RangeFilter.end;
+  double get y2FilterMin => _y2RangeFilter.start;
+  double get y2FilterMax => _y2RangeFilter.end;
+  Map<String, bool> get selectedXGroups => _selectedXGroups;
+  Map<String, bool> get selectedXSubGroups => _selectedXSubGroups;
 
   void toggleToolBar() {
     _showToolBar =! _showToolBar;
@@ -113,15 +124,7 @@ class DisplayInfo extends ChangeNotifier with StringSize{
 
   void toggleAverageLine() {
     _showAverageLine = !_showAverageLine;
-    if (_showAverageLine) {
-      _leftDisplayText = 'Avg: ${dataModel.y1Average.toStringAsFixed(2)}';
-      if (_hasYAxisOnTheRight) {
-        _rightDisplayText = 'Avg: ${dataModel.y2Average.toStringAsFixed(2)}';
-      }
-    } else {
-      _leftDisplayText = '';
-      _rightDisplayText = '';
-    }
+    _setMiniDisplayText();
     notifyListeners();
   }
 
@@ -140,11 +143,28 @@ class DisplayInfo extends ChangeNotifier with StringSize{
     notifyListeners();
   }
 
-  void setY1RangeFilter(RangeValues values) {
-    _y1RangeFilter = values;
-    print('Filter is now: $_y1RangeFilter');
-    dataModel = originalDataModel.applyFilter(y1Filter: _y1RangeFilter);
+  void setFilter({
+    RangeValues y1Filter,
+    RangeValues y2Filter,
+    Map<String, bool> xGroupFilter,
+    Map<String, bool> xSubGroupFilter,
+  }) {
+    _y1RangeFilter = y1Filter ?? this._y1RangeFilter;
+    _y2RangeFilter = y2Filter ?? this._y2RangeFilter;
+    _selectedXGroups = xGroupFilter ?? this._selectedXGroups;
+    _selectedXSubGroups = xSubGroupFilter ?? this._selectedXSubGroups;
+    print('Y1 Filter: $_y1RangeFilter');
+    print('Y2 Filter: $_y2RangeFilter');
+    print('XGroup Filter: $_selectedXGroups');
+    print('XGroup Filter: $_selectedXSubGroups');
+    dataModel = originalDataModel.applyFilter(
+      y1Filter: _y1RangeFilter,
+      y2Filter: _y2RangeFilter,
+      xGroupFilter: _selectedXGroups,
+      xSubGroupFilter: _selectedXSubGroups,
+    );
     _init();
+    _setMiniDisplayText();
     notifyListeners();
   }
 
@@ -173,6 +193,9 @@ class DisplayInfo extends ChangeNotifier with StringSize{
     // Set canvas size
     _setCanvasSize();
 
+    // Adjust the displayed y value range
+    _adjustDisplayValueRange();
+
     // Set xSectionWidth, this may also set a new bar width
     _setXSectionWidth();
 
@@ -181,9 +204,6 @@ class DisplayInfo extends ChangeNotifier with StringSize{
 
     // Set displayMiniCanvas bool
     _setDisplayMiniCanvas();
-
-    // Adjust the displayed y value range
-    _adjustDisplayValueRange();
 
     // TODO should this be done in here???
     dataModel.populateDataWithMinimumValue();
@@ -200,12 +220,43 @@ class DisplayInfo extends ChangeNotifier with StringSize{
     // Set Canvas wrapper size
     _setCanvasWrapperSize();
 
-    _y1RangeFilter = RangeValues(y1Min, y1Max);
+    // Set y filter range
+    _setYFilterRange();
   }
 
   void _setOriginalDisplayRange() {
     _originalDisplayY1Range = [_displayY1Range[0], _displayY1Range[1]];
     _originalDisplayY2Range = [_displayY2Range[0], _displayY2Range[1]];
+  }
+
+  void _setInitialSelectedXGroups() {
+    originalDataModel.xGroups.forEach((group) {
+      _selectedXGroups[group] = true;
+    });
+    originalDataModel.xSubGroups.forEach((subGroup) {
+      _selectedXSubGroups[subGroup] = true;
+    });
+  }
+
+  void _setYFilterRange() {
+    if (_y1RangeFilter == null) {
+      _y1RangeFilter = RangeValues(y1Min, y1Max);
+    }
+    if (_y2RangeFilter == null) {
+      _y2RangeFilter = RangeValues(y2Min, y2Max);
+    }
+  }
+
+  void _setMiniDisplayText() {
+    if (_showAverageLine) {
+      _leftDisplayText = 'Avg: ${dataModel.y1Average.toStringAsFixed(2)}';
+      if (_hasYAxisOnTheRight) {
+        _rightDisplayText = 'Avg: ${dataModel.y2Average.toStringAsFixed(2)}';
+      }
+    } else {
+      _leftDisplayText = '';
+      _rightDisplayText = '';
+    }
   }
 
   void _setIsMini() => _isMini = style.isMini;

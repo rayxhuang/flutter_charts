@@ -147,7 +147,7 @@ class ModularBarChart extends StatelessWidget with StringSize {
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: displayInfo.showFilterPanel
-                        ? FilterPanel(yMin: displayInfo.originalY1Min, yMax: displayInfo.originalY1Max,)
+                        ? FilterPanel(displayInfo: displayInfo,)
                         : ChartDisplayArea(),
                   ),
                 ],

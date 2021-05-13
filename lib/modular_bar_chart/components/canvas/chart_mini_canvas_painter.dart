@@ -22,7 +22,6 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
 
   @override
   void paint(Canvas canvas, Size size) {
-    //final double xSectionLength = size.width / dataModel.xGroups.length;
     final double xSectionLength = displayInfo.xSectionWidth;
     final BarChartType type = dataModel.type;
     if (type == BarChartType.Ungrouped) {

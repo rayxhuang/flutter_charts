@@ -272,63 +272,145 @@ class ModularBarChartData with StringSize {
   }
 
   ModularBarChartData applyFilter({
-    RangeValues y1Filter
+    @required RangeValues y1Filter,
+    @required RangeValues y2Filter,
+    @required Map<String, bool> xGroupFilter,
+    @required Map<String, bool> xSubGroupFilter,
   }) {
     if (type == BarChartType.Ungrouped) {
-      Map<String, double> filteredData = {};
-      rawData.forEach((group, value) {
+      Map<String, double> filteredData = _applyFilterOnUngroupedData(
+        y1Filter: y1Filter,
+        xGroupFilter: xGroupFilter,
+      );
+      if (filteredData.isNotEmpty) { return _returnNewDataModel(filteredData); }
+    } else if (type == BarChartType.Grouped) {
+      Map<String, Map<String, double>> filteredData = _applyFilterOnGroupedData(
+        y1Filter: y1Filter,
+        xGroupFilter: xGroupFilter,
+        xSubGroupFilter: xSubGroupFilter,
+      );
+      if (filteredData.isNotEmpty) { return _returnNewDataModel(filteredData); }
+    } else if (type == BarChartType.GroupedStacked) {
+      Map<String, Map<String, double>> filteredData = _applyFilterOnGroupedStackedData(
+        y1Filter: y1Filter,
+        xGroupFilter: xGroupFilter,
+        xSubGroupFilter: xSubGroupFilter,
+      );
+      if (filteredData.isNotEmpty) { return _returnNewDataModel(filteredData); }
+    } else if (type == BarChartType.GroupedSeparated) {
+      Map<String, Map<String, double>> filteredData = _applyFilterOnGroupedSeparatedData(
+        y1Filter: y1Filter,
+        y2Filter: y2Filter,
+        xGroupFilter: xGroupFilter,
+      );
+      if (filteredData.isNotEmpty) {
+        return _returnNewDataModel(filteredData);
+      }
+    }
+    return this;
+  }
+
+  Map<String, double> _applyFilterOnUngroupedData({
+    @required RangeValues y1Filter,
+    @required Map<String, bool> xGroupFilter,
+  }) {
+    Map<String, double> filteredData = {};
+    rawData.forEach((group, value) {
+      if (xGroupFilter[group]) {
         if (value is double) {
           if (value.within(y1Filter)) {
             filteredData[group] = value;
           }
         }
-      });
-      if (filteredData.isNotEmpty) {
-        return returnNewData(filteredData);
       }
-    } else if (type == BarChartType.Grouped) {
-      Map<String, Map<String, double>> filteredData = {};
-      List<String> initialisedGroup = [];
-      rawData.forEach((group, map) {
+    });
+    return filteredData;
+  }
+
+  Map<String, Map<String, double>> _applyFilterOnGroupedData({
+    @required RangeValues y1Filter,
+    @required Map<String, bool> xGroupFilter,
+    @required Map<String, bool> xSubGroupFilter,
+  }) {
+    Map<String, Map<String, double>> filteredData = {};
+    List<String> initialisedGroup = [];
+    rawData.forEach((group, map) {
+      if (xGroupFilter[group]) {
         map.forEach((subgroup, value) {
-          if (value is double) {
-            if (value.within(y1Filter)) {
-              if (!initialisedGroup.contains(group)) {
-                initialisedGroup.add(group);
-                filteredData[group] = {};
+          if (xSubGroupFilter[subgroup]) {
+            if (value is double) {
+              if (value.within(y1Filter)) {
+                if (!initialisedGroup.contains(group)) {
+                  initialisedGroup.add(group);
+                  filteredData[group] = {};
+                }
+                filteredData[group][subgroup] = value;
               }
-              filteredData[group][subgroup] = value;
             }
           }
         });
-      });
-      if (filteredData.isNotEmpty) {
-        return returnNewData(filteredData);
       }
-    } else if (type == BarChartType.GroupedStacked) {
-      Map<String, Map<String, double>> filteredData = {};
-      List<String> initialisedGroup = [];
-      rawData.forEach((group, map) {
+    });
+    return filteredData;
+  }
+
+  Map<String, Map<String, double>> _applyFilterOnGroupedStackedData({
+    @required RangeValues y1Filter,
+    @required Map<String, bool> xGroupFilter,
+    @required Map<String, bool> xSubGroupFilter,
+  }) {
+    Map<String, Map<String, double>> filteredData = {};
+    List<String> initialisedGroup = [];
+    print(xSubGroupFilter);
+    rawData.forEach((group, map) {
+      if (xGroupFilter[group]) {
         double localSum = 0;
         map.forEach((subgroup, value) {
-          localSum += value;
+          if (xSubGroupFilter[subgroup]) {
+            localSum += value;
+          }
         });
         if (localSum.within(y1Filter)) {
           if (!initialisedGroup.contains(group)) {
             initialisedGroup.add(group);
             filteredData[group] = {};
           }
-          filteredData[group] = rawData[group];
+          final Map<String, double> dirtyMap = new Map<String, double>.of(rawData[group]);
+          final List<String> subGroups = dirtyMap.keys.toList();
+          for (String name in subGroups) {
+            if (!xSubGroupFilter[name]) {
+              dirtyMap.remove(name);
+            }
+          }
+          filteredData[group] = dirtyMap;
         }
-      });
-      if (filteredData.isNotEmpty) {
-        return returnNewData(filteredData);
       }
-    }
-    return this;
+    });
+    return filteredData;
   }
 
-  ModularBarChartData returnNewData(Map<String, dynamic> filteredData) {
+  Map<String, Map<String, double>> _applyFilterOnGroupedSeparatedData({
+    @required RangeValues y1Filter,
+    @required RangeValues y2Filter,
+    @required Map<String, bool> xGroupFilter,
+  }) {
+    Map<String, Map<String, double>> filteredData = {};
+    rawData.forEach((group, map) {
+      if (xGroupFilter[group]) {
+        bool satisfyY1 = false, satisfyY2 = false;
+        final List<String> yGroups = map.keys.toList();
+        final double y1 = map[yGroups[0]], y2 = map[yGroups[1]];
+        if (y1.within(y1Filter)) { satisfyY1 = true; }
+        if (y2.within(y2Filter)) { satisfyY2 = true; }
+        if (satisfyY1 && satisfyY2) {
+          filteredData[group] = map;
+        }
+      }
+    });
+    return filteredData;
+  }
+
+  ModularBarChartData _returnNewDataModel(Map<String, dynamic> filteredData) {
     final ModularBarChartData newDataModel = ModularBarChartData._(
       rawData: filteredData,
       type: this.type,
