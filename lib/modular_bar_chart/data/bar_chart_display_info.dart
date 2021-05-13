@@ -32,7 +32,7 @@ class DisplayInfo extends ChangeNotifier with StringSize{
       parentSize: parentSize,
     );
     displayInfo._init();
-    displayInfo._setOriginalDisplayRange();
+    displayInfo._setInitialDisplayRange();
     displayInfo._setInitialSelectedXGroups();
     return displayInfo;
   }
@@ -98,6 +98,8 @@ class DisplayInfo extends ChangeNotifier with StringSize{
   String _rightDisplayText = '';
   RangeValues _y1RangeFilter;
   RangeValues _y2RangeFilter;
+  Map<String, bool> _originalSelectedXGroups = {};
+  Map<String, bool> _originalSelectedXSubGroups = {};
   Map<String, bool> _selectedXGroups = {};
   Map<String, bool> _selectedXSubGroups = {};
 
@@ -114,6 +116,8 @@ class DisplayInfo extends ChangeNotifier with StringSize{
   double get y1FilterMax => _y1RangeFilter.end;
   double get y2FilterMin => _y2RangeFilter.start;
   double get y2FilterMax => _y2RangeFilter.end;
+  Map<String, bool> get originalSelectedXGroups => _originalSelectedXGroups;
+  Map<String, bool> get originalSelectedXSubGroups => _originalSelectedXSubGroups;
   Map<String, bool> get selectedXGroups => _selectedXGroups;
   Map<String, bool> get selectedXSubGroups => _selectedXSubGroups;
 
@@ -153,10 +157,10 @@ class DisplayInfo extends ChangeNotifier with StringSize{
     _y2RangeFilter = y2Filter ?? this._y2RangeFilter;
     _selectedXGroups = xGroupFilter ?? this._selectedXGroups;
     _selectedXSubGroups = xSubGroupFilter ?? this._selectedXSubGroups;
-    print('Y1 Filter: $_y1RangeFilter');
-    print('Y2 Filter: $_y2RangeFilter');
-    print('XGroup Filter: $_selectedXGroups');
-    print('XGroup Filter: $_selectedXSubGroups');
+    // print('Y1 Filter: $_y1RangeFilter');
+    // print('Y2 Filter: $_y2RangeFilter');
+    // print('XGroup Filter: $_selectedXGroups');
+    // print('XGroup Filter: $_selectedXSubGroups');
     dataModel = originalDataModel.applyFilter(
       y1Filter: _y1RangeFilter,
       y2Filter: _y2RangeFilter,
@@ -224,16 +228,18 @@ class DisplayInfo extends ChangeNotifier with StringSize{
     _setYFilterRange();
   }
 
-  void _setOriginalDisplayRange() {
+  void _setInitialDisplayRange() {
     _originalDisplayY1Range = [_displayY1Range[0], _displayY1Range[1]];
     _originalDisplayY2Range = [_displayY2Range[0], _displayY2Range[1]];
   }
 
   void _setInitialSelectedXGroups() {
     originalDataModel.xGroups.forEach((group) {
+      _originalSelectedXGroups[group] = true;
       _selectedXGroups[group] = true;
     });
     originalDataModel.xSubGroups.forEach((subGroup) {
+      _originalSelectedXSubGroups[subGroup] = true;
       _selectedXSubGroups[subGroup] = true;
     });
   }

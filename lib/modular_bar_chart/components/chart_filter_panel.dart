@@ -112,19 +112,19 @@ class _FilterPanelState extends State<FilterPanel> {
                   : SizedBox(),
               displayInfo.originalDataModel.type == BarChartType.GroupedSeparated
                   ? SizedBox(
-                height: 17,
-                child: Row(
-                  children: [
-                    Text(
-                      'Start: ${y2Range.start.toStringAsFixed(2)}'
+                    height: 17,
+                    child: Row(
+                      children: [
+                        Text(
+                          'Start: ${y2Range.start.toStringAsFixed(2)}'
+                        ),
+                        Spacer(),
+                        Text(
+                          'End: ${y2Range.end.toStringAsFixed(2)}'
+                        )
+                      ],
                     ),
-                    Spacer(),
-                    Text(
-                      'End: ${y2Range.end.toStringAsFixed(2)}'
-                    )
-                  ],
-                ),
-              )
+                  )
                   : space,
               displayInfo.originalDataModel.type == BarChartType.GroupedSeparated
                   ? space
@@ -179,17 +179,40 @@ class _FilterPanelState extends State<FilterPanel> {
                   )
                   : SizedBox(),
               space,
-              IconButton(
-                onPressed: () {
-                  displayInfo.toggleFilterPanel();
-                  displayInfo.setFilter(
-                    y1Filter: y1Range,
-                    y2Filter: y2Range,
-                    xGroupFilter: selectedXGroups,
-                    xSubGroupFilter: selectedXSubGroups,
-                  );
-                },
-                icon: Icon(CupertinoIcons.checkmark),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Tooltip(
+                    message: 'Apply',
+                    child: IconButton(
+                      onPressed: () {
+                        displayInfo.toggleFilterPanel();
+                        displayInfo.setFilter(
+                          y1Filter: y1Range,
+                          y2Filter: y2Range,
+                          xGroupFilter: selectedXGroups,
+                          xSubGroupFilter: selectedXSubGroups,
+                        );
+                      },
+                      icon: Icon(CupertinoIcons.checkmark),
+                    ),
+                  ),
+                  Tooltip(
+                    message: 'Reset all filters',
+                    child: IconButton(
+                      onPressed: () {
+                        displayInfo.toggleFilterPanel();
+                        displayInfo.setFilter(
+                          y1Filter: RangeValues(displayInfo.originalY1Min, displayInfo.originalY1Max),
+                          y2Filter: RangeValues(displayInfo.originalY2Min, displayInfo.originalY2Max),
+                          xGroupFilter: new Map<String, bool>.from(displayInfo.originalSelectedXGroups),
+                          xSubGroupFilter: new Map<String, bool>.from(displayInfo.originalSelectedXSubGroups),
+                        );
+                      },
+                      icon: Icon(CupertinoIcons.clear),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
