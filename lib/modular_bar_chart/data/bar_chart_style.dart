@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 
 typedef Comparator<T> = int Function(T a, T b);
-enum BarChartBarShape {Rectangle, RoundedRectangle}
+enum BarChartBarShape { Rectangle, RoundedRectangle }
 
 class BarChartStyle {
   final BarChartLabel title;
@@ -35,6 +35,49 @@ class BarChartStyle {
     this.isMini = false,
   });
 
+  static const BarChartStyle standard = BarChartStyle(
+    isMini: true,
+    title: BarChartLabel(
+      text: 'Boring Title',
+      textStyle: TextStyle(color: Colors.white),
+    ),
+    sortXAxis: true,
+    groupMargin: 5,
+    xAxisStyle: AxisStyle(
+      label: BarChartLabel(
+        text: 'x Axis',
+        textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      ),
+      axisColor: Colors.teal,
+      tickStyle: TickStyle(
+        tickLength: 5,
+        tickColor: Colors.teal,
+      ),
+    ),
+    y1AxisStyle: AxisStyle(
+      numTicks: 5,
+      label: BarChartLabel(
+        text: 'Y Axis',
+        textStyle: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      //preferredEndValue: 20,
+      axisColor: Colors.teal,
+      tickStyle: TickStyle(
+        tickLength: 5,
+        tickColor: Colors.teal,
+      ),
+    ),
+    barStyle: BarChartBarStyle(
+      barWidth: 15,
+      barInGroupMargin: 1,
+    ),
+    legendStyle: BarChartLegendStyle(visible: false),
+    clickable: false,
+  );
+
   BarChartStyle copyWith({
     BarChartLabel title,
     double groupMargin,
@@ -50,22 +93,23 @@ class BarChartStyle {
     BarChartAnimation animation,
     bool clickable,
     bool isMini,
-  }) => BarChartStyle(
-      title: title ?? this.title,
-      groupMargin: groupMargin ?? this.groupMargin,
-      sortXAxis: sortXAxis ?? this.sortXAxis,
-      subGroupColors: subGroupColors ?? this.subGroupColors,
-      groupComparator: groupComparator ?? this.groupComparator,
-      contentPadding: contentPadding ?? this.contentPadding,
-      xAxisStyle: xAxisStyle ?? this.xAxisStyle,
-      y1AxisStyle: y1AxisStyle ?? this.y1AxisStyle,
-      y2AxisStyle: y2AxisStyle ?? this.y2AxisStyle,
-      barStyle: barStyle ?? this.barStyle,
-      legendStyle: legendStyle ?? this.legendStyle,
-      animation: animation ?? this.animation,
-      clickable: clickable ?? this.clickable,
-      isMini: isMini ?? this.isMini,
-    );
+  }) =>
+      BarChartStyle(
+        title: title ?? this.title,
+        groupMargin: groupMargin ?? this.groupMargin,
+        sortXAxis: sortXAxis ?? this.sortXAxis,
+        subGroupColors: subGroupColors ?? this.subGroupColors,
+        groupComparator: groupComparator ?? this.groupComparator,
+        contentPadding: contentPadding ?? this.contentPadding,
+        xAxisStyle: xAxisStyle ?? this.xAxisStyle,
+        y1AxisStyle: y1AxisStyle ?? this.y1AxisStyle,
+        y2AxisStyle: y2AxisStyle ?? this.y2AxisStyle,
+        barStyle: barStyle ?? this.barStyle,
+        legendStyle: legendStyle ?? this.legendStyle,
+        animation: animation ?? this.animation,
+        clickable: clickable ?? this.clickable,
+        isMini: isMini ?? this.isMini,
+      );
 }
 
 class AxisStyle {
@@ -101,17 +145,18 @@ class AxisStyle {
     double preferredEndValue,
     TickStyle tickStyle,
     BarChartLabel label,
-  }) => AxisStyle(
-    visible: visible ?? this.visible,
-    numTicks: numTicks ?? this.numTicks,
-    axisColor: axisColor ?? this.axisColor,
-    strokeWidth: strokeWidth ?? this.strokeWidth,
-    strokeCap: strokeCap ?? this.strokeCap,
-    preferredStartValue: preferredStartValue ?? this.preferredStartValue,
-    preferredEndValue: preferredEndValue ?? this.preferredEndValue,
-    tickStyle: tickStyle ?? this.tickStyle,
-    label: label ?? this.label,
-  );
+  }) =>
+      AxisStyle(
+        visible: visible ?? this.visible,
+        numTicks: numTicks ?? this.numTicks,
+        axisColor: axisColor ?? this.axisColor,
+        strokeWidth: strokeWidth ?? this.strokeWidth,
+        strokeCap: strokeCap ?? this.strokeCap,
+        preferredStartValue: preferredStartValue ?? this.preferredStartValue,
+        preferredEndValue: preferredEndValue ?? this.preferredEndValue,
+        tickStyle: tickStyle ?? this.tickStyle,
+        label: label ?? this.label,
+      );
 }
 
 class TickStyle {
@@ -144,16 +189,17 @@ class TickStyle {
     double tickMargin,
     int tickDecimal,
     double tickLength,
-  }) => TickStyle(
-    onlyShowTicksAtTwoSides: onlyShowTicksAtTwoSides ?? this.onlyShowTicksAtTwoSides,
-    lastTickWithUnit: lastTickWithUnit ?? this.lastTickWithUnit,
-    labelTextStyle: labelTextStyle ?? this.labelTextStyle,
-    unit: unit ?? this.unit,
-    tickColor: tickColor ?? this.tickColor,
-    tickMargin: tickMargin ?? this.tickMargin,
-    tickDecimal: tickDecimal ?? this.tickDecimal,
-    tickLength: tickLength ?? this.tickLength,
-  );
+  }) =>
+      TickStyle(
+        onlyShowTicksAtTwoSides: onlyShowTicksAtTwoSides ?? this.onlyShowTicksAtTwoSides,
+        lastTickWithUnit: lastTickWithUnit ?? this.lastTickWithUnit,
+        labelTextStyle: labelTextStyle ?? this.labelTextStyle,
+        unit: unit ?? this.unit,
+        tickColor: tickColor ?? this.tickColor,
+        tickMargin: tickMargin ?? this.tickMargin,
+        tickDecimal: tickDecimal ?? this.tickDecimal,
+        tickLength: tickLength ?? this.tickLength,
+      );
 }
 
 class BarChartBarStyle {
@@ -189,17 +235,18 @@ class BarChartBarStyle {
     Radius topRight,
     Radius bottomLeft,
     Radius bottomRight,
-  }) => BarChartBarStyle(
-    barWidth: barWidth ?? this.barWidth,
-    barInGroupMargin: barInGroupMargin ?? this.barInGroupMargin,
-    isStacked: isStacked ?? this.isStacked,
-    color: color ?? this.color,
-    shape: shape ?? this.shape,
-    topLeft: topLeft ?? this.topLeft,
-    topRight: topRight ?? this.topRight,
-    bottomLeft: bottomLeft ?? this.bottomLeft,
-    bottomRight: bottomRight ?? this.bottomRight,
-  );
+  }) =>
+      BarChartBarStyle(
+        barWidth: barWidth ?? this.barWidth,
+        barInGroupMargin: barInGroupMargin ?? this.barInGroupMargin,
+        isStacked: isStacked ?? this.isStacked,
+        color: color ?? this.color,
+        shape: shape ?? this.shape,
+        topLeft: topLeft ?? this.topLeft,
+        topRight: topRight ?? this.topRight,
+        bottomLeft: bottomLeft ?? this.bottomLeft,
+        bottomRight: bottomRight ?? this.bottomRight,
+      );
 }
 
 class BarChartLegendStyle {
@@ -220,12 +267,13 @@ class BarChartLegendStyle {
     TextStyle legendTextStyle,
     int preferredNumLegendsOnScreen,
     double minimumSize,
-  }) => BarChartLegendStyle(
-    visible: visible ?? this.visible,
-    legendTextStyle: legendTextStyle ?? this.legendTextStyle,
-    preferredNumLegendsOnScreen: preferredNumLegendsOnScreen ?? this.preferredNumLegendsOnScreen,
-    minimumSize: minimumSize ?? this.minimumSize,
-  );
+  }) =>
+      BarChartLegendStyle(
+        visible: visible ?? this.visible,
+        legendTextStyle: legendTextStyle ?? this.legendTextStyle,
+        preferredNumLegendsOnScreen: preferredNumLegendsOnScreen ?? this.preferredNumLegendsOnScreen,
+        minimumSize: minimumSize ?? this.minimumSize,
+      );
 }
 
 class BarChartAnimation {
@@ -240,8 +288,9 @@ class BarChartAnimation {
   BarChartAnimation copyWith({
     bool animateData,
     Duration dataAnimationDuration,
-  }) => BarChartAnimation(
-    animateData: animateData ?? this.animateData,
-    dataAnimationDuration: dataAnimationDuration ?? this.dataAnimationDuration,
-  );
+  }) =>
+      BarChartAnimation(
+        animateData: animateData ?? this.animateData,
+        dataAnimationDuration: dataAnimationDuration ?? this.dataAnimationDuration,
+      );
 }

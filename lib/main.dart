@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_charts/horizontal_chart_page.dart';
-
-import 'package:flutter_charts/modular_bar_chart/data/sample_data.dart';
-import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
+import 'package:flutter_charts/modular_bar_chart/data/sample_data.dart';
 import 'package:flutter_charts/modular_bar_chart/modular_bar_chart.dart';
 
-void main() { runApp(MyApp()); }
+// ! use expression body
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
@@ -21,433 +20,190 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatelessWidget {
-  final ModularBarChart chartUngrouped = ModularBarChart.ungrouped(
-    data: sampleData2,
-    style: BarChartStyle(
-      isMini: true,
-      title: BarChartLabel(
-        text: 'Boring Title',
-        textStyle: TextStyle(color: Colors.white),
-      ),
-      sortXAxis: true,
-      groupMargin: 5,
-      xAxisStyle: AxisStyle(
-        label: BarChartLabel(
-          text: 'x Axis',
-          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        axisColor: Colors.teal,
-        tickStyle: TickStyle(
-          tickLength: 5,
-          tickColor: Colors.teal,
-        ),
-      ),
-      y1AxisStyle: AxisStyle(
-        numTicks: 5,
-        label: BarChartLabel(
-          text: 'Y Axis',
-          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
-        ),
-        //preferredEndValue: 20,
-        axisColor: Colors.teal,
-        tickStyle: TickStyle(
-          tickLength: 5,
-          tickColor: Colors.teal,
-        ),
-      ),
-      barStyle: BarChartBarStyle(
-        barWidth: 15,
-        barInGroupMargin: 1,
-      ),
-      legendStyle: BarChartLegendStyle(visible: false),
-      clickable: false,
-    ),
-  );
-  final ModularBarChart chartGroupedSeparated = ModularBarChart.groupedSeparated(
-    data: sampleData6,
-    style: BarChartStyle(
-      isMini: true,
-      title: BarChartLabel(
-        text: 'Boring Title',
-        textStyle: TextStyle(color: Colors.white),
-      ),
-      sortXAxis: true,
-      groupMargin: 5,
-      xAxisStyle: AxisStyle(
-        label: BarChartLabel(
-          text: 'x Axis',
-          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        axisColor: Colors.teal,
-        tickStyle: TickStyle(
-          tickLength: 5,
-          tickColor: Colors.teal,
-        ),
-      ),
-      y1AxisStyle: AxisStyle(
-        numTicks: 5,
-        label: BarChartLabel(
-          text: 'Y Axis',
-          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
-        ),
-        //preferredEndValue: 20,
-        axisColor: Colors.teal,
-        tickStyle: TickStyle(
-          tickLength: 5,
-          tickColor: Colors.teal,
-        ),
-      ),
-      y2AxisStyle: AxisStyle(
-        numTicks: 5,
-        label: BarChartLabel(
-          text: 'Y Axis',
-          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
-        ),
-        //preferredEndValue: 20,
-        axisColor: Colors.teal,
-        tickStyle: TickStyle(
-          tickLength: 5,
-          tickColor: Colors.teal,
-        ),
-      ),
-      barStyle: BarChartBarStyle(
-        barWidth: 15,
-        barInGroupMargin: 1,
-      ),
-      legendStyle: BarChartLegendStyle(visible: false),
-      clickable: false,
-    ),
-  );
-  final ModularBarChart chartGrouped = ModularBarChart.grouped(
-    data: sampleData3,
-    style: BarChartStyle(
-      isMini: true,
-      title: BarChartLabel(
-        text: 'Boring Title',
-        textStyle: TextStyle(color: Colors.white),
-      ),
-      sortXAxis: true,
-      groupMargin: 5,
-      // TODO Allow subgroup comparator
-      xAxisStyle: AxisStyle(
-        label: BarChartLabel(
-          text: 'X Axis',
-          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        axisColor: Colors.teal,
-        tickStyle: TickStyle(
-          tickLength: 5,
-          tickColor: Colors.teal,
-        ),
-      ),
-      y1AxisStyle: AxisStyle(
-        numTicks: 5,
-        label: BarChartLabel(
-          text: 'Y Axis',
-          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
-        ),
-        //preferredEndValue: 20,
-        axisColor: Colors.teal,
-        tickStyle: TickStyle(
-          tickLength: 5,
-          tickColor: Colors.teal,
-        ),
-      ),
-      barStyle: BarChartBarStyle(
-        barWidth: 10,
-        barInGroupMargin: 0,
-      ),
-      clickable: false,
-    ),
-  );
-  final ModularBarChart chartGroupedStacked = ModularBarChart.groupedStacked(
-    data: sampleData3,
-    style: BarChartStyle(
-      isMini: true,
-      title: BarChartLabel(
-        text: 'Boring Title',
-        textStyle: TextStyle(color: Colors.white),
-      ),
-      sortXAxis: true,
-      groupMargin: 5,
-      xAxisStyle: AxisStyle(
-        label: BarChartLabel(
-          text: 'Age',
-          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        axisColor: Colors.teal,
-        tickStyle: TickStyle(
-          tickLength: 5,
-          tickColor: Colors.teal,
-        ),
-      ),
-      y1AxisStyle: AxisStyle(
-        numTicks: 5,
-        label: BarChartLabel(
-          text: 'Height in cm',
-          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
-        ),
-        //preferredEndValue: 20,
-        axisColor: Colors.teal,
-        tickStyle: TickStyle(
-          tickLength: 5,
-          tickColor: Colors.teal,
-        ),
-      ),
-      barStyle: BarChartBarStyle(
-        barWidth: 25,
-        barInGroupMargin: 0,
-        isStacked: true,
-      ),
-      clickable: false,
-    ),
-  );
-  final ModularBarChart chartGroupedTest = ModularBarChart.grouped(
-    data: sampleData7,
-    style: BarChartStyle(
-      isMini: true,
-      title: BarChartLabel(
-        text: 'Boring Title',
-        textStyle: TextStyle(color: Colors.white),
-      ),
-      sortXAxis: true,
-      groupMargin: 5,
-      groupComparator: (string, other) {
-        if (monthNames.indexOf(string) < monthNames.indexOf(other)) {
-          return -1;
-        } else {
-          return 1;
-        }
-      },
-      xAxisStyle: AxisStyle(
-        label: BarChartLabel(
-          text: 'X Axis',
-          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        axisColor: Colors.teal,
-        tickStyle: TickStyle(
-          tickLength: 5,
-          tickColor: Colors.teal,
-        ),
-      ),
-      y1AxisStyle: AxisStyle(
-        numTicks: 5,
-        label: BarChartLabel(
-          text: 'Y Axis',
-          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
-        ),
-        //preferredEndValue: 20,
-        axisColor: Colors.teal,
-        tickStyle: TickStyle(
-          tickLength: 5,
-          tickColor: Colors.teal,
-        ),
-      ),
-      barStyle: BarChartBarStyle(
-        barWidth: 10,
-        barInGroupMargin: 0,
-      ),
-      clickable: false,
-    ),
-  );
-  final ModularBarChart chartGroupedTest1 = ModularBarChart.grouped(
-    data: sampleData8,
-    style: BarChartStyle(
-      isMini: true,
-      title: BarChartLabel(
-        text: 'Boring Title',
-        textStyle: TextStyle(color: Colors.white),
-      ),
-      sortXAxis: true,
-      groupMargin: 5,
-      groupComparator: (string, other) {
-        if (monthNames.indexOf(string) < monthNames.indexOf(other)) {
-          return -1;
-        } else {
-          return 1;
-        }
-      },
-      xAxisStyle: AxisStyle(
-        label: BarChartLabel(
-          text: 'X Axis',
-          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        axisColor: Colors.teal,
-        tickStyle: TickStyle(
-          tickLength: 5,
-          tickColor: Colors.teal,
-        ),
-      ),
-      y1AxisStyle: AxisStyle(
-        numTicks: 5,
-        label: BarChartLabel(
-          text: 'Y Axis',
-          textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,),
-        ),
-        //preferredEndValue: 20,
-        axisColor: Colors.teal,
-        tickStyle: TickStyle(
-          tickLength: 5,
-          tickColor: Colors.teal,
-        ),
-      ),
-      barStyle: BarChartBarStyle(
-        barWidth: 10,
-        barInGroupMargin: 0,
-      ),
-      clickable: false,
-    ),
-  );
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Charts'),
       ),
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: GridView.count(
-          crossAxisCount: 2,
-          children: [
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) =>
-                    HorizontalChartViewPage(chart: chartUngrouped.copyWith(
+      // ! use another widget on body, it can easily extract body widget to fit other pages
+      body: const MyHomePageBody(),
+    );
+  }
+}
+
+class MyHomePageBody extends StatelessWidget {
+  const MyHomePageBody({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // ! use const value to fit factory pattern, reduce massive code
+    final ModularBarChart chartUngrouped = ModularBarChart.ungrouped(data: sampleData2);
+    final ModularBarChart chartGroupedSeparated = ModularBarChart.groupedSeparated(data: sampleData6);
+    final ModularBarChart chartGrouped = ModularBarChart.grouped(data: sampleData3);
+    final ModularBarChart chartGroupedStacked = ModularBarChart.groupedStacked(data: sampleData3);
+    final ModularBarChart chartGroupedTest = ModularBarChart.grouped(data: sampleData7);
+    return Align(
+      alignment: Alignment.topCenter,
+      child: GridView.count(
+        crossAxisCount: 2,
+        children: [
+          // ! extract it into MiniChart
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                // ! add ',' to restructure nicely
+                MaterialPageRoute(
+                  builder: (context) => HorizontalChartViewPage(
+                    // ! should not pass the whole widget, but only data and configuration
+                    chart: chartUngrouped.copyWith(
                       style: chartUngrouped.style.copyWith(
                         clickable: true,
                         isMini: false,
                         animation: BarChartAnimation(
                           animateData: true,
-                        )
-                      )
-                    ))
+                        ),
+                      ),
+                    ),
                   ),
-                );
-              },
-              child: Card(
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-                margin: const EdgeInsets.all(5),
-                child: Container(
-                  padding: EdgeInsets.all(5),
-                  child: chartUngrouped,
                 ),
+              );
+            },
+            child: Card(
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+              ),
+              margin: const EdgeInsets.all(5),
+              child: Container(
+                padding: EdgeInsets.all(5),
+                child: chartUngrouped,
               ),
             ),
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) =>
-                    HorizontalChartViewPage(
-                      chart: chartGroupedSeparated.copyWith(
-                        style: chartGroupedSeparated.style.copyWith(
-                          clickable: true,
-                          isMini: false,
-                          animation: BarChartAnimation(
-                            animateData: true,
-                          )
-                        )
-                      )
-                    )
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                // ! add ',' to restructure nicely
+                MaterialPageRoute(
+                  builder: (context) => HorizontalChartViewPage(
+                    chart: chartGroupedSeparated.copyWith(
+                      style: chartGroupedSeparated.style.copyWith(
+                        clickable: true,
+                        isMini: false,
+                        animation: BarChartAnimation(
+                          animateData: true,
+                        ),
+                      ),
+                    ),
                   ),
-                );
-              },
-              child: Card(
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-                margin: const EdgeInsets.all(5),
-                child: Container(
-                  padding: EdgeInsets.all(5),
-                  child: SafeArea(child: chartGroupedSeparated),
                 ),
+              );
+            },
+            child: Card(
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+              ),
+              margin: const EdgeInsets.all(5),
+              child: Container(
+                padding: EdgeInsets.all(5),
+                child: SafeArea(child: chartGroupedSeparated),
               ),
             ),
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) =>
-                    HorizontalChartViewPage(
-                      chart: chartGrouped.copyWith(
-                        colorMap: chartGrouped.dataModel.subGroupColors,
-                        style: chartGrouped.style.copyWith(
-                          clickable: true,
-                          isMini: false,
-                          animation: BarChartAnimation(animateData: true,)
-                        )
-                      )
-                    )
-                  ),
-                );
-              },
-              child: Card(
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-                margin: const EdgeInsets.all(5),
-                child: Container(
-                  padding: EdgeInsets.all(5),
-                  child: chartGrouped,
-                ),
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => HorizontalChartViewPage(
+                        chart: chartGrouped.copyWith(
+                            colorMap: chartGrouped.dataModel.subGroupColors,
+                            style: chartGrouped.style.copyWith(
+                                clickable: true,
+                                isMini: false,
+                                animation: BarChartAnimation(
+                                  animateData: true,
+                                ))))),
+              );
+            },
+            child: Card(
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+              ),
+              margin: const EdgeInsets.all(5),
+              child: Container(
+                padding: EdgeInsets.all(5),
+                child: chartGrouped,
               ),
             ),
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) =>
-                    HorizontalChartViewPage(
-                      chart: chartGroupedStacked.copyWith(
-                        colorMap: chartGroupedStacked.dataModel.subGroupColors,
-                        style: chartGroupedStacked.style.copyWith(
-                          clickable: true,
-                          isMini: false,
-                          animation: BarChartAnimation(animateData: true,)
-                        )
-                      )
-                    )
-                  ),
-                );
-              },
-              child: Card(
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-                margin: const EdgeInsets.all(5),
-                child: Container(
-                  padding: EdgeInsets.all(5),
-                  child: chartGroupedStacked,
-                ),
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => HorizontalChartViewPage(
+                        chart: chartGroupedStacked.copyWith(
+                            colorMap: chartGroupedStacked.dataModel.subGroupColors,
+                            style: chartGroupedStacked.style.copyWith(
+                                clickable: true,
+                                isMini: false,
+                                animation: BarChartAnimation(
+                                  animateData: true,
+                                ))))),
+              );
+            },
+            child: Card(
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+              ),
+              margin: const EdgeInsets.all(5),
+              child: Container(
+                padding: EdgeInsets.all(5),
+                child: chartGroupedStacked,
               ),
             ),
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) =>
-                    HorizontalChartViewPage(
-                      chart: chartGroupedTest.copyWith(
-                        colorMap: chartGroupedTest.dataModel.subGroupColors,
-                        style: chartGroupedTest.style.copyWith(
-                          clickable: true,
-                          isMini: false,
-                          animation: BarChartAnimation(animateData: true,)
-                        )
-                      )
-                    )
-                  ),
-                );
-              },
-              child: Card(
-                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20)),),
-                margin: const EdgeInsets.all(5),
-                child: Container(
-                  padding: EdgeInsets.all(5),
-                  child: chartGroupedTest,
-                ),
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => HorizontalChartViewPage(
+                        chart: chartGroupedTest.copyWith(
+                            colorMap: chartGroupedTest.dataModel.subGroupColors,
+                            style: chartGroupedTest.style.copyWith(
+                                clickable: true,
+                                isMini: false,
+                                animation: BarChartAnimation(
+                                  animateData: true,
+                                ))))),
+              );
+            },
+            child: Card(
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+              ),
+              margin: const EdgeInsets.all(5),
+              child: Container(
+                padding: EdgeInsets.all(5),
+                child: chartGroupedTest,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
+  }
+}
+
+class MiniChart extends StatelessWidget {
+  const MiniChart({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container();
   }
 }

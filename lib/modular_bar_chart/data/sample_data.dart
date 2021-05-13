@@ -1,4 +1,4 @@
-Map<String, double> sampleData2 =  {
+const sampleData2 = const <String, dynamic>{
   'A': 1,
   'C': 3,
   'B': 7,
@@ -19,7 +19,7 @@ Map<String, double> sampleData2 =  {
   'F2': 18,
 };
 
-Map<String, Map<String, double>> sampleData3 =  {
+const sampleData3 = const <String, dynamic>{
   'A': {
     'a': 2,
     'b': 4,
@@ -32,12 +32,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'C': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'C': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'D': {
     'a': 2,
     'b': 4,
@@ -51,12 +46,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'G': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'G': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'Y': {
     'a': 2,
     'b': 4,
@@ -70,12 +60,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'Z': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'Z': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   '2': {
     'a': 2,
     'b': 4,
@@ -88,12 +73,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'C4': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'C4': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'D5': {
     'a': 2,
     'b': 4,
@@ -107,12 +87,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'G7': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'G7': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'Yd': {
     'a': 2,
     'b': 4,
@@ -126,12 +101,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'Zj': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'Zj': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'Ax': {
     'a': 2,
     'b': 4,
@@ -144,12 +114,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'Ck': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'Ck': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'Ds': {
     'a': 2,
     'b': 4,
@@ -163,12 +128,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'Gx': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'Gx': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'Yk': {
     'a': 2,
     'b': 4,
@@ -182,12 +142,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'Zf': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'Zf': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'Ai': {
     'a': 2,
     'b': 4,
@@ -200,12 +155,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'Cd': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'Cd': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'Dg': {
     'a': 2,
     'b': 4,
@@ -219,12 +169,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'Gw': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'Gw': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'Yde': {
     'a': 2,
     'b': 4,
@@ -238,24 +183,14 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'Zz': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'Zz': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'A1': {
     'a': 2,
     'b': 4,
     'd': 1,
     'eeee': 2,
   },
-  'C1': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'C1': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'D1': {
     'a': 2,
     'b': 4,
@@ -269,12 +204,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'G1': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'G1': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'Y1': {
     'a': 2,
     'b': 4,
@@ -288,12 +218,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'Z1': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'Z1': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   '21': {
     'a': 2,
     'b': 4,
@@ -306,12 +231,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'C41': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'C41': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'D51': {
     'a': 2,
     'b': 4,
@@ -325,12 +245,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'G71': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'G71': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'Yd1': {
     'a': 2,
     'b': 4,
@@ -344,12 +259,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'Zj1': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'Zj1': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'Ax1': {
     'a': 2,
     'b': 4,
@@ -362,12 +272,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'Ck12': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'Ck12': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'Ds12': {
     'a': 2,
     'b': 4,
@@ -381,12 +286,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'G12x': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'G12x': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'Y12k': {
     'a': 2,
     'b': 4,
@@ -400,12 +300,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'Z12f': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'Z12f': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'A12i': {
     'a': 2,
     'b': 4,
@@ -418,12 +313,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'C12d': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'C12d': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'D12g': {
     'a': 2,
     'b': 4,
@@ -437,12 +327,7 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'G12w': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'G12w': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'Yd12e': {
     'a': 2,
     'b': 4,
@@ -456,15 +341,10 @@ Map<String, Map<String, double>> sampleData3 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'Z12z': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'Z12z': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
 };
 
-Map<String, Map<String, double>> sampleData4 =  {
+const sampleData4 = const <String, dynamic>{
   'A': {
     'a': 2,
     'b': 4,
@@ -477,12 +357,7 @@ Map<String, Map<String, double>> sampleData4 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'C': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'C': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'D': {
     'a': 2,
     'b': 4,
@@ -496,12 +371,7 @@ Map<String, Map<String, double>> sampleData4 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'G': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'G': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
   'Y': {
     'a': 2,
     'b': 4,
@@ -515,15 +385,10 @@ Map<String, Map<String, double>> sampleData4 =  {
     'c': 8.5,
     'd': 6.9,
   },
-  'Z': {
-    'a': 7,
-    'b': 2,
-    'c': 5,
-    'd': 12
-  },
+  'Z': {'a': 7, 'b': 2, 'c': 5, 'd': 12},
 };
 
-Map<String, Map<String, double>> sampleData5 = {
+const sampleData5 = const <String, dynamic>{
   '10': {
     'Male': 120,
     'Female': 130,
@@ -542,7 +407,7 @@ Map<String, Map<String, double>> sampleData5 = {
   },
 };
 
-Map<String, Map<String, double>> sampleData6 = {
+const sampleData6 = const <String, dynamic>{
   '10': {
     'weight': 99,
     'height': 80,
@@ -577,7 +442,7 @@ Map<String, Map<String, double>> sampleData6 = {
   },
 };
 
-Map<String, Map<String, double>> sampleData7 = {
+const sampleData7 = const <String, dynamic>{
   'JANUARY': {
     'weight': 40,
     'height': 80,
@@ -640,7 +505,7 @@ Map<String, Map<String, double>> sampleData7 = {
   },
 };
 
-Map<String, Map<String, double>> sampleData8 = {
+const sampleData8 = const <String, dynamic>{
   '1': {
     'weight': 99,
     'height': 80,
@@ -675,4 +540,17 @@ Map<String, Map<String, double>> sampleData8 = {
   },
 };
 
-List<String> monthNames = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+const monthNames = const <String>[
+  'JANUARY',
+  'FEBRUARY',
+  'MARCH',
+  'APRIL',
+  'MAY',
+  'JUNE',
+  'JULY',
+  'AUGUST',
+  'SEPTEMBER',
+  'OCTOBER',
+  'NOVEMBER',
+  'DECEMBER',
+];
