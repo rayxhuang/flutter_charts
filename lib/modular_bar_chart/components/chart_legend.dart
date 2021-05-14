@@ -4,38 +4,38 @@ import 'package:flutter_charts/modular_bar_chart/data/bar_chart_display_info.dar
 import 'package:provider/provider.dart';
 
 import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
-import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 
 class ChartLegendHorizontal extends StatelessWidget with StringSize{
   const ChartLegendHorizontal();
 
+  double _calculateLegendWidth({
+    @required DisplayInfo displayInfo,
+  }) {
+    final double maxWidthOfOneLegend = StringSize.getWidthOfString(displayInfo.longestGroupName, displayInfo.style.legendStyle.legendTextStyle);
+    double legendWidth;
+    if (maxWidthOfOneLegend * displayInfo.dataModel.xSubGroups.length <= displayInfo.canvasWidth) {
+      legendWidth = displayInfo.canvasWidth / displayInfo.dataModel.xSubGroups.length;
+    } else {
+      int numLegendOnScreen = displayInfo.canvasWidth ~/ 50;
+      legendWidth = displayInfo.canvasWidth / numLegendOnScreen;
+    }
+    return legendWidth;
+  }
+
   @override
   Widget build(BuildContext context) {
     final DisplayInfo displayInfo = context.read<DisplayInfo>();
-    final ModularBarChartData dataModel = displayInfo.dataModel;
-    final BarChartStyle style = displayInfo.style;
-    final double width = displayInfo.canvasWidth;
-    final double height = displayInfo.bottomLegendHeight;
-
-    // Calculate width for each legend
-    final double maxWidthOfOneLegend = StringSize.getWidthOfString(displayInfo.longestGroupName, style.legendStyle.legendTextStyle);
-    double legendWidth;
-    if (maxWidthOfOneLegend * dataModel.xSubGroups.length <= width) {
-      legendWidth = width / dataModel.xSubGroups.length;
-    } else {
-      int numLegendOnScreen = width ~/ 50;
-      legendWidth = width / numLegendOnScreen;
-    }
+    final double legendWidth = _calculateLegendWidth(displayInfo: displayInfo);
 
     return SizedBox(
-      width: width,
-      height: height,
+      width: displayInfo.canvasWidth,
+      height: displayInfo.bottomLegendHeight,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const ClampingScrollPhysics(),
-        itemCount: dataModel.xSubGroups.length,
-        itemBuilder: (BuildContext context, int index) {
+        itemCount: displayInfo.dataModel.xSubGroups.length,
+        itemBuilder: (context, index) {
           return HorizontalLegendTile(
             index: index,
             width: legendWidth,
@@ -62,7 +62,7 @@ class HorizontalLegendTile extends StatelessWidget {
     final DisplayInfo displayInfo = context.read<DisplayInfo>();
     final ModularBarChartData dataModel = displayInfo.dataModel;
     final String groupName = dataModel.xSubGroups[index];
-    final Color color = dataModel.subGroupColors[groupName];
+    final Color color = dataModel.xSubGroupColorMap[groupName];
     return SizedBox(
       width: width,
       height: displayInfo.bottomLegendHeight,

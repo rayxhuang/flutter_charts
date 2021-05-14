@@ -14,15 +14,15 @@ class ModularBarChartData with StringSize {
   final bool sortXAxis;
   final Comparator<String> xGroupComparator;
   final Comparator<String> xSubGroupComparator;
-  Map<String, Color> subGroupColors;
+  final Map<String, Color> xSubGroupColorMap;
 
   ModularBarChartData._({
-    this.rawData,
-    this.type,
+    @required this.rawData,
+    @required this.type,
     this.sortXAxis = false,
     this.xGroupComparator,
     this.xSubGroupComparator,
-    this.subGroupColors,
+    @required this.xSubGroupColorMap,
   });
 
   factory ModularBarChartData.ungrouped({
@@ -35,7 +35,7 @@ class ModularBarChartData with StringSize {
       type: BarChartType.Ungrouped,
       sortXAxis: sortXAxis,
       xGroupComparator: xGroupComparator,
-      subGroupColors: const {},
+      xSubGroupColorMap: const {}
     );
     dataModel._analyseData();
     return dataModel;
@@ -43,16 +43,18 @@ class ModularBarChartData with StringSize {
 
   factory ModularBarChartData.grouped({
     @required Map<String, Map<String, double>> rawData,
+    @required Map<String, Color> xSubGroupColorMap,
     bool sortXAxis = false,
     Comparator<String> xGroupComparator,
-    Map<String, Color> subGroupColors,
+    Comparator<String> xSubGroupComparator,
   }) {
     final ModularBarChartData dataModel = ModularBarChartData._(
       rawData: rawData,
       type: BarChartType.Grouped,
       sortXAxis: sortXAxis,
       xGroupComparator: xGroupComparator,
-      subGroupColors: subGroupColors ?? {},
+      xSubGroupComparator: xSubGroupComparator,
+      xSubGroupColorMap: xSubGroupColorMap,
     );
     dataModel._analyseData();
     return dataModel;
@@ -60,16 +62,18 @@ class ModularBarChartData with StringSize {
 
   factory ModularBarChartData.groupedStacked({
     @required Map<String, Map<String, double>> rawData,
+    @required Map<String, Color> xSubGroupColorMap,
     bool sortXAxis = false,
     Comparator<String> xGroupComparator,
-    Map<String, Color> subGroupColors,
+    Comparator<String> xSubGroupComparator,
   }) {
     final ModularBarChartData dataModel = ModularBarChartData._(
       rawData: rawData,
       type: BarChartType.GroupedStacked,
       sortXAxis: sortXAxis,
       xGroupComparator: xGroupComparator,
-      subGroupColors: subGroupColors ?? {},
+      xSubGroupComparator: xSubGroupComparator,
+      xSubGroupColorMap: xSubGroupColorMap,
     );
     dataModel._analyseData();
     return dataModel;
@@ -77,16 +81,18 @@ class ModularBarChartData with StringSize {
 
   factory ModularBarChartData.groupedSeparated({
     @required Map<String, Map<String, double>> rawData,
+    @required Map<String, Color> xSubGroupColorMap,
     bool sortXAxis = false,
     Comparator<String> xGroupComparator,
-    Map<String, Color> subGroupColors,
+    Comparator<String> xSubGroupComparator,
   }) {
     final ModularBarChartData dataModel = ModularBarChartData._(
       rawData: rawData,
       type: BarChartType.GroupedSeparated,
       sortXAxis: sortXAxis,
       xGroupComparator: xGroupComparator,
-      subGroupColors: subGroupColors ?? {},
+      xSubGroupComparator: xSubGroupComparator,
+      xSubGroupColorMap: xSubGroupColorMap,
     );
     dataModel._analyseData();
     return dataModel;
@@ -194,16 +200,16 @@ class ModularBarChartData with StringSize {
     _setY2ValueRange();
   }
 
-  void _generateSubGroupColors() {
-    if (type != BarChartType.Ungrouped && type != BarChartType.GroupedSeparated) {
-      final List<String> inputColorList = subGroupColors.keys.toList();
-      _xSubGroups.forEach((group) {
-        if (!inputColorList.contains(group)) {
-          subGroupColors[group] = Colors.primaries[Random().nextInt(Colors.primaries.length)];
-        }
-      });
-    }
-  }
+  // void _generateSubGroupColors() {
+  //   if (type != BarChartType.Ungrouped && type != BarChartType.GroupedSeparated) {
+  //     final List<String> inputColorList = subGroupColors.keys.toList();
+  //     _xSubGroups.forEach((group) {
+  //       if (!inputColorList.contains(group)) {
+  //         subGroupColors[group] = Colors.primaries[Random().nextInt(Colors.primaries.length)];
+  //       }
+  //     });
+  //   }
+  // }
 
   void _setNumberOfBarsInGroups() {
     _numBarsInGroups = _xSubGroups.length;
@@ -245,7 +251,7 @@ class ModularBarChartData with StringSize {
     }
 
     // Generate color for subgroups
-    _generateSubGroupColors();
+    //_generateSubGroupColors();
 
     // Set the number of bars in one group
     _setNumberOfBarsInGroups();
@@ -417,7 +423,7 @@ class ModularBarChartData with StringSize {
       sortXAxis: this.sortXAxis,
       xGroupComparator: this.xGroupComparator,
       xSubGroupComparator: this.xSubGroupComparator,
-      subGroupColors: this.subGroupColors,
+      xSubGroupColorMap: this.xSubGroupColorMap,
     );
     newDataModel._analyseData();
     return newDataModel;

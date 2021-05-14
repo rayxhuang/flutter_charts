@@ -88,7 +88,7 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
       List<BarChartDataDouble> barList = dataModel.groupedBars[j].dataList;
       for (int i = 0; i < barList.length; i++) {
         // Grouped Data must use grouped Color
-        paint..color = dataModel.subGroupColors[barList[i].group];
+        paint..color = dataModel.xSubGroupColorMap[barList[i].group];
         double inGroupMargin = i == 0
             ? 0
             : style.barStyle.barInGroupMargin;
@@ -124,7 +124,7 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
       double previousYValue = 0;
       for (int i = barList.length - 1; i  >= 0; i--) {
         // Grouped Data must use grouped Color
-        paint..color = dataModel.subGroupColors[barList[i].group];
+        paint..color = dataModel.xSubGroupColorMap[barList[i].group];
         double x1FromBottomLeft = j * xSectionLength + style.groupMargin;
         double x2FromBottomLeft = x1FromBottomLeft + style.barStyle.barWidth;
         double y1FromBottomLeft = (totalHeight - dataModel.y1ValueRange[0] - previousYValue) / displayInfo.y1UnitPerPixel;

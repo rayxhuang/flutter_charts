@@ -7,11 +7,13 @@ enum BarChartBarShape {Rectangle, RoundedRectangle}
 class BarChartStyle {
   final BarChartLabel title;
   final double groupMargin;
-  final Map<String, Color> subGroupColors;
   final bool sortXAxis;
   final Comparator<String> groupComparator;
+  final Comparator<String> subGroupComparator;
   final EdgeInsetsGeometry contentPadding;
-  final AxisStyle xAxisStyle, y1AxisStyle, y2AxisStyle;
+  final AxisStyle xAxisStyle;
+  final AxisStyle y1AxisStyle;
+  final AxisStyle y2AxisStyle;
   final BarChartLegendStyle legendStyle;
   final BarChartBarStyle barStyle;
   final BarChartAnimation animation;
@@ -22,8 +24,8 @@ class BarChartStyle {
     this.title = const BarChartLabel(),
     this.groupMargin = 12,
     this.sortXAxis = false,
-    this.subGroupColors,
     this.groupComparator,
+    this.subGroupComparator,
     this.contentPadding = const EdgeInsets.all(10),
     this.xAxisStyle = const AxisStyle(),
     this.y1AxisStyle = const AxisStyle(),
@@ -35,12 +37,71 @@ class BarChartStyle {
     this.isMini = false,
   });
 
+  static const BarChartStyle standardMiniStyle = BarChartStyle(
+    isMini: true,
+    title: BarChartLabel(
+      text: 'Boring Title',
+      textStyle: TextStyle(color: Colors.white),
+    ),
+    sortXAxis: true,
+    groupMargin: 5,
+    xAxisStyle: AxisStyle(
+      label: BarChartLabel(
+        text: 'X Axis',
+        textStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      ),
+      axisColor: Colors.teal,
+      tickStyle: TickStyle(
+        tickLength: 5,
+        tickColor: Colors.teal,
+      ),
+    ),
+    y1AxisStyle: AxisStyle(
+      numTicks: 5,
+      label: BarChartLabel(
+        text: 'Y Axis',
+        textStyle: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      //preferredEndValue: 20,
+      axisColor: Colors.teal,
+      tickStyle: TickStyle(
+        tickLength: 5,
+        tickColor: Colors.teal,
+      ),
+    ),
+    y2AxisStyle: AxisStyle(
+      numTicks: 5,
+      label: BarChartLabel(
+        text: 'Y Axis',
+        textStyle: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      //preferredEndValue: 20,
+      axisColor: Colors.teal,
+      tickStyle: TickStyle(
+        tickLength: 5,
+        tickColor: Colors.teal,
+      ),
+    ),
+    barStyle: BarChartBarStyle(
+      barWidth: 15,
+      barInGroupMargin: 1,
+    ),
+    legendStyle: BarChartLegendStyle(visible: false),
+    clickable: false,
+  );
+
   BarChartStyle copyWith({
     BarChartLabel title,
     double groupMargin,
-    bool sortXAxis,
+    bool sortXAxis, clickable, isMini,
     Map<String, Color> subGroupColors,
-    Comparator<String> groupComparator,
+    Comparator<String> groupComparator, subGroupComparator,
     EdgeInsetsGeometry contentPadding,
     AxisStyle xAxisStyle,
     AxisStyle y1AxisStyle,
@@ -48,14 +109,12 @@ class BarChartStyle {
     BarChartBarStyle barStyle,
     BarChartLegendStyle legendStyle,
     BarChartAnimation animation,
-    bool clickable,
-    bool isMini,
   }) => BarChartStyle(
       title: title ?? this.title,
       groupMargin: groupMargin ?? this.groupMargin,
       sortXAxis: sortXAxis ?? this.sortXAxis,
-      subGroupColors: subGroupColors ?? this.subGroupColors,
       groupComparator: groupComparator ?? this.groupComparator,
+      subGroupComparator: subGroupComparator ?? this.subGroupComparator,
       contentPadding: contentPadding ?? this.contentPadding,
       xAxisStyle: xAxisStyle ?? this.xAxisStyle,
       y1AxisStyle: y1AxisStyle ?? this.y1AxisStyle,

@@ -14,43 +14,34 @@ import 'components/chart_title.dart';
 
 @immutable
 class ModularBarChart extends StatelessWidget with StringSize {
-  final Map<String, dynamic> data;
   final ModularBarChartData dataModel;
   final BarChartStyle style;
   final BarChartType type;
 
   const ModularBarChart._({
-    @required this.data,
     @required this.dataModel,
     @required this.type,
     this.style = const BarChartStyle(),
-  }) : assert(data != null);
+  });
 
   ModularBarChart copyWith({
     BarChartStyle style,
-    Map<String, Color> colorMap,
-  }) {
-    final ModularBarChartData dataModel = this.dataModel;
-    dataModel.subGroupColors = colorMap ?? dataModel.subGroupColors;
-    return ModularBarChart._(
-      data: this.data,
-      dataModel: dataModel,
-      style: style ?? this.style,
-      type: this.type
-    );
-  }
+  }) => ModularBarChart._(
+    dataModel: this.dataModel,
+    style: style ?? this.style,
+    type: this.type
+  );
 
   factory ModularBarChart.ungrouped({
-    @required Map<String, double> data,
-    BarChartStyle style,
+    @required Map<String, double> rawData,
+    BarChartStyle style = const BarChartStyle(),
   }) {
     final ModularBarChartData dataModel = ModularBarChartData.ungrouped(
-      rawData: data,
-      sortXAxis: style.sortXAxis,
-      xGroupComparator: style.groupComparator
+        rawData: rawData,
+        sortXAxis: style.sortXAxis,
+        xGroupComparator: style.groupComparator
     );
     return ModularBarChart._(
-      data: data,
       dataModel: dataModel,
       type: BarChartType.Ungrouped,
       style: style,
@@ -58,16 +49,18 @@ class ModularBarChart extends StatelessWidget with StringSize {
   }
 
   factory ModularBarChart.grouped({
-    @required Map<String, Map<String, double>> data,
-    BarChartStyle style,
+    @required Map<String, Map<String, double>> rawData,
+    @required Map<String, Color> xSubGroupColorMap,
+    BarChartStyle style = const BarChartStyle(),
   }) {
     final ModularBarChartData dataModel = ModularBarChartData.grouped(
-      rawData: data,
+      rawData: rawData,
       sortXAxis: style.sortXAxis,
-      xGroupComparator: style.groupComparator
+      xGroupComparator: style.groupComparator,
+      xSubGroupComparator: style.subGroupComparator,
+      xSubGroupColorMap: xSubGroupColorMap,
     );
     return ModularBarChart._(
-      data: data,
       dataModel: dataModel,
       type: BarChartType.Grouped,
       style: style,
@@ -75,16 +68,18 @@ class ModularBarChart extends StatelessWidget with StringSize {
   }
 
   factory ModularBarChart.groupedStacked({
-    @required Map<String, Map<String, double>> data,
-    BarChartStyle style,
+    @required Map<String, Map<String, double>> rawData,
+    @required Map<String, Color> xSubGroupColorMap,
+    BarChartStyle style = const BarChartStyle(),
   }) {
     final ModularBarChartData dataModel = ModularBarChartData.groupedStacked(
-      rawData: data,
+      rawData: rawData,
       sortXAxis: style.sortXAxis,
-      xGroupComparator: style.groupComparator
+      xGroupComparator: style.groupComparator,
+      xSubGroupComparator: style.subGroupComparator,
+      xSubGroupColorMap: xSubGroupColorMap,
     );
     return ModularBarChart._(
-      data: data,
       dataModel: dataModel,
       type: BarChartType.GroupedStacked,
       style: style,
@@ -92,16 +87,17 @@ class ModularBarChart extends StatelessWidget with StringSize {
   }
 
   factory ModularBarChart.groupedSeparated({
-    @required Map<String, Map<String, double>> data,
-    BarChartStyle style,
+    @required Map<String, Map<String, double>> rawData,
+    @required Map<String, Color> xSubGroupColorMap,
+    BarChartStyle style = const BarChartStyle(),
   }) {
     final ModularBarChartData dataModel = ModularBarChartData.groupedSeparated(
-      rawData: data,
+      rawData: rawData,
       sortXAxis: style.sortXAxis,
-      xGroupComparator: style.groupComparator
+      xGroupComparator: style.groupComparator,
+      xSubGroupColorMap: xSubGroupColorMap,
     );
     return ModularBarChart._(
-      data: data,
       dataModel: dataModel,
       type: BarChartType.GroupedSeparated,
       style: style,

@@ -167,7 +167,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
     //Draw data as bars on grid
     for (int i = 0; i < dataList.length; i++) {
       // Grouped Data must use defined Color for its group
-      paint..color = dataModel.subGroupColors[dataList[i].group];
+      paint..color = dataModel.xSubGroupColorMap[dataList[i].group];
       double inGroupMargin = i == 0
           ? 0
           : style.barStyle.barInGroupMargin;
@@ -267,7 +267,7 @@ class SingleGroupDataPainter extends CustomPainter with Drawing{
     data.forEach((data) { totalHeight += data.data; });
     for (int i = data.length - 1; i >= 0; i--) {
       // Grouped Data must use grouped Color
-      paint..color = dataModel.subGroupColors[data[i].group];
+      paint..color = dataModel.xSubGroupColorMap[data[i].group];
       double x1FromBottomLeft = style.groupMargin;
       double x2FromBottomLeft = x1FromBottomLeft + displayInfo.barWidth;
       double y1FromBottomLeft = (totalHeight - displayInfo.y1Min - previousYValue) / displayInfo.y1UnitPerPixel;
