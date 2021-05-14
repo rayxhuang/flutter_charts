@@ -9,6 +9,8 @@ import 'bar_chart_style.dart';
 
 class DisplayInfo extends ChangeNotifier with StringSize{
   final ModularBarChartData originalDataModel;
+  // a new dataModel can be obtained by applying filter on the
+  // original dataModel
   ModularBarChartData dataModel;
   final BarChartStyle style;
   final Size parentSize;
@@ -32,26 +34,75 @@ class DisplayInfo extends ChangeNotifier with StringSize{
       parentSize: parentSize,
     );
     displayInfo._init();
-    displayInfo._setInitialDisplayRange();
-    displayInfo._setInitialSelectedXGroups();
     return displayInfo;
   }
 
   String _longestGroupName = '';
-  double _maxGroupNameWidth = 0, _maxGroupNameWidthWithSpace = 0;
-  double _leftAxisCombinedWidth = 0, _leftAxisWidth = 0, _leftAxisLabelWidth = 0;
-  double _rightAxisCombinedWidth = 0, _rightAxisWidth = 0, _rightAxisLabelWidth = 0;
-  double _canvasWidth = 0, _xSectionWidth = 0, _barWidth = 0, _xTotalLength;
-  double _titleHeight = 0, _spacingHeight = 0, _bottomAxisHeight = 0, _bottomLabelHeight = 0, _bottomLegendHeight = 0,
-  _canvasHeight = 0, _valueOnBarHeight = 0;
-  Size _canvasSize = Size.zero, _canvasWrapperSize = Size.zero;
-  bool _hasYAxisOnTheRight = false, _needResetYAxisWidth = false, _isMini = false, _displayMiniCanvas = false;
-  List<double> _displayY1Range = [0, 0], _displayY2Range = [0, 0];
-  List<double> _originalDisplayY1Range = [0, 0], _originalDisplayY2Range = [0, 0];
-  double _y1UnitPerPixel = 0, _y2UnitPerPixel = 0;
+  String _longestSubGroupName = '';
+  String _leftDisplayText = '';
+  String _rightDisplayText = '';
+  
+  // Width
+  double _maxGroupNameWidth = 0;
+  double _leftAxisCombinedWidth = 0;
+  double _leftAxisWidth = 0;
+  double _leftAxisLabelWidth = 0;
+  double _rightAxisCombinedWidth = 0;
+  double _rightAxisWidth = 0;
+  double _rightAxisLabelWidth = 0;
+  double _canvasWidth = 0;
+  double _xSectionWidth = 0;
+  double _barWidth = 0;
+  double _xTotalLength;
+  
+  // Height
+  double _titleHeight = 0;
+  double _spacingHeight = 0;
+  double _filterPanelHeight = 0;
+  double _bottomLabelHeight = 0;
+  double _bottomLegendHeight = 0;
+  double _valueOnBarHeight = 0;
+  double _bottomAxisHeight = 0;
+  double _canvasHeight = 0;
+  double _y1UnitPerPixel = 0;
+  double _y2UnitPerPixel = 0;
+  
+  // Size
+  Size _canvasSize = Size.zero;
+  Size _canvasWrapperSize = Size.zero;
+  
+  bool _hasXSubGroups = false;
+  bool _hasYAxisOnTheRight = false;
+  bool _needResetYAxisWidth = false;
+  bool _isMini = false;
+  bool _displayMiniCanvas = false;
+
+  RangeValues _displayY1Range = RangeValues(0, 0);
+  RangeValues _displayY2Range = RangeValues(0, 0);
+  RangeValues _originalDisplayY1Range = RangeValues(0, 0);
+  RangeValues _originalDisplayY2Range = RangeValues(0, 0);
+  RangeValues _y1RangeFilter;
+  RangeValues _y2RangeFilter;
+
   int _numOfGroupNamesToCombine = 1;
 
+  bool _showToolBar = false;
+  bool _showAverageLine = false;
+  bool _showValueOnBar = false;
+  bool _showGridLine = false;
+  bool _showFilterPanel = false;
+
+  Map<String, bool> _originalSelectedXGroups = {};
+  Map<String, bool> _originalSelectedXSubGroups = {};
+  Map<String, bool> _selectedXGroups = {};
+  Map<String, bool> _selectedXSubGroups = {};
+
+  // Getters
   String get longestGroupName => _longestGroupName;
+  String get longestSubGroupName => _longestSubGroupName;
+  String get leftDisplayText => _leftDisplayText;
+  String get rightDisplayText => _rightDisplayText;
+
   double get leftAxisCombinedWidth => _leftAxisCombinedWidth;
   double get leftAxisWidth => _leftAxisWidth;
   double get leftAxisLabelWidth => _leftAxisLabelWidth;
@@ -64,117 +115,126 @@ class DisplayInfo extends ChangeNotifier with StringSize{
   double get xTotalLength => _xTotalLength;
   double get titleHeight => _titleHeight;
   double get spacingHeight => _spacingHeight;
+  double get filterPanelHeight => _filterPanelHeight;
   double get bottomAxisHeight => _bottomAxisHeight;
   double get bottomLabelHeight => _bottomLabelHeight;
   double get bottomLegendHeight => _bottomLegendHeight;
   double get canvasHeight => _canvasHeight;
+  double get y1Min => _displayY1Range.start;
+  double get y1Max => _displayY1Range.end;
+  double get y2Min => _displayY2Range.start;
+  double get y2Max => _displayY2Range.end;
+  double get y1UnitPerPixel => _y1UnitPerPixel;
+  double get y2UnitPerPixel => _y2UnitPerPixel;
+  double get originalY1Min => _originalDisplayY1Range.start;
+  double get originalY1Max => _originalDisplayY1Range.end;
+  double get originalY2Min => _originalDisplayY2Range.start;
+  double get originalY2Max => _originalDisplayY2Range.end;
+  double get y1FilterMin => _y1RangeFilter.start;
+  double get y1FilterMax => _y1RangeFilter.end;
+  double get y2FilterMin => _y2RangeFilter.start;
+  double get y2FilterMax => _y2RangeFilter.end;
+
+  int get numOfGroupNamesToCombine => _numOfGroupNamesToCombine;
+
   Size get canvasSize => _canvasSize;
   Size get canvasWrapperSize => _canvasWrapperSize;
 
   bool get isMini => _isMini;
+  bool get hasXSubGroups => _hasXSubGroups;
   bool get hasYAxisOnTheRight => _hasYAxisOnTheRight;
   bool get displayMiniCanvas => _displayMiniCanvas;
-  double get y1Min => _displayY1Range[0];
-  double get y1Max => _displayY1Range[1];
-  double get y2Min => _displayY2Range[0];
-  double get y2Max => _displayY2Range[1];
-  double get originalY1Min => _originalDisplayY1Range[0];
-  double get originalY1Max => _originalDisplayY1Range[1];
-  double get originalY2Min => _originalDisplayY2Range[0];
-  double get originalY2Max => _originalDisplayY2Range[1];
-  List<double> get y1ValueRange => _displayY1Range;
-  List<double> get y2ValueRange => _displayY2Range;
-  double get y1UnitPerPixel => _y1UnitPerPixel;
-  double get y2UnitPerPixel => _y2UnitPerPixel;
-  int get numOfGroupNamesToCombine => _numOfGroupNamesToCombine;
-
-  // Events
-  bool _showToolBar = false;
-  bool _showAverageLine = false;
-  bool _showValueOnBar = false;
-  bool _showGridLine = false;
-  bool _showFilterPanel = false;
-  String _leftDisplayText = '';
-  String _rightDisplayText = '';
-  RangeValues _y1RangeFilter;
-  RangeValues _y2RangeFilter;
-  Map<String, bool> _originalSelectedXGroups = {};
-  Map<String, bool> _originalSelectedXSubGroups = {};
-  Map<String, bool> _selectedXGroups = {};
-  Map<String, bool> _selectedXSubGroups = {};
-
   bool get showToolBar => _showToolBar;
   bool get showAverageLine => _showAverageLine;
   bool get showValueOnBar =>  _showValueOnBar;
   bool get showGridLine => _showGridLine;
   bool get showFilterPanel => _showFilterPanel;
-  String get leftDisplayText => _leftDisplayText;
-  String get rightDisplayText => _rightDisplayText;
+
+  RangeValues get y1RangeValues => _displayY1Range;
+  RangeValues get y2RangeValues => _displayY2Range;
   RangeValues get y1RangeFilter => _y1RangeFilter;
   RangeValues get y2RangeFilter => _y2RangeFilter;
-  double get y1FilterMin => _y1RangeFilter.start;
-  double get y1FilterMax => _y1RangeFilter.end;
-  double get y2FilterMin => _y2RangeFilter.start;
-  double get y2FilterMax => _y2RangeFilter.end;
+
   Map<String, bool> get originalSelectedXGroups => _originalSelectedXGroups;
   Map<String, bool> get originalSelectedXSubGroups => _originalSelectedXSubGroups;
   Map<String, bool> get selectedXGroups => _selectedXGroups;
   Map<String, bool> get selectedXSubGroups => _selectedXSubGroups;
 
+  // Public methods
+  // Toggle whether or not to show tool bar
   void toggleToolBar() {
     _showToolBar =! _showToolBar;
     notifyListeners();
   }
 
+  // Toggle whether or not to show the filter panel
+  void toggleFilterPanel() {
+    _showFilterPanel = !_showFilterPanel;
+    notifyListeners();
+  }
+
+  // Toggle if the average line(s) should be drawn on the chart
   void toggleAverageLine() {
     _showAverageLine = !_showAverageLine;
     _setMiniDisplayText();
     notifyListeners();
   }
 
+  // Toggle if value should be shown on bar
   void toggleValueOnBar() {
     _showValueOnBar = !_showValueOnBar;
     notifyListeners();
   }
 
+  // Toggle if horizontal grid lines should be drawn
   void toggleGridLine() {
     _showGridLine = !_showGridLine;
     notifyListeners();
   }
 
-  void toggleFilterPanel() {
-    _showFilterPanel = !_showFilterPanel;
-    notifyListeners();
-  }
-
+  // Set and the apply filters on the original data model
   void setFilter({
     RangeValues y1Filter,
     RangeValues y2Filter,
     Map<String, bool> xGroupFilter,
     Map<String, bool> xSubGroupFilter,
   }) {
+    // Hide Filter Panel
+    toggleFilterPanel();
+
+    // Filters
     _y1RangeFilter = y1Filter ?? this._y1RangeFilter;
     _y2RangeFilter = y2Filter ?? this._y2RangeFilter;
     _selectedXGroups = xGroupFilter ?? this._selectedXGroups;
     _selectedXSubGroups = xSubGroupFilter ?? this._selectedXSubGroups;
-    // print('Y1 Filter: $_y1RangeFilter');
-    // print('Y2 Filter: $_y2RangeFilter');
-    // print('XGroup Filter: $_selectedXGroups');
-    // print('XGroup Filter: $_selectedXSubGroups');
+
+    // Obtain a new dataModel form applying filters on ORIGINAL dataModel
     dataModel = originalDataModel.applyFilter(
       y1Filter: _y1RangeFilter,
       y2Filter: _y2RangeFilter,
       xGroupFilter: _selectedXGroups,
       xSubGroupFilter: _selectedXSubGroups,
     );
-    _init();
+
+    // Re-setup, this basically rebuilds the whole chart
+    _setup();
+
+    // Reset mini display text
     _setMiniDisplayText();
+
     notifyListeners();
   }
 
-  void _init(){
-    // Set isMini?
+
+
+  // Private methods
+  // init is called only when the instance is first created
+  void _init() {
+    // Set is mini version boolean
     _setIsMini();
+
+    // Set whether the chart has x sub groups
+    _setHasXSubGroups();
 
     // Set whether the chart has y axis on the right
     _setHasYAxisOnTheRight();
@@ -185,11 +245,82 @@ class DisplayInfo extends ChangeNotifier with StringSize{
     // Set original bar width from style
     _setBarWidth();
 
+    // Set title Height;
+    _setTitleHeight();
+
+    // Set the spacing below title's height
+    _setSpacingHeight();
+
+    // Set bottom label height
+    _setBottomLabelHeight();
+
+    // Set bottom legend height
+    _setBottomLegendHeight();
+    
+    // Set filter panel height
+    _setFilterPanelHeight();
+
+    // Call set up
+    _setup();
+
+    // Set initial display range for filter panel
+    _setInitialDisplayRange();
+
+    // Set initial selected groups for filter panel
+    _setInitialSelectedXGroups();
+  }
+
+  void _setIsMini() => _isMini = style.isMini;
+
+  void _setHasXSubGroups() => _hasXSubGroups = (dataModel.type == BarChartType.Grouped || dataModel.type == BarChartType.GroupedStacked);
+
+  void _setHasYAxisOnTheRight() => _hasYAxisOnTheRight = dataModel.type == BarChartType.GroupedSeparated;
+
+  void _setValueOnBarHeight() => _valueOnBarHeight = StringSize.getWidthOfString('1', const TextStyle());
+
+  void _setTitleHeight() => _titleHeight = style.isMini ? StringSize.getHeight(style.title) : kMinInteractiveDimensionCupertino;
+
+  void _setSpacingHeight() => _spacingHeight = 0.5 * StringSize.getHeightOfString('I', style.y1AxisStyle.tickStyle.labelTextStyle);
+
+  void _setBottomLabelHeight() => _bottomLabelHeight = StringSize.getHeight(style.xAxisStyle.label);
+
+  void _setBottomLegendHeight() =>
+      _bottomLegendHeight = (style.legendStyle.visible && !_isMini) ? StringSize.getHeightOfString('I', style.legendStyle.legendTextStyle) + 4 : 0;
+
+  void _setFilterPanelHeight() => _filterPanelHeight = parentSize.height - spacingHeight - kMinInteractiveDimensionCupertino;
+
+  void _setInitialDisplayRange() {
+    _originalDisplayY1Range = RangeValues(_displayY1Range.start, _displayY1Range.end);
+    _originalDisplayY2Range = RangeValues(_displayY2Range.start, _displayY2Range.end);
+  }
+
+  void _setInitialSelectedXGroups() {
+    originalDataModel.xGroups.forEach((group) {
+      _originalSelectedXGroups[group] = true;
+      _selectedXGroups[group] = true;
+    });
+    originalDataModel.xSubGroups.forEach((subGroup) {
+      _originalSelectedXSubGroups[subGroup] = true;
+      _selectedXSubGroups[subGroup] = true;
+    });
+  }
+
+
+
+  // The following methods may be called again when
+  // new filter is applied
+  void _setup(){
+    // Set original bar width from style
+    _setBarWidth();
+
     // Set component heights
     _setComponentHeight();
 
     // Set maximum group name width
     _setMaxGroupNameWidth();
+
+    // Set maximum sub group name
+    _setLongestSubGroupName();
 
     // Set component widths
     _setComponentWidth();
@@ -210,7 +341,7 @@ class DisplayInfo extends ChangeNotifier with StringSize{
     _setDisplayMiniCanvas();
 
     // TODO should this be done in here???
-    dataModel.populateDataWithMinimumValue();
+    dataModel.populateDataWithMinimumValue(minimum: _displayY1Range.start);
 
     // Set Y unit per pixel
     _setYUnitPerPixel();
@@ -219,7 +350,7 @@ class DisplayInfo extends ChangeNotifier with StringSize{
     _combineGroupName();
 
     // Reset the width in case of e.g 999 -> 1000, which the number of digits changed
-    if (_needResetYAxisWidth) { _setCanvasSize(); }
+    _setCanvasSize();
 
     // Set Canvas wrapper size
     _setCanvasWrapperSize();
@@ -228,29 +359,11 @@ class DisplayInfo extends ChangeNotifier with StringSize{
     _setYFilterRange();
   }
 
-  void _setInitialDisplayRange() {
-    _originalDisplayY1Range = [_displayY1Range[0], _displayY1Range[1]];
-    _originalDisplayY2Range = [_displayY2Range[0], _displayY2Range[1]];
-  }
-
-  void _setInitialSelectedXGroups() {
-    originalDataModel.xGroups.forEach((group) {
-      _originalSelectedXGroups[group] = true;
-      _selectedXGroups[group] = true;
-    });
-    originalDataModel.xSubGroups.forEach((subGroup) {
-      _originalSelectedXSubGroups[subGroup] = true;
-      _selectedXSubGroups[subGroup] = true;
-    });
-  }
+  void _setBarWidth() => _barWidth = style.barStyle.barWidth;
 
   void _setYFilterRange() {
-    if (_y1RangeFilter == null) {
-      _y1RangeFilter = RangeValues(y1Min, y1Max);
-    }
-    if (_y2RangeFilter == null) {
-      _y2RangeFilter = RangeValues(y2Min, y2Max);
-    }
+    _y1RangeFilter ??= RangeValues(y1Min, y1Max);
+    _y2RangeFilter ??= RangeValues(y2Min, y2Max);
   }
 
   void _setMiniDisplayText() {
@@ -265,14 +378,6 @@ class DisplayInfo extends ChangeNotifier with StringSize{
     }
   }
 
-  void _setIsMini() => _isMini = style.isMini;
-
-  void _setHasYAxisOnTheRight() => _hasYAxisOnTheRight = dataModel.type == BarChartType.GroupedSeparated;
-
-  void _setValueOnBarHeight() => _valueOnBarHeight = StringSize.getWidthOfString('1', const TextStyle());
-
-  void _setBarWidth() => _barWidth = style.barStyle.barWidth;
-
   void _setComponentWidth() {
     // Set left axis width
     _setLeftAxisWidth();
@@ -286,7 +391,7 @@ class DisplayInfo extends ChangeNotifier with StringSize{
 
   void _setLeftAxisWidth(){
     _leftAxisWidth = _getVerticalAxisWidth(
-      axisMaxValue: _needResetYAxisWidth ? _displayY1Range[1] : dataModel.y1ValueRange[1],
+      axisMaxValue: _needResetYAxisWidth ? _displayY1Range.end : dataModel.y1ValueRange[1],
       axisStyle: style.y1AxisStyle,
     );
     _leftAxisLabelWidth = _isMini ? 0 : _getVerticalAxisLabelWidth(label: style.y1AxisStyle.label);
@@ -296,7 +401,7 @@ class DisplayInfo extends ChangeNotifier with StringSize{
   void _setRightAxisWidth(){
     if (_hasYAxisOnTheRight) {
       _rightAxisWidth = _getVerticalAxisWidth(
-        axisMaxValue: _needResetYAxisWidth ? _displayY2Range[1] : dataModel.y2ValueRange[1],
+        axisMaxValue: _needResetYAxisWidth ? _displayY2Range.end : dataModel.y2ValueRange[1],
         axisStyle: style.y2AxisStyle,
       );
       if (!style.isMini) {
@@ -320,10 +425,23 @@ class DisplayInfo extends ChangeNotifier with StringSize{
       double singleNameWidth = StringSize.getWidthOfString(name, textStyle);
       if ( singleNameWidth >= _maxGroupNameWidth) {
         _maxGroupNameWidth = singleNameWidth;
-        _maxGroupNameWidthWithSpace = StringSize.getWidthOfString(name + "  ", textStyle);
         _longestGroupName = name;
       }
     });
+  }
+
+  void _setLongestSubGroupName() {
+    if (_hasXSubGroups) {
+      _longestSubGroupName = '';
+      final TextStyle textStyle = const TextStyle();
+      double longestNameWidth = double.negativeInfinity;
+      dataModel.xSubGroups.forEach((name) {
+        double singleNameWidth = StringSize.getWidthOfString(name, textStyle);
+        if ( singleNameWidth >= longestNameWidth) {
+          _longestSubGroupName = name;
+        }
+      });
+    }
   }
 
   void _setXSectionWidth() {
@@ -345,28 +463,12 @@ class DisplayInfo extends ChangeNotifier with StringSize{
   void _setDisplayMiniCanvas() => _displayMiniCanvas = _barWidth == style.barStyle.barWidth;
 
   void _setComponentHeight() {
-    // Set title Height;
-    _setTitleHeight();
-
-    // Set the spacing below title's height
-    _setSpacingHeight();
-
     // Set bottom axis height
     _setBottomAxisHeight();
-
-    // Set bottom label height
-    _setBottomLabelHeight();
-
-    // Set bottom legend height
-    _setBottomLegendHeight();
 
     // Set canvas height
     _setCanvasHeight();
   }
-
-  void _setTitleHeight() => _titleHeight = style.isMini ? StringSize.getHeight(style.title) : kMinInteractiveDimensionCupertino;
-
-  void _setSpacingHeight() => _spacingHeight = 0.5 * StringSize.getHeightOfString('I', style.y1AxisStyle.tickStyle.labelTextStyle);
 
   void _setBottomAxisHeight() {
     final double labelHeight = StringSize.getHeightOfString('I', style.xAxisStyle.tickStyle.labelTextStyle);
@@ -376,11 +478,6 @@ class DisplayInfo extends ChangeNotifier with StringSize{
       _bottomAxisHeight = style.xAxisStyle.strokeWidth / 2;
     }
   }
-
-  void _setBottomLabelHeight() => _bottomLabelHeight = StringSize.getHeight(style.xAxisStyle.label);
-
-  void _setBottomLegendHeight() =>
-      _bottomLegendHeight = (style.legendStyle.visible && !_isMini) ? StringSize.getHeightOfString('I', style.legendStyle.legendTextStyle) + 4 : 0;
 
   void _setCanvasHeight() {
     _canvasHeight = parentSize.height -
@@ -399,42 +496,42 @@ class DisplayInfo extends ChangeNotifier with StringSize{
   void _setCanvasWrapperSize() => _canvasWrapperSize = isMini ? _canvasSize : Size(_canvasWidth, _canvasHeight + _bottomAxisHeight);
 
   void _adjustDisplayValueRange() {
-    _adjustDisplayValueRangeHelper(
+    _displayY1Range = _adjustDisplayValueRangeHelper(
       originalRange: dataModel.y1ValueRange,
-      valueRangeToBeAdjusted: _displayY1Range,
       axisStyle: style.y1AxisStyle,
     );
     if (_hasYAxisOnTheRight) {
-      _adjustDisplayValueRangeHelper(
+      _displayY2Range = _adjustDisplayValueRangeHelper(
         originalRange: dataModel.y2ValueRange,
-        valueRangeToBeAdjusted: _displayY2Range,
         axisStyle: style.y2AxisStyle,
       );
     }
     if (_needResetYAxisWidth) { _setComponentWidth(); }
   }
 
-  void _adjustDisplayValueRangeHelper({
+  RangeValues _adjustDisplayValueRangeHelper({
     @required List<double> originalRange,
-    @required List<double> valueRangeToBeAdjusted,
     @required AxisStyle axisStyle,
   }) {
     final double start = axisStyle.preferredStartValue;
     final double end = axisStyle.preferredEndValue;
+    double newStart, newEnd;
     start <= originalRange[0]
-        ? valueRangeToBeAdjusted[0] = start
-        : valueRangeToBeAdjusted[0] = originalRange[0];
+        ? newStart = start
+        : newStart = originalRange[0];
 
     String max = originalRange[1].toStringAsExponential();
     int expInt = int.tryParse(max.substring(max.indexOf('e+') + 2));
     num exp = pow(10, expInt - 1);
     double value = (((originalRange[1] * (1 + (_valueOnBarHeight) / _canvasHeight) / exp).ceil() + 5) * exp).toDouble();
     end >= value
-        ? valueRangeToBeAdjusted[1] = end
-        : valueRangeToBeAdjusted[1] = value;
+        ? newEnd = end
+        : newEnd = value;
 
     final int newDigit = int.tryParse(value.toStringAsExponential().substring(value.toStringAsExponential().indexOf('e+') + 2));
     if (newDigit > expInt) { _needResetYAxisWidth = true; }
+
+    return RangeValues(newStart, newEnd);
   }
 
   void _setYUnitPerPixel() {

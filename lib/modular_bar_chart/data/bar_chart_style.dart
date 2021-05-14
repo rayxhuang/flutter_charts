@@ -40,7 +40,7 @@ class BarChartStyle {
   static const BarChartStyle standardMiniStyle = BarChartStyle(
     isMini: true,
     title: BarChartLabel(
-      text: 'Boring Title',
+      text: 'Chart Title',
       textStyle: TextStyle(color: Colors.white),
     ),
     sortXAxis: true,
@@ -65,7 +65,6 @@ class BarChartStyle {
           fontWeight: FontWeight.bold,
         ),
       ),
-      //preferredEndValue: 20,
       axisColor: Colors.teal,
       tickStyle: TickStyle(
         tickLength: 5,
@@ -81,7 +80,6 @@ class BarChartStyle {
           fontWeight: FontWeight.bold,
         ),
       ),
-      //preferredEndValue: 20,
       axisColor: Colors.teal,
       tickStyle: TickStyle(
         tickLength: 5,

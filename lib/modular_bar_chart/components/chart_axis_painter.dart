@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 
 @immutable
@@ -77,17 +78,17 @@ class HorizontalAxisSimplePainter extends CustomPainter {
 
 @immutable
 class VerticalAxisPainter extends CustomPainter {
-  final List<double> valueRange;
+  final RangeValues rangeValues;
   final AxisStyle axisStyle;
   final bool isRight;
   final bool isMini;
 
   const VerticalAxisPainter({
-    @required this.valueRange,
+    @required this.rangeValues,
     @required this.axisStyle,
     @required this.isRight,
     this.isMini = false,
-  }) : assert(valueRange != null);
+  }) : assert(rangeValues != null);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -105,7 +106,7 @@ class VerticalAxisPainter extends CustomPainter {
     // TODO Auto num ticks in mini mode
     final TickStyle tickStyle = axisStyle.tickStyle;
     final double lengthPerTick = length / (axisStyle.numTicks - 1);
-    final double yMax = valueRange[1], yMin = valueRange[0];
+    final double yMax = rangeValues.end, yMin = rangeValues.start;
     final double valuePerTick = (yMax - yMin) / (axisStyle.numTicks - 1);
 
     Offset p1;

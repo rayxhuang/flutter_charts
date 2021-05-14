@@ -42,7 +42,8 @@ class HomeScreenBody extends StatelessWidget {
 }
 
 class MiniChartView extends StatelessWidget with CreateChart {
-  const MiniChartView({Key key,
+  const MiniChartView({
+    Key key,
     @required this.rawData,
     @required this.chartType,
     this.style = BarChartStyle.standardMiniStyle,
@@ -75,8 +76,6 @@ class MiniChartView extends StatelessWidget with CreateChart {
       rawData: rawData,
       chartType: chartType,
       style: style,
-      isMini: true,
-      clickable: false,
     );
     return GestureDetector(
       onTap: () => _pushToFullViewScreen(

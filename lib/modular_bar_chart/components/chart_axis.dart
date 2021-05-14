@@ -154,9 +154,9 @@ class VerticalAxisWithLabel extends StatelessWidget {
             ? displayInfo.style.y2AxisStyle
             : displayInfo.style.y1AxisStyle;
 
-        final List<double> yValueRange = isRightAxis
-            ? displayInfo.y2ValueRange
-            : displayInfo.y1ValueRange;
+        final RangeValues yRangeValues = isRightAxis
+            ? displayInfo.y2RangeValues
+            : displayInfo.y1RangeValues;
 
         final double combinedWidth = isRightAxis
             ? displayInfo.rightAxisCombinedWidth
@@ -200,7 +200,7 @@ class VerticalAxisWithLabel extends StatelessWidget {
                   height: displayInfo.canvasHeight,
                   child: CustomPaint(
                     painter: VerticalAxisPainter(
-                      valueRange: yValueRange,
+                      rangeValues: yRangeValues,
                       axisStyle: axisStyle,
                       isRight: isRightAxis,
                       isMini: displayInfo.isMini,

@@ -22,7 +22,10 @@ class ChartTitle extends StatelessWidget with StringSize {
 
   void _toggleFilterPanel(DisplayInfo displayInfo) => displayInfo.toggleFilterPanel();
 
-  Widget _buildMiniTitle(BarChartLabel label, double width) {
+  Widget _buildMiniTitle({
+    @required BarChartLabel label,
+    @required double width,
+  }) {
     return SizedBox(
       width: width,
       height: StringSize.getHeight(label),
@@ -35,7 +38,11 @@ class ChartTitle extends StatelessWidget with StringSize {
     );
   }
 
-  Widget _buildInteractiveTitleBar(BarChartLabel label, double width, bool showToolBar) {
+  Widget _buildInteractiveTitleBar({
+    @required BarChartLabel label,
+    @required double width,
+    @required bool showToolBar,
+  }) {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 500),
       child: showToolBar
@@ -45,7 +52,7 @@ class ChartTitle extends StatelessWidget with StringSize {
             toggleValueOnBar: _toggleValueOnBar,
             toggleGridLine: _toggleGridLine,
             toggleFilterPanel: _toggleFilterPanel,
-            w: width,
+            width: width,
           )
           : SizedBox(
             width: width,
@@ -64,9 +71,16 @@ class ChartTitle extends StatelessWidget with StringSize {
       builder: (context, displayInfo, child) {
         final BarChartLabel label = displayInfo.style.title;
         if (displayInfo.style.isMini) {
-          return _buildMiniTitle(label, displayInfo.parentSize.width);
+          return _buildMiniTitle(
+            label: label,
+            width: displayInfo.parentSize.width,
+          );
         } else {
-          return _buildInteractiveTitleBar(label,displayInfo.parentSize.width, displayInfo.showToolBar);
+          return _buildInteractiveTitleBar(
+            label: label,
+            width: displayInfo.parentSize.width,
+            showToolBar: displayInfo.showToolBar,
+          );
         }
       },
     );
@@ -117,7 +131,7 @@ class ChartToolBar extends StatelessWidget {
     @required this.toggleValueOnBar,
     @required this.toggleGridLine,
     @required this.toggleFilterPanel,
-    this.w
+    @required this.width,
   }) : super(key: key);
 
   final Function(DisplayInfo) toggleToolBar;
@@ -125,7 +139,7 @@ class ChartToolBar extends StatelessWidget {
   final Function(DisplayInfo) toggleValueOnBar;
   final Function(DisplayInfo) toggleGridLine;
   final Function(DisplayInfo) toggleFilterPanel;
-  final double w;
+  final double width;
 
   Widget _buildLeftDisplayText(DisplayInfo displayInfo) {
     return Text(
@@ -194,7 +208,7 @@ class ChartToolBar extends StatelessWidget {
           duration: const Duration(milliseconds: 500),
           child: SizedBox(
             height: kMinInteractiveDimensionCupertino,
-            width: w,
+            width: width,
             child: Row(
               children: [
                 SizedBox(

@@ -24,7 +24,16 @@ class ChartFullViewScreen extends StatelessWidget with CreateChart {
     final ModularBarChart _chart = createChart(
       rawData: rawData,
       chartType: chartType,
-      style: style,
+      style: style.copyWith(
+        isMini: false,
+        clickable: true,
+        legendStyle: style.legendStyle.copyWith(
+          visible: true,
+        ),
+        animation: style.animation.copyWith(
+          animateData: true
+        ),
+      ),
       xSubGroupColorMap: xSubGroupColorMap,
     );
     return Scaffold(

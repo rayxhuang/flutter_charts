@@ -14,8 +14,6 @@ mixin CreateChart {
     @required BarChartType chartType,
     @required BarChartStyle style,
     Map<String, Color> xSubGroupColorMap,
-    bool isMini = false,
-    bool clickable = true,
   }) {
     if (chartType != BarChartType.Ungrouped && xSubGroupColorMap == null) {
       xSubGroupColorMap = _generateXSubGroupColorMap(
@@ -27,16 +25,12 @@ mixin CreateChart {
         return _buildUngroupedChart(
           rawData: rawData,
           style: style,
-          isMini: isMini,
-          clickable: clickable,
         );
         break;
       case BarChartType.Grouped:
         return _buildGroupedChart(
           rawData: rawData,
           style: style,
-          isMini: isMini,
-          clickable: clickable,
           xSubGroupColorMap: xSubGroupColorMap,
         );
         break;
@@ -44,8 +38,6 @@ mixin CreateChart {
         return _buildGroupedStackedChart(
           rawData: rawData,
           style: style,
-          isMini: isMini,
-          clickable: clickable,
           xSubGroupColorMap: xSubGroupColorMap,
         );
         break;
@@ -53,8 +45,6 @@ mixin CreateChart {
         return _buildGroupedSeparatedChart(
           rawData: rawData,
           style: style,
-          isMini: isMini,
-          clickable: clickable,
           xSubGroupColorMap: xSubGroupColorMap,
         );
         break;
@@ -81,31 +71,21 @@ mixin CreateChart {
   ModularBarChart _buildUngroupedChart({
     @required Map<String, double> rawData,
     @required BarChartStyle style,
-    @required bool isMini,
-    @required bool clickable,
   }) {
     return ModularBarChart.ungrouped(
       rawData: rawData,
-      style: style.copyWith(
-        isMini: isMini,
-        clickable: clickable,
-      ),
+      style: style,
     );
   }
 
   ModularBarChart _buildGroupedChart({
     @required Map<String, Map<String,double>> rawData,
     @required BarChartStyle style,
-    @required bool isMini,
-    @required bool clickable,
     @required Map<String, Color> xSubGroupColorMap,
   }) {
     return ModularBarChart.grouped(
       rawData: rawData,
-      style: style.copyWith(
-        isMini: isMini,
-        clickable: clickable,
-      ),
+      style: style,
       xSubGroupColorMap: xSubGroupColorMap,
     );
   }
@@ -113,16 +93,11 @@ mixin CreateChart {
   ModularBarChart _buildGroupedStackedChart({
     @required Map<String, Map<String,double>> rawData,
     @required BarChartStyle style,
-    @required bool isMini,
-    @required bool clickable,
     @required Map<String, Color> xSubGroupColorMap,
   }) {
     return ModularBarChart.groupedStacked(
       rawData: rawData,
-      style: style.copyWith(
-        isMini: isMini,
-        clickable: clickable,
-      ),
+      style: style,
       xSubGroupColorMap: xSubGroupColorMap,
     );
   }
@@ -130,16 +105,11 @@ mixin CreateChart {
   ModularBarChart _buildGroupedSeparatedChart({
     @required Map<String, Map<String,double>> rawData,
     @required BarChartStyle style,
-    @required bool isMini,
-    @required bool clickable,
     @required Map<String, Color> xSubGroupColorMap,
   }) {
     return ModularBarChart.groupedSeparated(
       rawData: rawData,
-      style: style.copyWith(
-        isMini: isMini,
-        clickable: clickable,
-      ),
+      style: style,
       xSubGroupColorMap: xSubGroupColorMap,
     );
   }

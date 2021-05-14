@@ -200,17 +200,6 @@ class ModularBarChartData with StringSize {
     _setY2ValueRange();
   }
 
-  // void _generateSubGroupColors() {
-  //   if (type != BarChartType.Ungrouped && type != BarChartType.GroupedSeparated) {
-  //     final List<String> inputColorList = subGroupColors.keys.toList();
-  //     _xSubGroups.forEach((group) {
-  //       if (!inputColorList.contains(group)) {
-  //         subGroupColors[group] = Colors.primaries[Random().nextInt(Colors.primaries.length)];
-  //       }
-  //     });
-  //   }
-  // }
-
   void _setNumberOfBarsInGroups() {
     _numBarsInGroups = _xSubGroups.length;
     if (_numBarsInGroups <= 1) { _numBarsInGroups = 1; }
@@ -250,9 +239,6 @@ class ModularBarChartData with StringSize {
         break;
     }
 
-    // Generate color for subgroups
-    //_generateSubGroupColors();
-
     // Set the number of bars in one group
     _setNumberOfBarsInGroups();
 
@@ -260,7 +246,9 @@ class ModularBarChartData with StringSize {
     _setYAverage();
   }
 
-  void populateDataWithMinimumValue() {
+  void populateDataWithMinimumValue({
+    @required double minimum,
+  }) {
     if (type == BarChartType.Grouped || type == BarChartType.GroupedStacked) {
       _groupedBars = [];
       // populate with data with min value
@@ -270,7 +258,7 @@ class ModularBarChartData with StringSize {
         for (String key in _xSubGroups) {
           keys.contains(key)
             ? dataInGroup.add(BarChartDataDouble(group: key, data: map[key].toDouble()))
-            : dataInGroup.add(BarChartDataDouble(group: key, data: _y1ValueRange[0]));
+            : dataInGroup.add(BarChartDataDouble(group: key, data: minimum));
         }
         _groupedBars.add(BarChartDataDoubleGrouped(mainGroup: key, dataList: dataInGroup));
       });

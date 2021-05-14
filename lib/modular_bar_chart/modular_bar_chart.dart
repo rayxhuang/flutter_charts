@@ -129,8 +129,11 @@ class ModularBarChart extends StatelessWidget with StringSize {
             ChangeNotifierProvider<DisplayInfo>(
               create: (_) {
                 // init will calculate and set all component sizes
-                final DisplayInfo sizeInfo = DisplayInfo.init(dataModel: dataModel, style: style, parentSize: parentSize);
-                return sizeInfo;
+                return DisplayInfo.init(
+                  dataModel: dataModel,
+                  style: style,
+                  parentSize: parentSize,
+                );
               }
             ),
           ],
@@ -138,13 +141,13 @@ class ModularBarChart extends StatelessWidget with StringSize {
             builder: (context, displayInfo, child) {
               return Column(
                 children: [
-                  ChartTitle(),
+                  const ChartTitle(),
                   SizedBox(height: displayInfo.spacingHeight,),
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: displayInfo.showFilterPanel
                         ? FilterPanel(displayInfo: displayInfo,)
-                        : ChartDisplayArea(),
+                        : const ChartDisplayArea(),
                   ),
                 ],
               );
