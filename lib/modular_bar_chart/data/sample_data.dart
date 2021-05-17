@@ -675,4 +675,32 @@ Map<String, Map<String, double>> sampleData8 = {
   },
 };
 
+Map<String, Map<String, double>> sampleData9 = {
+  'A': {
+    'a': 2,
+    'b': 4,
+    'd': 1,
+    'eeee': 2,
+  },
+  'B': {
+    'a': 1,
+    'b': 3.5,
+    'c': 8.5,
+    'd': 6.9,
+  },
+  'C': {
+    'a': 7,
+    'b': 2,
+    'c': 5,
+    'd': 12
+  },
+  'D': {
+    'a': 2,
+    'b': 4,
+    'c': 6,
+    'd': 1,
+    'eeee': 2,
+  },
+};
+
 List<String> monthNames = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];

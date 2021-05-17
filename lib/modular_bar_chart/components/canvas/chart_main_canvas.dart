@@ -7,7 +7,9 @@ import 'package:provider/provider.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 
+import 'chart_mini_canvas.dart';
 import 'chart_single_group_canvas.dart';
+import 'chart_test_canvas.dart';
 
 class MainCanvas extends StatefulWidget {
   final BarChartAnimation animation;
@@ -143,28 +145,35 @@ class _MainCanvasState extends State<MainCanvas> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     final DisplayInfo displayInfo = context.read<DisplayInfo>();
     final ModularBarChartData dataModel = displayInfo.dataModel;
+    // return SizedBox.fromSize(
+    //   size: displayInfo.canvasSize,
+    //   child: ListView.builder(
+    //     padding: EdgeInsets.zero,
+    //     controller: widget.scrollController,
+    //     scrollDirection: Axis.horizontal,
+    //     physics: ClampingScrollPhysics(),
+    //     itemCount: dataModel.xGroups.length,
+    //     itemBuilder: (context, index) {
+    //       return SingleGroupedCanvas(
+    //         groupIndex: index,
+    //         isSelected: index == indexSelected,
+    //         barSelected: barSelected,
+    //         size: Size(displayInfo.xSectionWidth, displayInfo.canvasHeight),
+    //         dataAnimation: dataAnimation,
+    //         onBarSelected: (index, bar, details) {
+    //           setState(() {
+    //             _createOverlay(context: context, dataModel: dataModel, index: index, bar: bar, details: details);
+    //           });
+    //         },
+    //       );
+    //     },
+    //   ),
+    // );
     return SizedBox.fromSize(
       size: displayInfo.canvasSize,
-      child: ListView.builder(
-        padding: EdgeInsets.zero,
-        controller: widget.scrollController,
-        scrollDirection: Axis.horizontal,
-        physics: ClampingScrollPhysics(),
-        itemCount: dataModel.xGroups.length,
-        itemBuilder: (context, index) {
-          return SingleGroupedCanvas(
-            groupIndex: index,
-            isSelected: index == indexSelected,
-            barSelected: barSelected,
-            size: Size(displayInfo.xSectionWidth, displayInfo.canvasHeight),
-            dataAnimation: dataAnimation,
-            onBarSelected: (index, bar, details) {
-              setState(() {
-                _createOverlay(context: context, dataModel: dataModel, index: index, bar: bar, details: details);
-              });
-            },
-          );
-        },
+      child: ChartCanvasMini1(
+        containerSize: displayInfo.canvasSize,
+        dataAnimation: dataAnimation,
       ),
     );
   }

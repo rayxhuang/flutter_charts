@@ -4,13 +4,11 @@ import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 
 @immutable
 class HorizontalAxisSingleGroupPainter extends CustomPainter {
-  final String groupName;
   final AxisStyle axisStyle;
   final bool paintTickOnLeft;
   final bool paintTickOnRight;
 
   const HorizontalAxisSingleGroupPainter({
-    @required this.groupName,
     this.axisStyle = const AxisStyle(),
     this.paintTickOnLeft = true,
     this.paintTickOnRight = true,

@@ -30,11 +30,11 @@ class HomeScreenBody extends StatelessWidget {
       child: GridView.count(
         crossAxisCount: 2,
         children: [
-          MiniChartView(rawData: sampleData2, chartType: BarChartType.Ungrouped),
-          MiniChartView(rawData: sampleData6, chartType: BarChartType.GroupedSeparated),
-          MiniChartView(rawData: sampleData3, chartType: BarChartType.Grouped),
-          MiniChartView(rawData: sampleData7, chartType: BarChartType.Grouped),
-          MiniChartView(rawData: sampleData8, chartType: BarChartType.Grouped),
+          // MiniChartView(rawData: sampleData2, chartType: BarChartType.Ungrouped),
+          // MiniChartView(rawData: sampleData6, chartType: BarChartType.GroupedSeparated),
+          MiniChartView(rawData: sampleData9, chartType: BarChartType.Grouped),
+          // MiniChartView(rawData: sampleData7, chartType: BarChartType.Grouped),
+          // MiniChartView(rawData: sampleData8, chartType: BarChartType.Grouped),
         ],
       ),
     );

@@ -12,13 +12,15 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
   final ModularBarChartData dataModel;
   final BarChartStyle style;
   final DisplayInfo displayInfo;
+  Animation<double> dataAnimation;
 
   MiniCanvasPainter({
     @required this.size,
     @required this.dataModel,
     @required this.displayInfo,
     @required this.style,
-  });
+    this.dataAnimation,
+  }) : super(repaint: dataAnimation);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -104,6 +106,7 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
           y1: y1FromBottomLeft,
           style: style.barStyle,
           paint: paint,
+          barAnimationFraction: dataAnimation == null ? 1 : dataAnimation.value,
         );
       }
     }
@@ -201,5 +204,5 @@ class MiniCanvasPainter extends CustomPainter with Drawing{
   }
 
   @override
-  bool shouldRepaint(covariant MiniCanvasPainter oldDelegate) => false;
+  bool shouldRepaint(covariant MiniCanvasPainter oldDelegate) => true;
 }

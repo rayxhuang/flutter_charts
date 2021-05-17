@@ -58,7 +58,6 @@ class HorizontalAxisWrapper extends StatelessWidget {
     final bool paintTickOnRight = !isLastOfAll && isLastInGroup;
     return CustomPaint(
       painter: HorizontalAxisSingleGroupPainter(
-        groupName: dataModel.xGroups[index],
         axisStyle: style.xAxisStyle,
         paintTickOnLeft: paintTickOnLeft,
         paintTickOnRight: paintTickOnRight,

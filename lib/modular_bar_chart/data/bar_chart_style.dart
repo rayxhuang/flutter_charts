@@ -63,6 +63,7 @@ class BarChartStyle {
         textStyle: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
+          fontSize: 40,
         ),
       ),
       axisColor: Colors.teal,
