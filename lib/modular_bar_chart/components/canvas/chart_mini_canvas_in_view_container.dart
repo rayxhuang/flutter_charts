@@ -1,21 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_display_info.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 
 class MiniCanvasInViewContainer extends StatefulWidget {
   final LinkedScrollControllerGroup controllerGroup;
-  final Size containerSize;
   final Size inViewContainerSize;
-  final double canvasWidth;
-  final double xLength;
   final double inViewContainerMovingDistance;
 
   const MiniCanvasInViewContainer({
     @required this.controllerGroup,
-    @required this.containerSize,
     @required this.inViewContainerSize,
-    @required this.xLength,
-    @required this.canvasWidth,
     @required this.inViewContainerMovingDistance
   });
 
@@ -38,15 +35,19 @@ class _MiniCanvasInViewContainerState extends State<MiniCanvasInViewContainer> {
 
   @override
   Widget build(BuildContext context) {
-    final double inViewContainerOffset = (1 - scrollOffset / (widget.xLength - widget.canvasWidth));
+    final DisplayInfo displayInfo = context.read<DisplayInfo>();
+    final Size containerSize = displayInfo.canvasWrapperSize;
+    final double canvasWidth = displayInfo.canvasWidth;
+    final double xLength = displayInfo.xTotalLength;
+    final double inViewContainerOffset = (1 - scrollOffset / (xLength - canvasWidth));
     final Widget inViewContainerOnMiniCanvas = Container(
       width: widget.inViewContainerSize.width,
       height: widget.inViewContainerSize.height,
       color: Colors.white12,
     );
     return SizedBox.fromSize(
-      size: widget.containerSize,
-      // TODO replace stack with align tmrw
+      size: containerSize,
+      // TODO replace stack with align tomorrow
       child: Stack(
         children: [
           Positioned(

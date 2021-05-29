@@ -8,21 +8,21 @@ import 'bar_chart_style.dart';
 
 enum BarChartType {Ungrouped, Grouped, GroupedStacked, GroupedSeparated, Grouped3D}
 
-class ModularBarChartData extends ChangeNotifier with StringSize{
+class ModularBarChartData with StringSize {
   final Map<String, dynamic> rawData;
   final BarChartType type;
   final bool sortXAxis;
   final Comparator<String> xGroupComparator;
   final Comparator<String> xSubGroupComparator;
-  Map<String, Color> subGroupColors;
+  final Map<String, Color> xSubGroupColorMap;
 
   ModularBarChartData._({
-    this.rawData,
-    this.type,
+    @required this.rawData,
+    @required this.type,
     this.sortXAxis = false,
     this.xGroupComparator,
     this.xSubGroupComparator,
-    this.subGroupColors,
+    @required this.xSubGroupColorMap,
   });
 
   factory ModularBarChartData.ungrouped({
@@ -35,7 +35,7 @@ class ModularBarChartData extends ChangeNotifier with StringSize{
       type: BarChartType.Ungrouped,
       sortXAxis: sortXAxis,
       xGroupComparator: xGroupComparator,
-      subGroupColors: const {},
+      xSubGroupColorMap: const {}
     );
     dataModel._analyseData();
     return dataModel;
@@ -43,16 +43,18 @@ class ModularBarChartData extends ChangeNotifier with StringSize{
 
   factory ModularBarChartData.grouped({
     @required Map<String, Map<String, double>> rawData,
+    @required Map<String, Color> xSubGroupColorMap,
     bool sortXAxis = false,
     Comparator<String> xGroupComparator,
-    Map<String, Color> subGroupColors,
+    Comparator<String> xSubGroupComparator,
   }) {
     final ModularBarChartData dataModel = ModularBarChartData._(
       rawData: rawData,
       type: BarChartType.Grouped,
       sortXAxis: sortXAxis,
       xGroupComparator: xGroupComparator,
-      subGroupColors: subGroupColors ?? {},
+      xSubGroupComparator: xSubGroupComparator,
+      xSubGroupColorMap: xSubGroupColorMap,
     );
     dataModel._analyseData();
     return dataModel;
@@ -60,16 +62,18 @@ class ModularBarChartData extends ChangeNotifier with StringSize{
 
   factory ModularBarChartData.groupedStacked({
     @required Map<String, Map<String, double>> rawData,
+    @required Map<String, Color> xSubGroupColorMap,
     bool sortXAxis = false,
     Comparator<String> xGroupComparator,
-    Map<String, Color> subGroupColors,
+    Comparator<String> xSubGroupComparator,
   }) {
     final ModularBarChartData dataModel = ModularBarChartData._(
       rawData: rawData,
       type: BarChartType.GroupedStacked,
       sortXAxis: sortXAxis,
       xGroupComparator: xGroupComparator,
-      subGroupColors: subGroupColors ?? {},
+      xSubGroupComparator: xSubGroupComparator,
+      xSubGroupColorMap: xSubGroupColorMap,
     );
     dataModel._analyseData();
     return dataModel;
@@ -77,16 +81,18 @@ class ModularBarChartData extends ChangeNotifier with StringSize{
 
   factory ModularBarChartData.groupedSeparated({
     @required Map<String, Map<String, double>> rawData,
+    @required Map<String, Color> xSubGroupColorMap,
     bool sortXAxis = false,
     Comparator<String> xGroupComparator,
-    Map<String, Color> subGroupColors,
+    Comparator<String> xSubGroupComparator,
   }) {
     final ModularBarChartData dataModel = ModularBarChartData._(
       rawData: rawData,
       type: BarChartType.GroupedSeparated,
       sortXAxis: sortXAxis,
       xGroupComparator: xGroupComparator,
-      subGroupColors: subGroupColors ?? {},
+      xSubGroupComparator: xSubGroupComparator,
+      xSubGroupColorMap: xSubGroupColorMap,
     );
     dataModel._analyseData();
     return dataModel;
@@ -94,44 +100,54 @@ class ModularBarChartData extends ChangeNotifier with StringSize{
 
   // Data processing variables
   List<String> _xGroups = [], _xSubGroups = [];
-  List<double> _y1Values = [], _y2Values = [], _stackedYValues = [], _y1ValueRange = [0, 0, 0], _y2ValueRange = [0, 0, 0];
-  double _y1Average = 0, _y2Average = 0;
+  List<double> _y1Values = [], _y2Values = [], _stackedValues = [], _y1ValueRange = [0, 0], _y2ValueRange = [0, 0];
   List<BarChartDataDouble> _bars = [], _points = [];
   List<BarChartDataDoubleGrouped> _groupedBars = [];
   int _numBarsInGroups = 1;
-  double _valueOnBarHeight = 0, _maxGroupNameWidth = 0, _maxGroupNameWidthWithSpace = 0;
-  String _longestGroupName = '';
+  double _y1Average = 0, _y2Average = 0,_valueOnBarHeight = 0, _maxGroupNameWidth = 0, _maxGroupNameWidthWithSpace = 0;
 
-  // Getters
   List<String> get xGroups => _xGroups;
   List<String> get xSubGroups => _xSubGroups;
   List<double> get y1ValueRange => _y1ValueRange;
   List<double> get y2ValueRange => _y2ValueRange;
-  List<double> get stackedYValues => _stackedYValues;
-  double get y1Average => _y1Average;
-  double get y2Average => _y2Average;
-  double get y1Difference => _y1ValueRange[2] - _y1ValueRange[0];
-  double get y2Difference => _y2ValueRange[2] - _y2ValueRange[0];
-  double get valueOnBarHeight => _valueOnBarHeight;
-  double get maxGroupNameWidth => _maxGroupNameWidth;
-  double get maxGroupNameWidthWithSpace => _maxGroupNameWidthWithSpace;
   List<BarChartDataDouble> get bars => _bars;
   List<BarChartDataDouble> get points => _points;
   List<BarChartDataDoubleGrouped> get groupedBars => _groupedBars;
   int get numBarsInGroups => _numBarsInGroups;
-  String get longestGroupName => _longestGroupName;
+  double get y1Average => _y1Average;
+  double get y2Average => _y2Average;
+  double get valueOnBarHeight => _valueOnBarHeight;
+  double get maxGroupNameWidth => _maxGroupNameWidth;
+  double get maxGroupNameWidthWithSpace => _maxGroupNameWidthWithSpace;
 
   void _setXGroups() => _xGroups = rawData.keys.toList();
-  void _sortXGroups() => xGroupComparator == null ? xGroups.sort() : xGroups.sort(xGroupComparator);
-  void _sortXSubGroups() => xSubGroupComparator == null ? xSubGroups.sort() : xSubGroups.sort(xSubGroupComparator);
-  void _setY1ValueRange () {
+
+  void _sortXGroups() {
+    if (sortXAxis) {
+      xGroupComparator != null
+          ? _xGroups.sort(xGroupComparator)
+          : _xGroups.sort();
+    }
+  }
+
+  void _sortXSubGroups() {
+    if (sortXAxis) {
+      xSubGroupComparator != null
+          ? _xSubGroups.sort(xSubGroupComparator)
+          : _xSubGroups.sort();
+    }
+  }
+
+  void _setY1ValueRange() {
     _y1ValueRange[0] = _y1Values.reduce(min);
     _y1ValueRange[1] = _y1Values.reduce(max);
   }
-  void _setY2ValueRange () {
+
+  void _setY2ValueRange() {
     _y2ValueRange[0] = _y2Values.reduce(min);
     _y2ValueRange[1] = _y2Values.reduce(max);
   }
+
   void _initUngroupedData() {
     for (String key in _xGroups) {
       _y1Values.add(rawData[key]);
@@ -139,6 +155,7 @@ class ModularBarChartData extends ChangeNotifier with StringSize{
     }
     _setY1ValueRange();
   }
+
   void _initGroupedData() {
     double localMaximum = double.negativeInfinity;
     rawData.forEach((key, map) {
@@ -149,17 +166,18 @@ class ModularBarChartData extends ChangeNotifier with StringSize{
         _y1Values.add(value.toDouble());
         sum += value.toDouble();
       });
-      _stackedYValues.add(sum);
+      _stackedValues.add(sum);
       if (sum >= localMaximum) { localMaximum = sum; }
     });
     _xSubGroups = _xSubGroups.toSet().toList();
-    if (sortXAxis) { _sortXSubGroups(); }
+    _sortXSubGroups();
     _y1ValueRange[0] = _y1Values.reduce(min);
     // If data type is stacked, use local maximum
     _y1ValueRange[1] = type == BarChartType.Grouped
         ? _y1Values.reduce(max)
         : localMaximum;
   }
+
   void _initGroupedSeparatedData() {
     rawData.forEach((key, map) {
       if (map.keys.toList().length != 2) {
@@ -167,37 +185,30 @@ class ModularBarChartData extends ChangeNotifier with StringSize{
       }
       _xSubGroups = map.keys.toList();
       for (int i = 0; i < 2; i++) {
+        final String name = _xSubGroups[i];
+        final double value = map[name];
         if (i == 0) {
-          _y1Values.add(map[_xSubGroups[i]]);
-          _bars.add(BarChartDataDouble(group: key, data: map[_xSubGroups[i]], separatedGroupName: _xSubGroups[i]));
+          _y1Values.add(value);
+          _bars.add(BarChartDataDouble(group: key, data: value, separatedGroupName: name));
         } else {
-          _y2Values.add(map[_xSubGroups[i]]);
-          _points.add(BarChartDataDouble(group: key, data: map[_xSubGroups[i]], separatedGroupName: _xSubGroups[i]));
+          _y2Values.add(value);
+          _points.add(BarChartDataDouble(group: key, data: value, separatedGroupName: name));
         }
       }
     });
     _setY1ValueRange();
     _setY2ValueRange();
   }
-  void _generateSubGroupColors() {
-    if (type != BarChartType.Ungrouped && type != BarChartType.GroupedSeparated) {
-      final List<String> inputColorList = subGroupColors.keys.toList();
-      _xSubGroups.forEach((group) {
-        if (!inputColorList.contains(group)) {
-          subGroupColors[group] = Colors.primaries[Random().nextInt(Colors.primaries.length)];
-        }
-      });
-    }
-  }
-  void _setValueOnBarHeight() => _valueOnBarHeight = StringSize.getWidthOfString('1', const TextStyle());
+
   void _setNumberOfBarsInGroups() {
     _numBarsInGroups = _xSubGroups.length;
     if (_numBarsInGroups <= 1) { _numBarsInGroups = 1; }
     if (type == BarChartType.GroupedStacked || type == BarChartType.GroupedSeparated) { _numBarsInGroups = 1; }
   }
+
   void _setYAverage() {
     if (type == BarChartType.GroupedStacked) {
-      _y1Average = _stackedYValues.reduce((a, b) => a + b) / xGroups.length;
+      _y1Average = _stackedValues.reduce((a, b) => a + b) / _xGroups.length;
     } else {
       _y1Average = _y1Values.reduce((a, b) => a + b) / _y1Values.length;
     }
@@ -207,11 +218,10 @@ class ModularBarChartData extends ChangeNotifier with StringSize{
   }
 
   void _analyseData() {
-    // Set X groups
+    // Set X Groups
     _setXGroups();
-
-    // Sort X Axis
-    if (sortXAxis) {  _sortXGroups(); }
+    // Sort X Groups
+    _sortXGroups();
 
     switch (type) {
       case BarChartType.Ungrouped:
@@ -229,63 +239,182 @@ class ModularBarChartData extends ChangeNotifier with StringSize{
         break;
     }
 
-    // Generate color for subgroups
-    _generateSubGroupColors();
-
     // Set the number of bars in one group
     _setNumberOfBarsInGroups();
-
-    // Set the height on value string on bar
-    _setValueOnBarHeight();
 
     // Set average for y1 and y2
     _setYAverage();
   }
 
-  void setMaxGroupNameWidth({TextStyle textStyle = const TextStyle()}) {
-    // Calculate max width for group names
-    _maxGroupNameWidth = double.negativeInfinity;
-    String longestGroupName = '';
-    xGroups.forEach((name) {
-      final double singleNameWidth = StringSize.getWidthOfString(name, textStyle);
-      if ( singleNameWidth >= _maxGroupNameWidth) {
-        _maxGroupNameWidth = singleNameWidth;
-        longestGroupName = name;
-        _maxGroupNameWidthWithSpace = StringSize.getWidthOfString(name + "  ", textStyle);
-      }
-    });
-    _longestGroupName = longestGroupName;
-  }
-
-  void adjustAxisValueRange(double yAxisHeight, {@required List<double> valueRangeToBeAdjusted, double start = 0, double end = 0,}) {
-    start <= valueRangeToBeAdjusted[0]
-        ? valueRangeToBeAdjusted[0] = start
-        : valueRangeToBeAdjusted[0] = valueRangeToBeAdjusted[0];
-
-    String max = valueRangeToBeAdjusted[1].toStringAsExponential();
-    int expInt = int.tryParse(max.substring(max.indexOf('e+') + 2));
-    num exp = pow(10, expInt - 1);
-    double value = (((valueRangeToBeAdjusted[1] * (1 + (valueOnBarHeight) / yAxisHeight) / exp).ceil() + 5) * exp).toDouble();
-    end >= value
-        ? valueRangeToBeAdjusted[2] = end
-        : valueRangeToBeAdjusted[2] = value;
-  }
-
-  void populateDataWithMinimumValue() {
+  void populateDataWithMinimumValue({
+    @required double minimum,
+  }) {
     if (type == BarChartType.Grouped || type == BarChartType.GroupedStacked) {
       _groupedBars = [];
       // populate with data with min value
       rawData.forEach((key, map) {
         final List<BarChartDataDouble> dataInGroup = [];
         final List<String> keys = map.keys.toList();
-        for (String key in xSubGroups) {
+        for (String key in _xSubGroups) {
           keys.contains(key)
             ? dataInGroup.add(BarChartDataDouble(group: key, data: map[key].toDouble()))
-            : dataInGroup.add(BarChartDataDouble(group: key, data: y1ValueRange[0]));
+            : dataInGroup.add(BarChartDataDouble(group: key, data: minimum));
         }
-        groupedBars.add(BarChartDataDoubleGrouped(mainGroup: key, dataList: dataInGroup));
+        _groupedBars.add(BarChartDataDoubleGrouped(mainGroup: key, dataList: dataInGroup));
       });
     }
+  }
+
+  ModularBarChartData applyFilter({
+    @required RangeValues y1Filter,
+    @required RangeValues y2Filter,
+    @required Map<String, bool> xGroupFilter,
+    @required Map<String, bool> xSubGroupFilter,
+  }) {
+    if (type == BarChartType.Ungrouped) {
+      Map<String, double> filteredData = _applyFilterOnUngroupedData(
+        y1Filter: y1Filter,
+        xGroupFilter: xGroupFilter,
+      );
+      if (filteredData.isNotEmpty) { return _returnNewDataModel(filteredData); }
+    } else if (type == BarChartType.Grouped) {
+      Map<String, Map<String, double>> filteredData = _applyFilterOnGroupedData(
+        y1Filter: y1Filter,
+        xGroupFilter: xGroupFilter,
+        xSubGroupFilter: xSubGroupFilter,
+      );
+      if (filteredData.isNotEmpty) { return _returnNewDataModel(filteredData); }
+    } else if (type == BarChartType.GroupedStacked) {
+      Map<String, Map<String, double>> filteredData = _applyFilterOnGroupedStackedData(
+        y1Filter: y1Filter,
+        xGroupFilter: xGroupFilter,
+        xSubGroupFilter: xSubGroupFilter,
+      );
+      if (filteredData.isNotEmpty) { return _returnNewDataModel(filteredData); }
+    } else if (type == BarChartType.GroupedSeparated) {
+      Map<String, Map<String, double>> filteredData = _applyFilterOnGroupedSeparatedData(
+        y1Filter: y1Filter,
+        y2Filter: y2Filter,
+        xGroupFilter: xGroupFilter,
+      );
+      if (filteredData.isNotEmpty) {
+        return _returnNewDataModel(filteredData);
+      }
+    }
+    return this;
+  }
+
+  Map<String, double> _applyFilterOnUngroupedData({
+    @required RangeValues y1Filter,
+    @required Map<String, bool> xGroupFilter,
+  }) {
+    Map<String, double> filteredData = {};
+    rawData.forEach((group, value) {
+      if (xGroupFilter[group]) {
+        if (value is double) {
+          if (value.within(y1Filter)) {
+            filteredData[group] = value;
+          }
+        }
+      }
+    });
+    return filteredData;
+  }
+
+  Map<String, Map<String, double>> _applyFilterOnGroupedData({
+    @required RangeValues y1Filter,
+    @required Map<String, bool> xGroupFilter,
+    @required Map<String, bool> xSubGroupFilter,
+  }) {
+    Map<String, Map<String, double>> filteredData = {};
+    List<String> initialisedGroup = [];
+    rawData.forEach((group, map) {
+      if (xGroupFilter[group]) {
+        map.forEach((subgroup, value) {
+          if (xSubGroupFilter[subgroup]) {
+            if (value is double) {
+              if (value.within(y1Filter)) {
+                if (!initialisedGroup.contains(group)) {
+                  initialisedGroup.add(group);
+                  filteredData[group] = {};
+                }
+                filteredData[group][subgroup] = value;
+              }
+            }
+          }
+        });
+      }
+    });
+    return filteredData;
+  }
+
+  Map<String, Map<String, double>> _applyFilterOnGroupedStackedData({
+    @required RangeValues y1Filter,
+    @required Map<String, bool> xGroupFilter,
+    @required Map<String, bool> xSubGroupFilter,
+  }) {
+    Map<String, Map<String, double>> filteredData = {};
+    List<String> initialisedGroup = [];
+    print(xSubGroupFilter);
+    rawData.forEach((group, map) {
+      if (xGroupFilter[group]) {
+        double localSum = 0;
+        map.forEach((subgroup, value) {
+          if (xSubGroupFilter[subgroup]) {
+            localSum += value;
+          }
+        });
+        if (localSum.within(y1Filter)) {
+          if (!initialisedGroup.contains(group)) {
+            initialisedGroup.add(group);
+            filteredData[group] = {};
+          }
+          final Map<String, double> dirtyMap = new Map<String, double>.of(rawData[group]);
+          final List<String> subGroups = dirtyMap.keys.toList();
+          for (String name in subGroups) {
+            if (!xSubGroupFilter[name]) {
+              dirtyMap.remove(name);
+            }
+          }
+          filteredData[group] = dirtyMap;
+        }
+      }
+    });
+    return filteredData;
+  }
+
+  Map<String, Map<String, double>> _applyFilterOnGroupedSeparatedData({
+    @required RangeValues y1Filter,
+    @required RangeValues y2Filter,
+    @required Map<String, bool> xGroupFilter,
+  }) {
+    Map<String, Map<String, double>> filteredData = {};
+    rawData.forEach((group, map) {
+      if (xGroupFilter[group]) {
+        bool satisfyY1 = false, satisfyY2 = false;
+        final List<String> yGroups = map.keys.toList();
+        final double y1 = map[yGroups[0]], y2 = map[yGroups[1]];
+        if (y1.within(y1Filter)) { satisfyY1 = true; }
+        if (y2.within(y2Filter)) { satisfyY2 = true; }
+        if (satisfyY1 && satisfyY2) {
+          filteredData[group] = map;
+        }
+      }
+    });
+    return filteredData;
+  }
+
+  ModularBarChartData _returnNewDataModel(Map<String, dynamic> filteredData) {
+    final ModularBarChartData newDataModel = ModularBarChartData._(
+      rawData: filteredData,
+      type: this.type,
+      sortXAxis: this.sortXAxis,
+      xGroupComparator: this.xGroupComparator,
+      xSubGroupComparator: this.xSubGroupComparator,
+      xSubGroupColorMap: this.xSubGroupColorMap,
+    );
+    newDataModel._analyseData();
+    return newDataModel;
   }
 }
 
@@ -354,4 +483,10 @@ class BarChartLabel {
       fontSize: 20,
     )
   });
+}
+
+extension WithinRange on double {
+  bool within(RangeValues range) {
+    return (this <= range.end && this >= range.start);
+  }
 }

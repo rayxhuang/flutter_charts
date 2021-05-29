@@ -1,51 +1,44 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_display_info.dart';
 import 'package:provider/provider.dart';
 
 import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
-import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
 
-@immutable
 class ChartLegendHorizontal extends StatelessWidget with StringSize{
-  final double width;
+  const ChartLegendHorizontal();
 
-  ChartLegendHorizontal({@required this.width,});
-
-  double _getLegendWidth({@required ModularBarChartData dataModel, @required double maxWidth}) {
+  double _calculateLegendWidth({
+    @required DisplayInfo displayInfo,
+  }) {
+    final double maxWidthOfOneLegend = StringSize.getWidthOfString(displayInfo.longestGroupName, displayInfo.style.legendStyle.legendTextStyle);
     double legendWidth;
-    if (maxWidth * dataModel.xSubGroups.length <= width) {
-      legendWidth = width / dataModel.xSubGroups.length;
+    if (maxWidthOfOneLegend * displayInfo.dataModel.xSubGroups.length <= displayInfo.canvasWidth) {
+      legendWidth = displayInfo.canvasWidth / displayInfo.dataModel.xSubGroups.length;
     } else {
-      int numLegendOnScreen = width ~/ 50;
-      legendWidth = width / numLegendOnScreen;
+      int numLegendOnScreen = displayInfo.canvasWidth ~/ 50;
+      legendWidth = displayInfo.canvasWidth / numLegendOnScreen;
     }
     return legendWidth;
   }
 
   @override
   Widget build(BuildContext context) {
-    final ModularBarChartData dataModel = context.read<ModularBarChartData>();
-    final BarChartStyle style = context.read<BarChartStyle>();
-    final double height = StringSize.getHeightOfString(dataModel.xSubGroups.first, style.legendStyle.legendTextStyle) + 4;
-
-    // Calculate width for each legend
-    final double maxWidthOfOneLegend = StringSize.getWidthOfString(dataModel.longestGroupName, style.legendStyle.legendTextStyle);
-    final double legendWidth = _getLegendWidth(dataModel: dataModel, maxWidth: maxWidthOfOneLegend);
+    final DisplayInfo displayInfo = context.read<DisplayInfo>();
+    final double legendWidth = _calculateLegendWidth(displayInfo: displayInfo);
 
     return SizedBox(
-      width: width,
-      height: height,
+      width: displayInfo.canvasWidth,
+      height: displayInfo.bottomLegendHeight,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const ClampingScrollPhysics(),
-        itemCount: dataModel.xSubGroups.length,
-        itemBuilder: (BuildContext context, int index) {
-          final String groupName = dataModel.xSubGroups[index];
-          return SizedBox(
+        itemCount: displayInfo.dataModel.xSubGroups.length,
+        itemBuilder: (context, index) {
+          return HorizontalLegendTile(
+            index: index,
             width: legendWidth,
-            height: height,
-            child: ChartLegendTile(groupName: groupName,),
           );
         },
       ),
@@ -54,30 +47,41 @@ class ChartLegendHorizontal extends StatelessWidget with StringSize{
 }
 
 @immutable
-class ChartLegendTile extends StatelessWidget {
-  final String groupName;
+class HorizontalLegendTile extends StatelessWidget {
+  const HorizontalLegendTile({
+    Key key,
+    @required this.index,
+    @required this.width,
+  }) : super(key: key);
 
-  const ChartLegendTile({@required this.groupName});
+  final int index;
+  final double width;
 
   @override
   Widget build(BuildContext context) {
-    final Color color = context.read<ModularBarChartData>().subGroupColors[groupName];
-    final TextStyle textStyle = context.read<BarChartStyle>().legendStyle.legendTextStyle;
-    return Tooltip(
-      message: groupName,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Icon(Icons.circle, color: color, size: 8,),
-          SizedBox(width: 5,),
-          Expanded(
-            child: Text(
-              groupName,
-              style: textStyle,
-              overflow: TextOverflow.ellipsis,
+    final DisplayInfo displayInfo = context.read<DisplayInfo>();
+    final ModularBarChartData dataModel = displayInfo.dataModel;
+    final String groupName = dataModel.xSubGroups[index];
+    final Color color = dataModel.xSubGroupColorMap[groupName];
+    return SizedBox(
+      width: width,
+      height: displayInfo.bottomLegendHeight,
+      child: Tooltip(
+        message: groupName,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(Icons.circle, color: color, size: 8,),
+            SizedBox(width: 5,),
+            Expanded(
+              child: Text(
+                groupName,
+                style: displayInfo.style.legendStyle.legendTextStyle,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -544,7 +544,7 @@ Map<String, Map<String, double>> sampleData5 = {
 
 Map<String, Map<String, double>> sampleData6 = {
   '10': {
-    'weight': 40,
+    'weight': 99,
     'height': 80,
   },
   '13': {
@@ -642,7 +642,7 @@ Map<String, Map<String, double>> sampleData7 = {
 
 Map<String, Map<String, double>> sampleData8 = {
   '1': {
-    'weight': 40,
+    'weight': 99,
     'height': 80,
   },
   '3': {
@@ -672,6 +672,34 @@ Map<String, Map<String, double>> sampleData8 = {
   '7': {
     'weight': 80,
     'height': 200,
+  },
+};
+
+Map<String, Map<String, double>> sampleData9 = {
+  'A': {
+    'a': 2,
+    'b': 4,
+    'd': 1,
+    'eeee': 2,
+  },
+  'B': {
+    'a': 1,
+    'b': 3.5,
+    'c': 8.5,
+    'd': 6.9,
+  },
+  'C': {
+    'a': 7,
+    'b': 2,
+    'c': 5,
+    'd': 12
+  },
+  'D': {
+    'a': 2,
+    'b': 4,
+    'c': 6,
+    'd': 1,
+    'eeee': 2,
   },
 };
 

@@ -1,62 +1,88 @@
 import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_charts/modular_bar_chart/data/bar_chart_display_info.dart';
+import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
 import 'package:provider/provider.dart';
 
-import 'package:flutter_charts/modular_bar_chart/data/bar_chart_event.dart';
-import 'package:flutter_charts/modular_bar_chart/mixin/string_size_mixin.dart';
 import 'package:flutter_charts/modular_bar_chart/data/bar_chart_data.dart';
-import 'package:flutter_charts/modular_bar_chart/data/bar_chart_style.dart';
 
-class ChartTitle extends StatefulWidget with StringSize {
-  final double width;
-  final bool isXAxisLabel;
-  final bool hasRightAxis;
+@immutable
+class ChartTitle extends StatelessWidget with StringSize {
+  const ChartTitle();
 
-  // TODO Separate out x label
-  const ChartTitle({
-    @required this.width,
-    this.isXAxisLabel = false,
-    this.hasRightAxis = false,
-  });
+  void _toggleToolBar(DisplayInfo displayInfo) => displayInfo.toggleToolBar();
 
-  @override
-  _ChartTitleState createState() => _ChartTitleState();
-}
+  void _toggleAverageLine(DisplayInfo displayInfo) => displayInfo.toggleAverageLine();
 
-class _ChartTitleState extends State<ChartTitle> {
-  bool showToolbar;
+  void _toggleValueOnBar(DisplayInfo displayInfo) => displayInfo.toggleValueOnBar();
 
-  @override
-  void initState() {
-    super.initState();
-    showToolbar = false;
+  void _toggleGridLine(DisplayInfo displayInfo) => displayInfo.toggleGridLine();
+
+  void _toggleFilterPanel(DisplayInfo displayInfo) => displayInfo.toggleFilterPanel();
+
+  Widget _buildMiniTitle({
+    @required BarChartLabel label,
+    @required double width,
+  }) {
+    return SizedBox(
+      width: width,
+      height: StringSize.getHeight(label),
+      child: Center(
+        child: Text(
+          label.text,
+          style: label.textStyle,
+        ),
+      ),
+    );
   }
 
-  void _toggleToolBar() => setState(() { showToolbar = !showToolbar; });
-
-  void _toggleAverageLine(BarChartEvent event) => event.toggleAverageLine(hasRightAxis: widget.hasRightAxis);
-
-  Size size(BarChartLabel title) =>
-      Size(widget.width, StringSize.getHeight(title));
+  Widget _buildInteractiveTitleBar({
+    @required BarChartLabel label,
+    @required double width,
+    @required bool showToolBar,
+  }) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 500),
+      child: showToolBar
+          ? ChartToolBar(
+            toggleToolBar: _toggleToolBar,
+            toggleAverageLine: _toggleAverageLine,
+            toggleValueOnBar: _toggleValueOnBar,
+            toggleGridLine: _toggleGridLine,
+            toggleFilterPanel: _toggleFilterPanel,
+            width: width,
+          )
+          : SizedBox(
+            width: width,
+            height: kMinInteractiveDimensionCupertino,
+            child: ChartTitleBar(
+              label: label,
+              onPressed: _toggleToolBar,
+            ),
+          ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final BarChartLabel label = widget.isXAxisLabel
-        ? context.read<BarChartStyle>().xAxisStyle.label
-        : context.read<BarChartStyle>().title;
-    return SizedBox(
-      width: widget.width,
-      height: StringSize.getHeight(label),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 500),
-        child: showToolbar
-            ? ChartToolBar(
-                onPressed: _toggleToolBar,
-                toggleAverageLine: _toggleAverageLine,
-              )
-            : ChartTitleBar(label: label, onPressed: _toggleToolBar),
-      ),
+    return Consumer<DisplayInfo>(
+      builder: (context, displayInfo, child) {
+        final BarChartLabel label = displayInfo.style.title;
+        if (displayInfo.style.isMini) {
+          return _buildMiniTitle(
+            label: label,
+            width: displayInfo.parentSize.width,
+          );
+        } else {
+          return _buildInteractiveTitleBar(
+            label: label,
+            width: displayInfo.parentSize.width,
+            showToolBar: displayInfo.showToolBar,
+          );
+        }
+      },
     );
   }
 }
@@ -69,7 +95,7 @@ class ChartTitleBar extends StatelessWidget {
   });
 
   final BarChartLabel label;
-  final VoidCallback onPressed;
+  final Function(DisplayInfo) onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -80,22 +106,15 @@ class ChartTitleBar extends StatelessWidget {
         Spacer(),
         Text(
           label.text,
-          style: label.textStyle,
-        ),
-        Material(
-          color: Colors.white10,
-          clipBehavior: Clip.hardEdge,
-          shape: CircleBorder(side: BorderSide(color: Colors.black12)),
-          elevation: 16,
-          child: IconButton(
-            padding: EdgeInsets.symmetric(horizontal: 4),
-            onPressed: onPressed,
-            icon: const Icon(
-              CupertinoIcons.chevron_down,
-              size: 12,
-              color: Colors.white70,
-            ),
+          style: label.textStyle.copyWith(
+            fontSize: 20,
           ),
+        ),
+        SizedBox(width: 4),
+        ChartToolBarButton(
+          icon: CupertinoIcons.chevron_down,
+          onPressed: () => onPressed(context.read<DisplayInfo>()),
+          message: 'Options',
         ),
         Spacer(),
       ],
@@ -107,55 +126,114 @@ class ChartTitleBar extends StatelessWidget {
 class ChartToolBar extends StatelessWidget {
   const ChartToolBar({
     Key key,
-    @required this.onPressed,
+    @required this.toggleToolBar,
     @required this.toggleAverageLine,
+    @required this.toggleValueOnBar,
+    @required this.toggleGridLine,
+    @required this.toggleFilterPanel,
+    @required this.width,
   }) : super(key: key);
 
-  final VoidCallback onPressed;
-  final Function(BarChartEvent) toggleAverageLine;
+  final Function(DisplayInfo) toggleToolBar;
+  final Function(DisplayInfo) toggleAverageLine;
+  final Function(DisplayInfo) toggleValueOnBar;
+  final Function(DisplayInfo) toggleGridLine;
+  final Function(DisplayInfo) toggleFilterPanel;
+  final double width;
+
+  Widget _buildLeftDisplayText(DisplayInfo displayInfo) {
+    return Text(
+      displayInfo.leftDisplayText,
+      style: TextStyle(
+        color: Colors.red,
+      ),
+    );
+  }
+
+  Widget _buildRightDisplayText(DisplayInfo displayInfo) {
+    return Text(
+      displayInfo.rightDisplayText,
+    );
+  }
+
+  Widget _buildAvgLineButton(DisplayInfo displayInfo) {
+    return ChartToolBarButton(
+      icon: CupertinoIcons.minus,
+      onPressed: () => toggleAverageLine(displayInfo),
+      message: 'Show average line',
+    );
+  }
+
+  Widget _buildValueOnBarButton(DisplayInfo displayInfo) {
+    return ChartToolBarButton(
+      icon: CupertinoIcons.textformat_123,
+      onPressed: () => toggleValueOnBar(displayInfo),
+      message: 'Show value on bar',
+    );
+  }
+
+  Widget _buildGridLineButton(DisplayInfo displayInfo) {
+    return ChartToolBarButton(
+      icon: CupertinoIcons.line_horizontal_3,
+      onPressed: () => toggleGridLine(displayInfo),
+      message: 'Show grid line',
+    );
+  }
+
+  Widget _buildGoBackButton(DisplayInfo displayInfo) {
+    return ChartToolBarButton(
+      icon: CupertinoIcons.chevron_compact_up,
+      onPressed: () => toggleToolBar(displayInfo),
+      message: 'Go back',
+    );
+  }
+
+  Widget _buildFilterButton(DisplayInfo displayInfo) {
+    return ChartToolBarButton(
+      icon: CupertinoIcons.slider_horizontal_3,
+      onPressed: () => toggleFilterPanel(displayInfo),
+      message: 'Filter data',
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BarChartEvent>(
-      builder: (context, event, child) {
+    return Consumer<DisplayInfo>(
+      builder: (context, displayInfo, child) {
         final double maxLengthOfDisplayText = [
-          StringSize.getWidthOfString(event.leftDisplayText, TextStyle()),
-          StringSize.getWidthOfString(event.rightDisplayText, TextStyle())
+          StringSize.getWidthOfString(displayInfo.leftDisplayText, TextStyle()),
+          StringSize.getWidthOfString(displayInfo.rightDisplayText, TextStyle())
         ].reduce(max);
-        return Row(
-          children: [
-            SizedBox(
-              width: maxLengthOfDisplayText,
-              child: Text(
-                event.leftDisplayText
-              ),
-            ),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ChartToolBarButton(
-                    icon: CupertinoIcons.minus,
-                    onPressed: () => toggleAverageLine(event),
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 500),
+          child: SizedBox(
+            height: kMinInteractiveDimensionCupertino,
+            width: width,
+            child: Row(
+              children: [
+                SizedBox(
+                  width: maxLengthOfDisplayText,
+                  child: _buildLeftDisplayText(displayInfo),
+                ),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildValueOnBarButton(displayInfo),
+                      _buildAvgLineButton(displayInfo),
+                      _buildGridLineButton(displayInfo),
+                      _buildFilterButton(displayInfo),
+                      _buildGoBackButton(displayInfo),
+                    ],
                   ),
-                  ChartToolBarButton(
-                    icon: CupertinoIcons.chevron_up,
-                    onPressed: onPressed,
-                  ),
-                  ChartToolBarButton(
-                    icon: CupertinoIcons.chevron_up,
-                    onPressed: onPressed,
-                  ),
-                ],
-              ),
+                ),
+                SizedBox(
+                  width: maxLengthOfDisplayText,
+                  child: _buildRightDisplayText(displayInfo),
+                ),
+              ],
             ),
-            SizedBox(
-              width: maxLengthOfDisplayText,
-              child: Text(
-                event.rightDisplayText
-              ),
-            ),
-          ],
+          )
         );
       },
     );
@@ -168,25 +246,33 @@ class ChartToolBarButton extends StatelessWidget {
     Key key,
     @required this.icon,
     @required this.onPressed,
+    @required this.message,
   }) : super(key: key);
 
   final IconData icon;
   final Function onPressed;
+  final String message;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white10,
-      clipBehavior: Clip.hardEdge,
-      shape: CircleBorder(side: BorderSide(color: Colors.black12)),
-      elevation: 16,
-      child: IconButton(
-        padding: EdgeInsets.symmetric(horizontal: 0),
-        onPressed: onPressed,
-        iconSize: 12,
-        icon: Icon(
-          icon,
-          color: Colors.white70,
+    return SizedBox(
+      width: 28,
+      child: Material(
+        color: Colors.white10,
+        clipBehavior: Clip.hardEdge,
+        shape: CircleBorder(side: BorderSide(color: Colors.black12)),
+        elevation: 16,
+        child: Tooltip(
+          message: message,
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            onPressed: onPressed,
+            iconSize: 24,
+            icon: Icon(
+              icon,
+              color: Colors.white70,
+            ),
+          ),
         ),
       ),
     );
